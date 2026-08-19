@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YT Audio Player</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1e3a8a">
+    <!-- Tailwind CSS for modern, Next.js-style utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom range slider styling for a professional look */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            height: 6px;
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        /* Custom scrollbar for the playlist */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
+        #player-wrapper { position: absolute; left: -9999px; visibility: hidden; }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-slate-100 font-sans flex items-center justify-center p-4 md:p-8">
+
+    <div id="player-wrapper"><div id="player"></div></div>
+
+    <div class="w-full max-w-2xl flex flex-col gap-6">
+        
+        <!-- HEADER -->
+        <header class="text-center mb-2">
+            <h1 class="text-3xl font-light tracking-wide text-white drop-shadow-lg">
+                Audio<span class="font-bold text-blue-400">Sphere</span>
+            </h1>
+        </header>
+
+        <!-- PLAYER CARD (GLASS) -->
+        <div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6 shadow-2xl">
+            
+            <!-- Now Playing Info -->
+            <div class="text-center mb-6">
+                <p class="text-xs font-semibold text-blue-300 uppercase tracking-widest mb-1">Now Playing</p>
+                <h2 id="currentSongTitle" class="text-xl font-medium truncate text-white">Select a track from the playlist</h2>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="flex items-center gap-4 mb-6">
+                <span id="currentTime" class="text-xs font-mono text-slate-300 w-10 text-right">0:00</span>
+                <input type="range" id="progressBar" value="0" min="0" max="100" class="w-full h-1.5 cursor-pointer">
+                <span id="totalTime" class="text-xs font-mono text-slate-300 w-10">0:00</span>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center justify-between">
+                
+                <!-- Playback Modes -->
+                <div class="flex gap-3">
+                    <button id="btnSeq" onclick="setMode('sequential')" class="p-2 rounded-full bg-white/5 hover:bg-white/20 transition border border-white/10 text-blue-300" title="Sequential Mode">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                    <button id="btnRand" onclick="setMode('random')" class="p-2 rounded-full bg-white/5 hover:bg-white/20 transition border border-white/10 text-slate-400" title="Shuffle Mode">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                    </button>
+                </div>
+
+                <!-- Main Playback Controls -->
+                <div class="flex items-center gap-4">
+                    <button onclick="togglePlay()" class="w-14 h-14 flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-400 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)] transition transform hover:scale-105">
+                        <span id="playPauseIcon">
+                            <!-- Play Icon (Default) -->
+                            <svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </span>
+                    </button>
+                    <button onclick="nextVideo()" class="p-3 rounded-full bg-white/10 hover:bg-white/20 transition border border-white/10" title="Skip Forward">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                    </button>
+                </div>
+
+                <!-- Volume -->
+                <div class="flex items-center gap-2 w-28 group">
+                    <svg class="w-5 h-5 text-slate-300 group-hover:text-white transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.657 6.343a8 8 0 010 11.314M10 19l-7-7H2V9h5l7-7v17z"></path></svg>
+                    <input type="range" id="volumeSlider" value="100" min="0" max="100" class="w-full">
+                </div>
+            </div>
+        </div>
+
+        <!-- PLAYLIST CARD (GLASS) -->
+        <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 shadow-xl flex flex-col h-96">
+            
+            <!-- Input Area -->
+            <div class="flex gap-3 mb-4">
+                <input type="text" id="newLink" placeholder="Paste YouTube URL..." class="flex-grow bg-black/20 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition placeholder-slate-500 text-white">
+                <button id="addBtn" onclick="addLink()" class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-xl text-sm font-medium transition shadow-lg whitespace-nowrap">
+                    Add
+                </button>
+            </div>
+
+            <!-- List Area -->
+            <ul id="playlist" class="overflow-y-auto pr-2 flex flex-col gap-2 flex-grow">
+                <!-- Javascript will populate this -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // --- State ---
+        let links = [];
+        let mode = 'sequential';
+        let currentIndex = -1;
+        let player;
+        let isPlayerReady = false;
+        let progressInterval;
+
+        // --- SVGs for buttons ---
+        const playSVG = `<svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+        const pauseSVG = `<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+
+        // --- Core Logic ---
+        async function fetchLinks() {
+            const res = await fetch('/links');
+            links = await res.json();
+            renderList();
+            updateHighlight();
+        }
+
+        async function addLink() {
+            const url = document.getElementById('newLink').value;
+            if(!url) return;
+            const btn = document.getElementById('addBtn');
+            btn.textContent = '...';
+            await fetch('/add', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({url}) });
+            document.getElementById('newLink').value = '';
+            btn.textContent = 'Add';
+            fetchLinks();
+        }
+
+        async function removeLink(url) {
+            await fetch('/remove', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({url}) });
+            fetchLinks();
+        }
+
+        function renderList() {
+            const ul = document.getElementById('playlist');
+            ul.innerHTML = '';
+            links.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = `group flex items-center justify-between p-3 rounded-xl border border-transparent hover:bg-white/5 hover:border-white/10 transition cursor-pointer ${currentIndex === index ? 'bg-white/10 border-white/20' : ''}`;
+                
+                const titleSpan = document.createElement('span');
+                titleSpan.className = `truncate flex-grow text-sm pr-4 ${currentIndex === index ? 'text-blue-300 font-semibold' : 'text-slate-300 group-hover:text-white'}`;
+                titleSpan.textContent = item.title || item.url;
+                titleSpan.onclick = () => playSpecificVideo(index);
+                
+                const rmBtn = document.createElement('button');
+                rmBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+                rmBtn.className = "text-slate-500 hover:text-red-400 transition p-1";
+                rmBtn.onclick = () => removeLink(item.url);
+                
+                li.appendChild(titleSpan);
+                li.appendChild(rmBtn);
+                ul.appendChild(li);
+            });
+        }
+
+        // --- YouTube Setup ---
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
+            });
+        }
+
+        function onPlayerReady() {
+            isPlayerReady = true;
+            player.setVolume(document.getElementById('volumeSlider').value);
+        }
+
+        // --- Playback Controls ---
+        function setMode(m) {
+            mode = m;
+            document.getElementById('btnSeq').className = `p-2 rounded-full transition border ${mode === 'sequential' ? 'bg-white/20 border-blue-400 text-blue-300' : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/20'}`;
+            document.getElementById('btnRand').className = `p-2 rounded-full transition border ${mode === 'random' ? 'bg-white/20 border-blue-400 text-blue-300' : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/20'}`;
+        }
+
+        function togglePlay() {
+            if (!isPlayerReady || links.length === 0) return;
+            if (currentIndex === -1) return nextVideo(); // Start playing if stopped
+            
+            const state = player.getPlayerState();
+            if (state === YT.PlayerState.PLAYING) player.pauseVideo();
+            else player.playVideo();
+        }
+
+        function playSpecificVideo(index) {
+            if (!isPlayerReady || links.length === 0) return;
+            currentIndex = index;
+            playVideo(links[currentIndex].url);
+        }
+
+        function nextVideo() {
+            if (links.length === 0) return;
+            currentIndex = mode === 'sequential' 
+                ? (currentIndex + 1) % links.length 
+                : Math.floor(Math.random() * links.length);
+            playVideo(links[currentIndex].url);
+        }
+
+        function playVideo(url) {
+            const id = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/)?.[2];
+            if(id) {
+                player.loadVideoById(id);
+                document.getElementById('currentSongTitle').textContent = links[currentIndex].title;
+                updateHighlight();
+            }
+        }
+
+        function updateHighlight() { renderList(); }
+
+        function onPlayerStateChange(event) {
+            const icon = document.getElementById('playPauseIcon');
+            
+            if (event.data == YT.PlayerState.PLAYING) {
+                icon.innerHTML = pauseSVG;
+                const duration = player.getDuration();
+                document.getElementById('progressBar').max = duration;
+                document.getElementById('totalTime').textContent = formatTime(duration);
+                clearInterval(progressInterval);
+                progressInterval = setInterval(updateProgressBar, 500);
+            } 
+            else {
+                clearInterval(progressInterval);
+                if (event.data == YT.PlayerState.PAUSED) icon.innerHTML = playSVG;
+                if (event.data == YT.PlayerState.ENDED) nextVideo();
+            }
+        }
+
+        function updateProgressBar() {
+            if (player && player.getCurrentTime) {
+                const ct = player.getCurrentTime();
+                document.getElementById('progressBar').value = ct;
+                document.getElementById('currentTime').textContent = formatTime(ct);
+            }
+        }
+
+        function formatTime(sec) {
+            if (!sec || isNaN(sec)) return "0:00";
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        // --- Event Listeners ---
+        document.getElementById('progressBar').addEventListener('input', e => {
+            if (player && player.seekTo) {
+                player.seekTo(e.target.value, true);
+                document.getElementById('currentTime').textContent = formatTime(e.target.value);
+            }
+        });
+
+        document.getElementById('volumeSlider').addEventListener('input', e => {
+            if (player && player.setVolume) player.setVolume(e.target.value);
+        });
+
+        // Init
+        fetchLinks();
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(() => {
+                console.log('Service Worker Registered');
+            });
+        }
+    </script>
+</body>
+</html>
