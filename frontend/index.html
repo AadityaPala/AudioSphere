@@ -233,8 +233,35 @@
             const id = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/)?.[2];
             if(id) {
                 player.loadVideoById(id);
-                document.getElementById('currentSongTitle').textContent = links[currentIndex].title;
+                const currentTitle = links[currentIndex].title;
+                document.getElementById('currentSongTitle').textContent = currentTitle;
                 updateHighlight();
+
+                // NEW: Tell Android this is a native media session
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: currentTitle,
+                        artist: 'AudioSphere',
+                        artwork: [
+                            { src: 'https://cdn-icons-png.flaticon.com/512/3844/3844724.png', sizes: '512x512', type: 'image/png' }
+                        ]
+                    });
+
+                    // Hook up the lock-screen buttons to your existing functions
+                    navigator.mediaSession.setActionHandler('play', () => player.playVideo());
+                    navigator.mediaSession.setActionHandler('pause', () => player.pauseVideo());
+                    navigator.mediaSession.setActionHandler('nexttrack', () => nextVideo());
+                    navigator.mediaSession.setActionHandler('previoustrack', () => {
+                        // Skip backward logic
+                        if (links.length === 0) return;
+                        if (mode === 'sequential') {
+                            currentIndex = (currentIndex - 1 + links.length) % links.length;
+                        } else {
+                            currentIndex = Math.floor(Math.random() * links.length);
+                        }
+                        playVideo(links[currentIndex].url);
+                    });
+                }
             }
         }
 
