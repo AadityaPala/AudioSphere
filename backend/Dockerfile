@@ -6,12 +6,12 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy your code into the container
+# Copy ONLY your backend code into the container
 COPY backend/ ./backend/
-COPY frontend/ ./frontend/
 
-# Install the dependencies globally inside the container using uv
-RUN uv pip install --system fastapi uvicorn pydantic
+# Install ALL required dependencies globally inside the container using uv
+# (Added sqlalchemy, psycopg[binary] for Neon, pyjwt, and python-dotenv)
+RUN uv pip install --system fastapi uvicorn pydantic sqlalchemy "psycopg[binary]" pyjwt python-dotenv
 
 # Change working directory to backend so uvicorn can easily find main.py
 WORKDIR /app/backend
