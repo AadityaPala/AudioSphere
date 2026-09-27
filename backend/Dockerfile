@@ -10,7 +10,8 @@ WORKDIR /app
 COPY . .
 
 # Install ALL required dependencies globally inside the container using uv
-RUN uv pip install --system fastapi uvicorn pydantic sqlalchemy "psycopg[binary]" pyjwt python-dotenv
+# Add cryptography to the list of installed packages
+RUN uv pip install --system fastapi uvicorn pydantic sqlalchemy "psycopg[binary]" pyjwt cryptography python-dotenv
 
 # Run the application (since we are already in /app, uvicorn can see main.py)
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
