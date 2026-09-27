@@ -3,7 +3,7 @@ import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, Plus, Tra
 import type { Song, PlaybackMode } from './types';
 import { CAS_URL, fetchPlaylists, addSong, removeSong, fetchTrackMetadata } from './services/api';
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID; // Replace with your Google Client ID
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID; 
 
 export default function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('st-access-token'));

@@ -42,11 +42,18 @@ export async function fetchTrackMetadata(title: string): Promise<{ artist: strin
     };
 }
 
-export async function fetchPlaylists(): Promise<Song[]> {
-    const res = await fetch(`${BACKEND_URL}/links`, { headers: getAuthHeaders() });
-    if(!res.ok) throw new Error('Unauthorized');
-    return res.json();
-}
+export const fetchPlaylists = async () => {
+  const token = localStorage.getItem('st-access-token');
+  
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/links`, {
+    headers: {
+      'Authorization': `Bearer ${token}` 
+    }
+  });
+
+  if (!response.ok) throw new Error("Failed to fetch");
+  return response.json();
+};
 
 export async function addSong(url: string): Promise<void> {
     const res = await fetch(`${BACKEND_URL}/add`, {
