@@ -1,5 +1,3 @@
-import type { Song } from '../types';
-
 export const CAS_URL = import.meta.env.VITE_CAS_URL;
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
