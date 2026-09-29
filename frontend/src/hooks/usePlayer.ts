@@ -20,7 +20,6 @@ export function usePlayer(initialSongs: Song[]) {
   const playerRef = useRef<any>(null);
   const progressInterval = useRef<any>(null);
   
-  // Refs to fix the stale closure bug in YouTube's onStateChange event
   const queueRef = useRef(queue);
   const indexRef = useRef(currentIndex);
 
@@ -35,11 +34,14 @@ export function usePlayer(initialSongs: Song[]) {
   }, [initialSongs, mode]);
 
   const playSong = useCallback(async (index: number) => {
-    if (!queueRef.current[index]) return;
+    const targetQueue = queueRef.current;
+    if (!targetQueue[index]) return;
+    
     setCurrentIndex(index);
+    indexRef.current = index;
     setIsBuffering(true);
     
-    const target = queueRef.current[index];
+    const target = targetQueue[index];
     const match = target.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);
     const videoId = match?.[2];
 
@@ -82,7 +84,7 @@ export function usePlayer(initialSongs: Song[]) {
             } else {
               clearInterval(progressInterval.current);
               if (event.data === window.YT.PlayerState.PAUSED) setIsPlaying(false);
-              if (event.data === window.YT.PlayerState.ENDED) nextSong(); // Now uses fresh ref state
+              if (event.data === window.YT.PlayerState.ENDED) nextSong();
             }
           },
         },
@@ -104,13 +106,20 @@ export function usePlayer(initialSongs: Song[]) {
       setMode('shuffle');
       const shuffled = [...songs].sort(() => Math.random() - 0.5);
       setQueue(shuffled);
+      queueRef.current = shuffled;
       setCurrentIndex(0);
-      playSong(0); // Actually play the first song of the new random queue
+      indexRef.current = 0;
+      if (shuffled.length > 0) {
+        playSong(0);
+      }
     } else {
       setMode('sequential');
       setQueue(songs);
+      queueRef.current = songs;
       const originalIndex = songs.findIndex(s => s.url === queueRef.current[indexRef.current]?.url);
-      setCurrentIndex(originalIndex !== -1 ? originalIndex : 0);
+      const safeIdx = originalIndex !== -1 ? originalIndex : 0;
+      setCurrentIndex(safeIdx);
+      indexRef.current = safeIdx;
     }
   };
 

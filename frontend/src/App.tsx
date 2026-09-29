@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { AuthOverlay } from './components/AuthOverlay';
 import { Sidebar } from './components/Sidebar';
 import { PlayerView } from './components/PlayerView';
+import { RecommendationSidebar } from './components/RecommendationSidebar';
 import { usePlayer } from './hooks/usePlayer';
 import { CAS_URL, fetchPlaylists, addSong, removeSong } from './services/api';
 import type { Song } from './types';
@@ -15,7 +16,6 @@ export default function App() {
   
   const player = usePlayer(songs);
 
-  // Initialize Google Login Button
   useEffect(() => {
     if (!token && window.google) {
       window.google.accounts.id.initialize({
@@ -77,7 +77,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative h-screen w-screen flex flex-col md:flex-row bg-linear-to-tr from-slate-950 via-indigo-950 to-slate-900 text-slate-100 overflow-hidden font-sans">
+    <div className="relative h-screen w-screen flex flex-col lg:flex-row bg-linear-to-tr from-slate-950 via-indigo-950 to-slate-900 text-slate-100 overflow-hidden font-sans">
       <div id="yt-hidden-player" className="absolute left-[9999px] top-[9999px] opacity-0 pointer-events-none" />
 
       {/* Dynamic Background Glow */}
@@ -89,7 +89,7 @@ export default function App() {
       <AuthOverlay token={token} />
 
       {/* Main Layout Shell */}
-      <div className="relative z-10 flex w-full h-full md:p-6 gap-6">
+      <div className="relative z-10 flex flex-col lg:flex-row w-full h-full p-4 lg:p-6 gap-6 overflow-hidden">
         <Sidebar 
           songs={songs} 
           handleAdd={handleAdd} 
@@ -98,6 +98,7 @@ export default function App() {
           loading={loading} 
         />
         <PlayerView player={player} />
+        <RecommendationSidebar />
       </div>
     </div>
   );
