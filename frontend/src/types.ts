@@ -1,17 +1,19 @@
 export interface Song {
-    id?: number;
     url: string;
     title: string;
-    artist?: string;
-    artwork?: string;
 }
 
 export type PlaybackMode = 'sequential' | 'shuffle';
 
+export interface TrackMetadata {
+    artist: string;
+    artwork: string;
+}
+
 declare global {
-    interface Window {
-        onYouTubeIframeAPIReady?: () => void;
-        YT: any;
-        google?: any;
-    }
+  interface Window {
+    google: any;
+    YT: any;
+    onYouTubeIframeAPIReady: () => void;
+  }
 }
