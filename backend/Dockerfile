@@ -1,17 +1,22 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
-# Copy uv from the official image
+# Install uv for ultra-fast dependency resolution
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the contents of the current folder (backend) into /app
-COPY . .
+# Enable bytecode compilation and copy dependency files
+ENV UV_COMPILE_BYTECODE=1
+COPY pyproject.toml ./
 
-# Install ALL required dependencies globally inside the container using uv
-# Add cryptography to the list of installed packages
-RUN uv pip install --system fastapi uvicorn pydantic sqlalchemy "psycopg[binary]" pyjwt cryptography python-dotenv
+# Install dependencies into the system python environment
+RUN uv pip install --system --no-cache -r pyproject.toml
 
-# Run the application (since we are already in /app, uvicorn can see main.py)
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Copy application code
+COPY main.py ./
+
+# Expose default port
+EXPOSE 8000
+
+# Use shell form to allow Render's $PORT environment variable to expand
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}

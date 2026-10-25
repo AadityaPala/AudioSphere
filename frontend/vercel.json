@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/links/:path*",
+      "destination": "https://audiosphere-java.onrender.com/links/:path*"
+    },
+    {
+      "source": "/api/links",
+      "destination": "https://audiosphere-java.onrender.com/links"
+    },
+    {
+      "source": "/api/metadata/:path*",
+      "destination": "https://YOUR_PYTHON_SERVICE.onrender.com/metadata/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
