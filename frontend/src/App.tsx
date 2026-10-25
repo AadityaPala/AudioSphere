@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { AuthOverlay } from './components/AuthOverlay';
 import { Sidebar } from './components/Sidebar';
 import { PlayerView } from './components/PlayerView';
-import { RecommendationSidebar } from './components/RecommendationSidebar';
-import { ResizableLayout } from './components/ResizableLayout';
+import { InfoPanel } from './components/InfoPanel';
 import { usePlayer } from './hooks/usePlayer';
 import { CAS_URL, fetchPlaylists, addSong, removeSong } from './services/api';
 import type { Song, Recommendation } from './types';
@@ -21,7 +20,8 @@ export default function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('st-access-token'));
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(false);
-  
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
   const player = usePlayer(songs);
 
   useEffect(() => {
@@ -85,28 +85,57 @@ export default function App() {
   };
 
   return (
-    <div className="relative h-screen w-screen flex flex-col bg-linear-to-tr from-slate-950 via-indigo-950 to-slate-900 text-slate-100 overflow-hidden font-sans">
+    <div className="relative h-screen w-screen flex flex-col bg-[#070711] text-slate-100 overflow-hidden font-sans">
       <div id="yt-hidden-player" className="absolute left-[9999px] top-[9999px] opacity-0 pointer-events-none" />
 
-      {/* Dynamic Background Glow */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center filter blur-3xl opacity-20 transition-all duration-1000 scale-125"
-        style={{ backgroundImage: `url(${player.meta.artwork})` }}
-      />
+      {/* Ambient animated mesh gradient background */}
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-40 -left-40 h-[60vh] w-[60vh] rounded-full bg-indigo-600/25 blur-[120px] animate-aurora" />
+        <div className="absolute top-1/3 -right-40 h-[55vh] w-[55vh] rounded-full bg-fuchsia-600/20 blur-[120px] animate-aurora-slow" />
+        <div className="absolute -bottom-40 left-1/4 h-[50vh] w-[50vh] rounded-full bg-cyan-500/20 blur-[120px] animate-aurora" />
+        <div
+          className="absolute inset-0 opacity-25 transition-all duration-1000"
+          style={{ backgroundImage: `url(${player.meta.artwork})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(90px) saturate(1.2)' }}
+        />
+      </div>
 
       <AuthOverlay token={token} />
 
-      {/* Desktop Resizable Layout Wrapper */}
-      <ResizableLayout>
-        <Sidebar songs={songs} handleAdd={handleAdd} handleRemove={handleRemove} handleSignOut={handleSignOut} loading={loading} recommendations={MOCK_RECOMMENDATIONS} />
-        <PlayerView player={player} />
-        <RecommendationSidebar />
-      </ResizableLayout>
+      {/* Unified Flexbox layout — no JS resize listeners */}
+      <div className="flex flex-1 min-h-0 w-full gap-3 p-3 lg:p-4">
+        {/* Left: Navigation Sidebar */}
+        <Sidebar
+          songs={songs}
+          handleAdd={handleAdd}
+          handleRemove={handleRemove}
+          handleSignOut={handleSignOut}
+          loading={loading}
+          recommendations={MOCK_RECOMMENDATIONS}
+        />
 
-      {/* Mobile Fallback Layout (Non-resizable stack with drawer support) */}
-      <div className="lg:hidden relative z-10 flex flex-col w-full h-full p-4 overflow-hidden">
-        <Sidebar songs={songs} handleAdd={handleAdd} handleRemove={handleRemove} handleSignOut={handleSignOut} loading={loading} recommendations={MOCK_RECOMMENDATIONS} />
-        <PlayerView player={player} />
+        {/* Center: Player / playlist view */}
+        <PlayerView player={player} onOpenInfo={() => setDrawerOpen(true)} />
+
+        {/* Right: unified Recommendations + Lyrics panel (desktop) */}
+        <InfoPanel
+          player={player}
+          recommendations={MOCK_RECOMMENDATIONS}
+          className="hidden xl:flex"
+        />
+      </div>
+
+      {/* Mobile slide-out drawer for Recommendations + Lyrics */}
+      <div
+        className={`xl:hidden fixed inset-0 z-50 transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+      >
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
+        <div className={`absolute top-0 right-0 h-full w-full max-w-md p-3 transition-transform duration-300 ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+          <InfoPanel
+            player={player}
+            recommendations={MOCK_RECOMMENDATIONS}
+            onClose={() => setDrawerOpen(false)}
+          />
+        </div>
       </div>
     </div>
   );

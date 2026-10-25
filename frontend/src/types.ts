@@ -18,6 +18,15 @@ export interface TrackMetadata {
   artwork: string;
 }
 
+export interface EnrichedMetadata {
+  artist: string;
+  title: string;
+  albumArtUrl: string;
+  genre: string;
+  releaseYear: string;
+  lyrics: string;
+}
+
 export interface Recommendation {
   id: string;
   title: string;

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type { Song, PlaybackMode, TrackMetadata } from '../types';
-import { fetchTrackMetadata } from '../services/api';
+import type { Song, PlaybackMode, TrackMetadata, EnrichedMetadata } from '../types';
+import { fetchTrackMetadata, fetchEnrichedMetadata } from '../services/api';
+
+const DEFAULT_ARTWORK = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80';
 
 export function usePlayer(initialSongs: Song[]) {
   const [songs, setSongs] = useState<Song[]>(initialSongs);
@@ -14,12 +16,14 @@ export function usePlayer(initialSongs: Song[]) {
   const [volume, setVolume] = useState<number>(80);
   const [meta, setMeta] = useState<TrackMetadata>({
     artist: 'Select a track',
-    artwork: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
+    artwork: DEFAULT_ARTWORK,
   });
+  const [enriched, setEnriched] = useState<EnrichedMetadata | null>(null);
+  const [enriching, setEnriching] = useState<boolean>(false);
 
   const playerRef = useRef<any>(null);
   const progressInterval = useRef<any>(null);
-  
+
   const queueRef = useRef(queue);
   const indexRef = useRef(currentIndex);
 
@@ -36,11 +40,12 @@ export function usePlayer(initialSongs: Song[]) {
   const playSong = useCallback(async (index: number) => {
     const targetQueue = queueRef.current;
     if (!targetQueue[index]) return;
-    
+
     setCurrentIndex(index);
     indexRef.current = index;
     setIsBuffering(true);
-    
+    setEnriched(null);
+
     const target = targetQueue[index];
     const match = target.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);
     const videoId = match?.[2];
@@ -49,6 +54,11 @@ export function usePlayer(initialSongs: Song[]) {
       playerRef.current.loadVideoById(videoId);
       const metadata = await fetchTrackMetadata(target.title);
       setMeta(metadata);
+
+      setEnriching(true);
+      fetchEnrichedMetadata(metadata.artist, target.title)
+        .then((data) => setEnriched(data))
+        .finally(() => setEnriching(false));
     }
   }, []);
 
@@ -64,7 +74,6 @@ export function usePlayer(initialSongs: Song[]) {
     playSong(prevIdx);
   }, [playSong]);
 
-  // YouTube API Initialization
   useEffect(() => {
     const initPlayer = () => {
       playerRef.current = new window.YT.Player('yt-hidden-player', {
@@ -141,6 +150,7 @@ export function usePlayer(initialSongs: Song[]) {
 
   return {
     songs, queue, currentIndex, isPlaying, isBuffering, mode, currentTime, duration, volume, meta,
+    enriched, enriching,
     playSong, nextSong, prevSong, togglePlay, toggleShuffle, seekTo, changeVolume
   };
 }

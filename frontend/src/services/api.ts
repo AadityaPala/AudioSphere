@@ -1,3 +1,5 @@
+import type { EnrichedMetadata } from '../types';
+
 export const CAS_URL = import.meta.env.VITE_CAS_URL;
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -13,7 +15,7 @@ export function getAuthHeaders() {
 export async function fetchTrackMetadata(title: string): Promise<{ artist: string; artwork: string }> {
     try {
         const cleanQuery = title
-            .replace(/\s*[\(\[][^)]*?(official\vert{}video\vert{}audio\vert{}lyrics\vert{}hd\vert{}4k)[^)]*?[\)\]]/gi, '')
+            .replace(/\s*[\(\[][^)]*?(official|video|audio|lyrics|hd|4k)[^)]*?[\)\]]/gi, '')
             .replace(/\|.*/, '')
             .trim();
 
@@ -40,12 +42,32 @@ export async function fetchTrackMetadata(title: string): Promise<{ artist: strin
     };
 }
 
+export async function fetchEnrichedMetadata(artist: string, title: string): Promise<EnrichedMetadata | null> {
+    try {
+        const url = `${import.meta.env.VITE_BACKEND_URL}/metadata/enrich?artist=${encodeURIComponent(artist)}&title=${encodeURIComponent(title)}`;
+        const res = await fetch(url, { headers: getAuthHeaders() });
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!data || !data.lyrics) return null;
+        return {
+            artist: data.artist || artist,
+            title: data.title || title,
+            albumArtUrl: data.albumArtUrl || '',
+            genre: data.genre || '',
+            releaseYear: data.releaseYear || '',
+            lyrics: data.lyrics || '',
+        };
+    } catch {
+        return null;
+    }
+}
+
 export const fetchPlaylists = async () => {
   const token = localStorage.getItem('st-access-token');
-  
+
   const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/links`, {
     headers: {
-      'Authorization': `Bearer ${token}` 
+      'Authorization': `Bearer ${token}`
     }
   });
 
