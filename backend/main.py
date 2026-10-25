@@ -3,10 +3,15 @@ import httpx
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
+from prometheus_fastapi_instrumentator import Instrumentator
+
+
 app = FastAPI(
     title="Audiosphere Metadata & AI Service",
     version="0.2.0",
 )
+
+Instrumentator().instrument(app).expose(app)
 
 # Allow local development, Caddy gateway, and Vercel frontend
 app.add_middleware(
