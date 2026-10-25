@@ -2,6 +2,7 @@ import type { EnrichedMetadata } from '../types';
 
 export const CAS_URL = import.meta.env.VITE_CAS_URL;
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+export const PYTHON_URL = import.meta.env.VITE_PYTHON_URL;
 
 export function getAuthHeaders() {
     const token = localStorage.getItem('st-access-token');
@@ -44,7 +45,7 @@ export async function fetchTrackMetadata(title: string): Promise<{ artist: strin
 
 export async function fetchEnrichedMetadata(artist: string, title: string): Promise<EnrichedMetadata | null> {
     try {
-        const url = `${import.meta.env.VITE_BACKEND_URL}/metadata/enrich?artist=${encodeURIComponent(artist)}&title=${encodeURIComponent(title)}`;
+        const url = `${PYTHON_URL}/metadata/enrich?artist=${encodeURIComponent(artist)}&title=${encodeURIComponent(title)}`;
         const res = await fetch(url, { headers: getAuthHeaders() });
         if (!res.ok) return null;
         const data = await res.json();
@@ -65,7 +66,7 @@ export async function fetchEnrichedMetadata(artist: string, title: string): Prom
 export const fetchPlaylists = async () => {
   const token = localStorage.getItem('st-access-token');
 
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/links`, {
+  const response = await fetch(`${BACKEND_URL}/links`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
