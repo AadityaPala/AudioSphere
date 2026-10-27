@@ -117,6 +117,11 @@ export default function App() {
     }
   };
 
+  const handlePlayTrack = (url: string) => {
+    const index = player.queue.findIndex((song) => song.url === url);
+    if (index >= 0) player.playSong(index);
+  };
+
   return (
     <div className="relative h-screen w-screen flex flex-col bg-[#06060f] text-slate-100 overflow-hidden font-sans">
       <div id="yt-hidden-player" className="absolute left-[9999px] top-[9999px] opacity-0 pointer-events-none" />
@@ -143,7 +148,7 @@ export default function App() {
               songs={songs}
               handleAdd={handleAdd}
               handleRemove={handleRemove}
-              handlePlay={player.playSong}
+              handlePlay={handlePlayTrack}
               handleSignOut={handleSignOutRequest}
               loading={loading}
               className="h-full"
