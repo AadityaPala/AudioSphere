@@ -95,14 +95,26 @@ export default function App() {
 
   const handleAdd = async (url: string) => {
     setLoading(true);
-    await addSong(url);
-    await loadSongs();
-    setLoading(false);
+    try {
+      await addSong(url);
+      await loadSongs();
+    } catch (error) {
+      console.error('Failed to add track:', error);
+      window.alert(error instanceof Error ? error.message : 'Failed to add track.');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRemove = async (url: string) => {
-    await removeSong(url);
-    await loadSongs();
+    try {
+      await removeSong(url);
+      await loadSongs();
+    } catch (error) {
+      console.error('Failed to remove track:', error);
+      window.alert(error instanceof Error ? error.message : 'Failed to remove track.');
+    }
   };
 
   return (
@@ -131,6 +143,7 @@ export default function App() {
               songs={songs}
               handleAdd={handleAdd}
               handleRemove={handleRemove}
+              handlePlay={player.playSong}
               handleSignOut={handleSignOutRequest}
               loading={loading}
               className="h-full"
@@ -163,6 +176,7 @@ export default function App() {
           songs={songs}
           handleAdd={handleAdd}
           handleRemove={handleRemove}
+          handlePlay={player.playSong}
           handleSignOut={handleSignOutRequest}
           loading={loading}
         />
