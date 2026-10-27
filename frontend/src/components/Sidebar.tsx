@@ -7,12 +7,13 @@ interface SidebarProps {
   songs: Song[];
   handleAdd: (url: string) => Promise<void>;
   handleRemove: (url: string) => void;
+  handlePlay: (index: number) => void;
   handleSignOut: () => void;
   loading: boolean;
   className?: string;
 }
 
-export function Sidebar({ songs, handleAdd, handleRemove, handleSignOut, loading, className = '' }: SidebarProps) {
+export function Sidebar({ songs, handleAdd, handleRemove, handlePlay, handleSignOut, loading, className = '' }: SidebarProps) {
   const [inputUrl, setInputUrl] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
@@ -90,10 +91,17 @@ export function Sidebar({ songs, handleAdd, handleRemove, handleSignOut, loading
           )}
           {songs.map((song, i) => (
             <li
-              key={i}
+              key={song.url}
               className="group flex items-center justify-between gap-2 p-2.5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/15 transition-all duration-300"
             >
-              <div className="flex items-center gap-3 min-w-0">
+              <div
+                role="button"
+                tabIndex={0}
+                aria-label={`Play ${song.title}`}
+                onClick={() => handlePlay(i)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePlay(i); } }}
+                className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg"
+              >
                 <span className="text-[11px] font-mono text-slate-500 w-4 shrink-0 whitespace-nowrap">{i + 1}</span>
                 <TrackThumbnail title={song.title} className="w-10 h-10 rounded-xl shadow-md" />
                 <span className="text-xs font-medium text-slate-200 truncate whitespace-nowrap min-w-0">{song.title}</span>
