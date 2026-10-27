@@ -92,7 +92,7 @@ function getYouTubeVideoId(input: string): string | null {
     return null;
 }
 
-async function getYouTubeTitle(url: string): Promise<string> {
+async function getYouTubeMetadata(url: string): Promise<{ title: string; author: string }> {
     const videoId = getYouTubeVideoId(url);
     if (!videoId) throw new Error('Enter a valid YouTube video URL.');
     const canonicalUrl = `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`;
@@ -100,14 +100,19 @@ async function getYouTubeTitle(url: string): Promise<string> {
     if (!response.ok) throw new Error('Could not fetch this YouTube video. Check that the URL is public and valid.');
     const data = await response.json();
     if (typeof data.title !== 'string' || !data.title.trim()) throw new Error('YouTube did not return a title for this video.');
-    return data.title.trim();
+    return {
+        title: data.title.trim(),
+        author: typeof data.author_name === 'string' ? data.author_name.trim() : '',
+    };
 }
 
 export async function addSong(url: string): Promise<void> {
     // Resolve the actual YouTube title and enrich it before saving to the Java API.
-    const title = await getYouTubeTitle(url);
+    const youtube = await getYouTubeMetadata(url);
+    const title = youtube.title;
     const trackMetadata = await fetchTrackMetadata(title);
-    const enriched = await fetchEnrichedMetadata(trackMetadata.artist, title);
+    const artist = trackMetadata.artist !== 'Unknown Artist' ? trackMetadata.artist : (youtube.author || 'Unknown Artist');
+    const enriched = await fetchEnrichedMetadata(artist, title);
 
     const res = await fetch(`${BACKEND_URL}/links`, {
         method: 'POST',
