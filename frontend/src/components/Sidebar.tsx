@@ -7,7 +7,7 @@ interface SidebarProps {
   songs: Song[];
   handleAdd: (url: string) => Promise<void>;
   handleRemove: (url: string) => void;
-  handlePlay: (index: number) => void;
+  handlePlay: (url: string) => void;
   handleSignOut: () => void;
   loading: boolean;
   className?: string;
@@ -98,8 +98,8 @@ export function Sidebar({ songs, handleAdd, handleRemove, handlePlay, handleSign
                 role="button"
                 tabIndex={0}
                 aria-label={`Play ${song.title}`}
-                onClick={() => handlePlay(i)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePlay(i); } }}
+                onClick={() => handlePlay(song.url)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePlay(song.url); } }}
                 className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg"
               >
                 <span className="text-[11px] font-mono text-slate-500 w-4 shrink-0 whitespace-nowrap">{i + 1}</span>
