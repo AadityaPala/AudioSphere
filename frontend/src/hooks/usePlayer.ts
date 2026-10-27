@@ -47,8 +47,22 @@ export function usePlayer(initialSongs: Song[]) {
     setEnriched(null);
 
     const target = targetQueue[index];
-    const match = target.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);
-    const videoId = match?.[2];
+    let videoId: string | null = null;
+    try {
+      const parsed = new URL(target.url);
+      const host = parsed.hostname.replace(/^www\./, '').toLowerCase();
+      if (host === 'youtu.be') {
+        videoId = parsed.pathname.split('/').filter(Boolean)[0] || null;
+      } else if (host === 'youtube.com' || host.endsWith('.youtube.com') || host === 'youtube-nocookie.com') {
+        if (parsed.pathname === '/watch') videoId = parsed.searchParams.get('v');
+        else {
+          const parts = parsed.pathname.split('/').filter(Boolean);
+          if (['embed', 'shorts', 'live', 'v'].includes(parts[0])) videoId = parts[1] || null;
+        }
+      }
+    } catch {
+      videoId = null;
+    }
 
     if (videoId && playerRef.current) {
       playerRef.current.loadVideoById(videoId);
