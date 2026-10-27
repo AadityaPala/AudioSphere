@@ -49,7 +49,7 @@ export async function fetchEnrichedMetadata(artist: string, title: string): Prom
         const res = await fetch(url, { headers: getAuthHeaders() });
         if (!res.ok) return null;
         const data = await res.json();
-        if (!data || !data.lyrics) return null;
+        if (!data || !(data.lyrics || data.genre || data.releaseYear || data.albumArtUrl)) return null;
         return {
             artist: data.artist || artist,
             title: data.title || title,
