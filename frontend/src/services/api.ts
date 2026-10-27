@@ -77,19 +77,27 @@ export const fetchPlaylists = async () => {
 };
 
 export async function addSong(url: string): Promise<void> {
-    const res = await fetch(`${BACKEND_URL}/add`, {
+    // The Java API creates tracks at POST /links and requires a non-blank title.
+    // Use the submitted URL as a fallback title until the UI supplies a track title.
+    const res = await fetch(`${BACKEND_URL}/links`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, title: url }),
     });
-    if(!res.ok) throw new Error('Failed to add track');
+    if (!res.ok) {
+        throw new Error(res.status === 400
+            ? 'Track already exists or the submitted track is invalid'
+            : `Failed to add track (HTTP ${res.status})`);
+    }
 }
 
 export async function removeSong(url: string): Promise<void> {
-    const res = await fetch(`${BACKEND_URL}/remove`, {
-        method: 'POST',
+    // The Java API deletes by URL using DELETE /links?url=...
+    const res = await fetch(`${BACKEND_URL}/links?url=${encodeURIComponent(url)}`, {
+        method: 'DELETE',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ url }),
     });
-    if(!res.ok) throw new Error('Failed to remove track');
+    if (!res.ok) {
+        throw new Error(`Failed to remove track (HTTP ${res.status})`);
+    }
 }
