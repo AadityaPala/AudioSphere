@@ -181,7 +181,7 @@ export default function App() {
           songs={songs}
           handleAdd={handleAdd}
           handleRemove={handleRemove}
-          handlePlay={player.playSong}
+          handlePlay={handlePlayTrack}
           handleSignOut={handleSignOutRequest}
           loading={loading}
         />
