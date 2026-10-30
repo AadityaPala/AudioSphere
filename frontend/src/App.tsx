@@ -6,7 +6,6 @@ import { Sidebar } from './components/Sidebar';
 import { PlayerView } from './components/PlayerView';
 import { InfoPanel } from './components/InfoPanel';
 import { LogoutModal } from './components/LogoutModal';
-import { ParticleBackground } from './components/ParticleBackground';
 import { HomePage } from './components/HomePage';
 import { OnboardingModal } from './components/OnboardingModal';
 import { usePlayer } from './hooks/usePlayer';
@@ -137,8 +136,6 @@ export default function App() {
   return (
     <div className="relative h-screen w-screen flex flex-col bg-[#06060f] text-slate-100 overflow-hidden font-sans">
       <div id="yt-hidden-player" className="absolute left-[9999px] top-[9999px] opacity-0 pointer-events-none" />
-
-      <ParticleBackground />
 
       {/* Deep, colorful ambient gradient background */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
