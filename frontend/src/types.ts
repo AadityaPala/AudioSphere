@@ -33,3 +33,21 @@ export interface Recommendation {
   artist: string;
   artwork: string;
 }
+
+export interface MockArtist {
+  id: string;
+  name: string;
+  image: string;
+  monthlyListeners: string;
+}
+
+export interface MockTrack {
+  id: string;
+  title: string;
+  artist: string;
+  album: string;
+  artwork: string;
+  duration: string;
+  playable: boolean;
+  url?: string;
+}
