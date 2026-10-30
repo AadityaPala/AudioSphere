@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Trash2, LogOut, Menu, X, Music, Library } from 'lucide-react';
 import type { Song } from '../types';
 import { TrackThumbnail } from './TrackThumbnail';
+import { UserAvatar } from './UserAvatar';
 
 interface SidebarProps {
   songs: Song[];
@@ -10,10 +11,11 @@ interface SidebarProps {
   handlePlay: (url: string) => void;
   handleSignOut: () => void;
   loading: boolean;
+  displayName?: string | null;
   className?: string;
 }
 
-export function Sidebar({ songs, handleAdd, handleRemove, handlePlay, handleSignOut, loading, className = '' }: SidebarProps) {
+export function Sidebar({ songs, handleAdd, handleRemove, handlePlay, handleSignOut, loading, displayName = null, className = '' }: SidebarProps) {
   const [inputUrl, setInputUrl] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
@@ -41,7 +43,7 @@ export function Sidebar({ songs, handleAdd, handleRemove, handlePlay, handleSign
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         } ${className}`}
       >
-        {/* Brand + Sign out */}
+        {/* Brand + Avatar + Sign out */}
         <div className="flex items-center justify-between pl-12 lg:pl-0 pb-4 border-b border-white/10">
           <div className="flex items-center gap-2 min-w-0">
             <div className="grid place-items-center w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 shadow-lg shadow-indigo-500/30 shrink-0">
@@ -51,13 +53,21 @@ export function Sidebar({ songs, handleAdd, handleRemove, handlePlay, handleSign
               Audio<span className="text-indigo-300">Sphere</span>
             </span>
           </div>
-          <button
-            onClick={handleSignOut}
-            className="p-2 rounded-xl text-slate-300 hover:text-red-300 hover:bg-white/5 transition-all duration-300 shrink-0"
-            title="Sign out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 px-1.5 py-1 rounded-full bg-white/[0.06] border border-white/10">
+              <UserAvatar name={displayName} size={24} />
+              {displayName && (
+                <span className="text-[11px] font-medium text-slate-200 max-w-[80px] truncate pr-1.5 hidden lg:block">{displayName}</span>
+              )}
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="p-2 rounded-xl text-slate-300 hover:text-red-300 hover:bg-white/5 transition-all duration-300"
+              title="Sign out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Section label */}
