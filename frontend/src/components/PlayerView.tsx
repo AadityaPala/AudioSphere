@@ -1,5 +1,6 @@
-import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, Loader2, Info, ListMusic } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, VolumeX, Loader2, Info, ListMusic } from 'lucide-react';
 import { RgbBorder } from './RgbBorder';
+import { useScrollRestore } from '../hooks/useScrollRestore';
 
 interface PlayerViewProps {
   player: any;
@@ -37,9 +38,10 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
   const currentUrl = currentIndex !== -1 && queue[currentIndex] ? queue[currentIndex].url : '';
   const hasTrack = currentIndex !== -1 && !!queue[currentIndex];
   const rgbActive = hasTrack && (isPlaying || isBuffering);
+  const isMuted = volume === 0;
 
   const inner = (
-    <main className={`flex flex-col min-w-0 min-h-0 overflow-hidden bg-white/5 backdrop-blur-xl border border-white/15 rounded-3xl p-4 md:p-6 shadow-2xl transition-all duration-300 ${className}`}>
+    <main className={`flex flex-col min-w-0 min-h-0 overflow-hidden bg-white/[0.04] backdrop-blur-xl border border-white/[0.12] rounded-3xl p-4 md:p-6 shadow-2xl transition-all duration-300 ${className}`}>
       {/* Central album art — grows/shrinks with panel */}
       <div className="flex-1 min-h-0 flex flex-col items-center justify-center w-full">
         <div className="relative group w-full max-w-[200px] flex-1 min-h-0 mb-3 rounded-2xl overflow-hidden shadow-2xl border border-white/20 transition-all duration-300">
@@ -55,7 +57,7 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
           )}
         </div>
 
-        {/* Metadata + title (shrinks last, keeps identity visible) */}
+        {/* Metadata + title */}
         <div className="shrink-0 flex flex-col items-center w-full">
           <div className="flex flex-wrap items-center justify-center gap-1.5 mb-1.5 max-w-full">
             {enriched?.genre && (
@@ -74,8 +76,8 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
         </div>
       </div>
 
-      {/* Bottom control area — height strictly preserved */}
-      <div className="shrink-0 flex flex-col gap-4 mt-4 w-full">
+      {/* Bottom control area */}
+      <div className="shrink-0 flex flex-col gap-3 mt-3 w-full">
         {/* Progress Bar */}
         <div className="flex items-center gap-2.5 w-full">
           <span className="text-[10px] font-mono text-slate-400 w-9 text-right shrink-0 whitespace-nowrap">{formatTime(currentTime)}</span>
@@ -90,8 +92,9 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
           <span className="text-[10px] font-mono text-slate-400 w-9 shrink-0 whitespace-nowrap">{formatTime(duration)}</span>
         </div>
 
-        {/* Controls */}
+        {/* Controls + Vertical Volume */}
         <div className="flex items-center justify-between w-full">
+          {/* Shuffle button */}
           <button
             onClick={toggleShuffle}
             className={`p-2 rounded-full border transition-all duration-300 ${
@@ -102,13 +105,15 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
           >
             <Shuffle className="w-3.5 h-3.5" />
           </button>
+
+          {/* Transport controls */}
           <div className="flex items-center gap-3">
             <button onClick={prevSong} className="p-2 text-slate-300 hover:text-white transition-all duration-300 active:scale-90">
               <SkipBack className="w-5 h-5 fill-current" />
             </button>
             <button
               onClick={togglePlay}
-              className="grid place-items-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 hover:brightness-110 text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 active:scale-95"
+              className="grid place-items-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-cyan-400 hover:brightness-110 text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 active:scale-95"
             >
               {isPlaying && !isBuffering ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-0.5" />}
             </button>
@@ -116,22 +121,34 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
               <SkipForward className="w-5 h-5 fill-current" />
             </button>
           </div>
-          <button className="p-2 rounded-full border border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300">
-            <Repeat className="w-3.5 h-3.5" />
-          </button>
-        </div>
 
-        {/* Volume control */}
-        <div className="flex items-center gap-2.5 w-full max-w-xs mx-auto">
-          <Volume2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={volume}
-            onChange={(e) => changeVolume(Number(e.target.value))}
-            className="flex-1 min-w-0 h-1 cursor-pointer accent-indigo-500 transition-all duration-300"
-          />
+          {/* Repeat + Vertical Volume */}
+          <div className="flex items-center gap-2">
+            <button className="p-2 rounded-full border border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300">
+              <Repeat className="w-3.5 h-3.5" />
+            </button>
+            {/* Vertical volume slider */}
+            <div className="flex flex-col items-center gap-1 group/vol">
+              <button
+                onClick={() => changeVolume(isMuted ? 80 : 0)}
+                className="text-slate-400 hover:text-white transition-colors duration-200"
+                title={isMuted ? 'Unmute' : 'Mute'}
+              >
+                {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                </button>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={volume}
+                onChange={(e) => changeVolume(Number(e.target.value))}
+                className="vol-slider-vertical"
+                style={{
+                  background: `linear-gradient(to top, rgba(99,102,241,0.6) 0%, rgba(34,211,238,0.4) ${volume}%, rgba(255,255,255,0.08) ${volume}%)`,
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Mobile info button */}
@@ -164,14 +181,18 @@ interface QueueProps {
 
 PlayerView.Queue = function Queue({ player, className = '' }: QueueProps) {
   const { queue, currentIndex, mode, playSong, isPlaying, isBuffering } = player;
+  const scrollRef = useScrollRestore('queue', queue.length > 0);
 
   return (
-    <section className={`flex flex-col min-h-0 bg-white/5 backdrop-blur-xl border border-white/15 rounded-3xl p-4 shadow-2xl overflow-hidden transition-all duration-300 ${className}`}>
+    <section className={`flex flex-col min-h-0 bg-white/[0.04] backdrop-blur-xl border border-white/[0.12] rounded-3xl p-4 shadow-2xl overflow-hidden transition-all duration-300 ${className}`}>
       <h3 className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase mb-2.5 shrink-0 whitespace-nowrap">
         <ListMusic className="w-3.5 h-3.5" />
         {mode === 'shuffle' ? 'Shuffled Queue' : 'Current Queue'}
       </h3>
-      <ul className="flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
+      <ul
+        ref={scrollRef as React.RefObject<HTMLUListElement>}
+        className="flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar"
+      >
         {queue.length === 0 && (
           <li className="text-[11px] text-slate-500 text-center py-8">Queue is empty.</li>
         )}

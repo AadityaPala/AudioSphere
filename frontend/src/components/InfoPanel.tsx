@@ -1,6 +1,7 @@
 import { Sparkles, Play, X, Music2, Loader2, Mic2, Disc3, Calendar } from 'lucide-react';
 import type { Recommendation } from '../types';
 import { RgbBorder } from './RgbBorder';
+import { useScrollRestore } from '../hooks/useScrollRestore';
 
 interface InfoPanelProps {
   player: any;
@@ -13,10 +14,11 @@ export function InfoPanel({ player, recommendations, className = '', onClose }: 
   const { meta, enriched, enriching, currentIndex, queue, isPlaying, isBuffering } = player;
   const hasTrack = currentIndex !== -1 && queue[currentIndex];
   const currentUrl = hasTrack ? queue[currentIndex].url : '';
+  const scrollRef = useScrollRestore('discover', true);
 
   return (
     <aside
-      className={`flex flex-col w-full xl:w-full shrink-0 h-full bg-white/5 backdrop-blur-xl border border-white/15 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 ${className}`}
+      className={`flex flex-col w-full xl:w-full shrink-0 h-full bg-white/[0.03] backdrop-blur-xl border border-white/[0.1] rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 ${className}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between gap-2 p-4 border-b border-white/10 shrink-0">
@@ -34,7 +36,10 @@ export function InfoPanel({ player, recommendations, className = '', onClose }: 
         )}
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-4 space-y-5">
+      <div
+        ref={scrollRef as React.RefObject<HTMLDivElement>}
+        className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-4 space-y-5"
+      >
         {/* Now Playing / Lyrics */}
         <section>
           <h3 className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase mb-3 whitespace-nowrap">
@@ -49,7 +54,7 @@ export function InfoPanel({ player, recommendations, className = '', onClose }: 
           ) : (
             <>
               <RgbBorder trackId={currentUrl} isPlaying={isPlaying} isBuffering={isBuffering} className="rounded-2xl">
-                <div className="flex items-center gap-3 mb-3 p-2">
+                <div className="flex items-center gap-3 mb-3 p-2 bg-white/[0.03] rounded-2xl">
                   <img
                     src={enriched?.albumArtUrl || meta.artwork}
                     alt="Album art"
@@ -105,7 +110,7 @@ export function InfoPanel({ player, recommendations, className = '', onClose }: 
             {recommendations.map((rec) => (
               <li
                 key={rec.id}
-                className="group flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/15 transition-all duration-300 cursor-pointer"
+                className="group flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/10 hover:border-white/15 transition-all duration-300 cursor-pointer"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <img

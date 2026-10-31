@@ -1,7 +1,9 @@
+import type { RefObject } from 'react';
 import { Play, Info } from 'lucide-react';
 import type { MockArtist, MockTrack, Song } from '../types';
 import { MOCK_ARTISTS, MOCK_TRACKS } from '../data/mockMusic';
 import { RgbBorder } from './RgbBorder';
+import { useScrollRestore } from '../hooks/useScrollRestore';
 
 interface HomePageProps {
   displayName: string | null;
@@ -20,6 +22,7 @@ export function HomePage({ displayName, songs, player }: HomePageProps) {
   const greeting = getGreeting();
   const name = displayName?.trim();
   const heading = name ? `${greeting}, ${name}.` : `${greeting}.`;
+  const scrollRef = useScrollRestore('home', true);
 
   const playLibraryTrack = (url: string) => {
     const index = player.queue.findIndex((s: Song) => s.url === url);
@@ -27,7 +30,10 @@ export function HomePage({ displayName, songs, player }: HomePageProps) {
   };
 
   return (
-    <div className="flex flex-col min-h-0 h-full overflow-y-auto custom-scrollbar">
+    <div
+      ref={scrollRef as RefObject<HTMLDivElement>}
+      className="flex flex-col min-h-0 h-full overflow-y-auto custom-scrollbar"
+    >
       {/* Welcome section */}
       <section className="relative px-6 sm:px-8 pt-8 pb-6">
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-3xl">

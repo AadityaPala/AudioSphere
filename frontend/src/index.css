@@ -68,13 +68,13 @@ input[type=range]::-webkit-slider-thumb:hover {
     isolation: isolate;
 }
 
-/* Main RGB outline — thin, bright, well-defined border */
+/* Main RGB outline — thin, bright, well-defined border only */
 .rgb-border::before {
     content: '';
     position: absolute;
-    inset: -3px;
+    inset: -2px;
     border-radius: inherit;
-    padding: 3px;
+    padding: 2px;
     background: conic-gradient(
         from var(--rgb-angle, 0deg),
         var(--rgb-c1, #3b82f6),
@@ -98,11 +98,11 @@ input[type=range]::-webkit-slider-thumb:hover {
     z-index: 2;
 }
 
-/* Outer neon glow — soft, wide, ambient halo */
+/* Outer neon glow — soft halo just outside the border */
 .rgb-border::after {
     content: '';
     position: absolute;
-    inset: -6px;
+    inset: -4px;
     border-radius: inherit;
     background: conic-gradient(
         from var(--rgb-angle, 0deg),
@@ -113,8 +113,8 @@ input[type=range]::-webkit-slider-thumb:hover {
         var(--rgb-c5, #6366f1),
         var(--rgb-c1, #3b82f6)
     );
-    filter: blur(12px);
-    opacity: 0.65;
+    filter: blur(10px);
+    opacity: 0.45;
     animation: rgb-rotate var(--rgb-duration, 4s) linear infinite;
     animation-direction: var(--rgb-direction, normal);
     pointer-events: none;
@@ -125,12 +125,11 @@ input[type=range]::-webkit-slider-thumb:hover {
 .rgb-border.rgb-paused::before,
 .rgb-border.rgb-paused::after {
     animation-play-state: paused;
-    opacity: 0.45;
+    opacity: 0.4;
 }
 
 .rgb-border.rgb-paused::after {
-    opacity: 0.2;
-    filter: blur(12px);
+    opacity: 0.12;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -138,4 +137,18 @@ input[type=range]::-webkit-slider-thumb:hover {
     .rgb-border::after {
         animation: none;
     }
+}
+
+/* ── Vertical volume slider ── */
+
+.vol-slider-vertical {
+    -webkit-appearance: slider-vertical;
+    writing-mode: bt-lr;
+    appearance: slider-vertical;
+    width: 4px;
+    height: 80px;
+    cursor: pointer;
+    accent-color: #6366f1;
+    border-radius: 8px;
+    background: linear-gradient(to top, rgba(99, 102, 241, 0.3), rgba(255, 255, 255, 0.1));
 }

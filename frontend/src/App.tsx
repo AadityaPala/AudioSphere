@@ -9,7 +9,8 @@ import { LogoutModal } from './components/LogoutModal';
 import { HomePage } from './components/HomePage';
 import { OnboardingModal } from './components/OnboardingModal';
 import { RippleLayer } from './components/RippleLayer';
-import { UserAvatar } from './components/UserAvatar';
+import { CustomCursor } from './components/CustomCursor';
+import { ProfileDropdown } from './components/ProfileDropdown';
 import { usePlayer } from './hooks/usePlayer';
 import { useOnboarding } from './hooks/useOnboarding';
 import { CAS_URL, fetchPlaylists, addSong, removeSong } from './services/api';
@@ -152,6 +153,7 @@ export default function App() {
       </div>
 
       <RippleLayer />
+      <CustomCursor />
 
       <AuthOverlay token={token} />
 
@@ -177,11 +179,8 @@ export default function App() {
           >
             <Disc3 className="w-3.5 h-3.5" /> Now Playing
           </button>
-          <div className="ml-auto flex items-center gap-2 px-2 py-1 rounded-full bg-white/[0.06] border border-white/10">
-            <UserAvatar name={onboarding.displayName} size={22} />
-            {onboarding.displayName && (
-              <span className="text-[11px] font-medium text-slate-200 max-w-[100px] truncate pr-1.5 hidden sm:block">{onboarding.displayName}</span>
-            )}
+          <div className="ml-auto">
+            <ProfileDropdown displayName={onboarding.displayName} onLogout={handleSignOutRequest} />
           </div>
         </div>
       )}
@@ -205,7 +204,6 @@ export default function App() {
                   handleAdd={handleAdd}
                   handleRemove={handleRemove}
                   handlePlay={handlePlayTrack}
-                  handleSignOut={handleSignOutRequest}
                   loading={loading}
                   displayName={onboarding.displayName}
                   currentTrackUrl={player.currentIndex >= 0 ? player.queue[player.currentIndex]?.url ?? null : null}
@@ -241,7 +239,6 @@ export default function App() {
               handleAdd={handleAdd}
               handleRemove={handleRemove}
               handlePlay={handlePlayTrack}
-              handleSignOut={handleSignOutRequest}
               loading={loading}
               displayName={onboarding.displayName}
               currentTrackUrl={player.currentIndex >= 0 ? player.queue[player.currentIndex]?.url ?? null : null}
