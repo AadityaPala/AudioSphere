@@ -68,12 +68,13 @@ input[type=range]::-webkit-slider-thumb:hover {
     isolation: isolate;
 }
 
+/* Main RGB outline — thin, bright, well-defined border */
 .rgb-border::before {
     content: '';
     position: absolute;
-    inset: -2px;
+    inset: -3px;
     border-radius: inherit;
-    padding: 2px;
+    padding: 3px;
     background: conic-gradient(
         from var(--rgb-angle, 0deg),
         var(--rgb-c1, #3b82f6),
@@ -94,14 +95,14 @@ input[type=range]::-webkit-slider-thumb:hover {
     animation: rgb-rotate var(--rgb-duration, 4s) linear infinite;
     animation-direction: var(--rgb-direction, normal);
     pointer-events: none;
-    z-index: 1;
+    z-index: 2;
 }
 
-/* Outer neon glow */
+/* Outer neon glow — soft, wide, ambient halo */
 .rgb-border::after {
     content: '';
     position: absolute;
-    inset: -4px;
+    inset: -6px;
     border-radius: inherit;
     background: conic-gradient(
         from var(--rgb-angle, 0deg),
@@ -112,22 +113,24 @@ input[type=range]::-webkit-slider-thumb:hover {
         var(--rgb-c5, #6366f1),
         var(--rgb-c1, #3b82f6)
     );
-    filter: blur(8px);
-    opacity: 0.5;
+    filter: blur(12px);
+    opacity: 0.65;
     animation: rgb-rotate var(--rgb-duration, 4s) linear infinite;
     animation-direction: var(--rgb-direction, normal);
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
 }
 
+/* When paused: stop the rotation, dim the glow, keep the border visible */
 .rgb-border.rgb-paused::before,
 .rgb-border.rgb-paused::after {
     animation-play-state: paused;
-    opacity: 0.3;
+    opacity: 0.45;
 }
 
 .rgb-border.rgb-paused::after {
-    opacity: 0.15;
+    opacity: 0.2;
+    filter: blur(12px);
 }
 
 @media (prefers-reduced-motion: reduce) {

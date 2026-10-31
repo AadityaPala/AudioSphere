@@ -1,15 +1,15 @@
 import type { CSSProperties, ReactNode } from 'react';
 
 const PALETTES: [string, string, string, string, string][] = [
-  ['#3b82f6', '#06b6d4', '#8b5cf6', '#ec4899', '#6366f1'],
-  ['#06b6d4', '#3b82f6', '#a855f7', '#ec4899', '#0ea5e9'],
-  ['#6366f1', '#8b5cf6', '#06b6d4', '#3b82f6', '#d946ef'],
+  ['#22d3ee', '#3b82f6', '#a855f7', '#ec4899', '#6366f1'],
+  ['#06b6d4', '#0ea5e9', '#8b5cf6', '#d946ef', '#3b82f6'],
+  ['#6366f1', '#8b5cf6', '#22d3ee', '#3b82f6', '#f472b6'],
   ['#0ea5e9', '#6366f1', '#ec4899', '#a855f7', '#06b6d4'],
-  ['#8b5cf6', '#3b82f6', '#06b6d4', '#d946ef', '#6366f1'],
-  ['#3b82f6', '#a855f7', '#06b6d4', '#6366f1', '#ec4899'],
+  ['#a855f7', '#3b82f6', '#22d3ee', '#f472b6', '#6366f1'],
+  ['#3b82f6', '#a855f7', '#06b6d4', '#818cf8', '#ec4899'],
 ];
 
-const DURATIONS = [3.5, 4, 4.5, 5, 6];
+const DURATIONS = [3, 3.5, 4, 4.5, 5];
 const DIRECTIONS: Array<'normal' | 'reverse'> = ['normal', 'reverse'];
 
 function hashString(str: string): number {
@@ -37,7 +37,6 @@ export function RgbBorder({ trackId, isPlaying, isBuffering = false, children, c
   const direction = DIRECTIONS[hash % DIRECTIONS.length];
 
   const active = isPlaying && !isBuffering;
-  // Keep the border visible while buffering (subdued), hide only when truly stopped/paused
   const paused = !active;
 
   const cssVars: CSSProperties = {
