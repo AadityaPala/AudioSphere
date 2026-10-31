@@ -1,6 +1,7 @@
 import { Play, Info } from 'lucide-react';
 import type { MockArtist, MockTrack, Song } from '../types';
 import { MOCK_ARTISTS, MOCK_TRACKS } from '../data/mockMusic';
+import { RgbBorder } from './RgbBorder';
 
 interface HomePageProps {
   displayName: string | null;
@@ -83,10 +84,11 @@ export function HomePage({ displayName, songs, player }: HomePageProps) {
               s.title.toLowerCase().includes(track.artist.toLowerCase())
             );
             const playable = track.playable || !!libMatch;
+            const isCurrentTrack = !!libMatch && player.currentIndex >= 0 && player.queue[player.currentIndex]?.url === libMatch.url;
+            const rgbActive = isCurrentTrack && (player.isPlaying || player.isBuffering);
 
-            return (
+            const cardInner = (
               <div
-                key={track.id}
                 className={`group flex items-center gap-4 p-3 rounded-2xl border transition-all duration-300 ${
                   playable
                     ? 'bg-white/[0.04] border-white/[0.06] hover:bg-white/[0.08] hover:border-indigo-400/30 cursor-pointer'
@@ -118,6 +120,18 @@ export function HomePage({ displayName, songs, player }: HomePageProps) {
                   )}
                   <span className="text-[11px] font-mono text-slate-500">{track.duration}</span>
                 </div>
+              </div>
+            );
+
+            return (
+              <div key={track.id}>
+                {rgbActive ? (
+                  <RgbBorder trackId={libMatch!.url} isPlaying={player.isPlaying} isBuffering={player.isBuffering} className="rounded-2xl">
+                    {cardInner}
+                  </RgbBorder>
+                ) : (
+                  cardInner
+                )}
               </div>
             );
           })}

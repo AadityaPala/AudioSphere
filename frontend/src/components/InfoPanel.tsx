@@ -1,5 +1,6 @@
 import { Sparkles, Play, X, Music2, Loader2, Mic2, Disc3, Calendar } from 'lucide-react';
 import type { Recommendation } from '../types';
+import { RgbBorder } from './RgbBorder';
 
 interface InfoPanelProps {
   player: any;
@@ -9,8 +10,9 @@ interface InfoPanelProps {
 }
 
 export function InfoPanel({ player, recommendations, className = '', onClose }: InfoPanelProps) {
-  const { meta, enriched, enriching, currentIndex, queue } = player;
+  const { meta, enriched, enriching, currentIndex, queue, isPlaying, isBuffering } = player;
   const hasTrack = currentIndex !== -1 && queue[currentIndex];
+  const currentUrl = hasTrack ? queue[currentIndex].url : '';
 
   return (
     <aside
@@ -46,29 +48,31 @@ export function InfoPanel({ player, recommendations, className = '', onClose }: 
             </div>
           ) : (
             <>
-              <div className="flex items-center gap-3 mb-3">
-                <img
-                  src={enriched?.albumArtUrl || meta.artwork}
-                  alt="Album art"
-                  className="w-16 h-16 rounded-2xl object-cover shadow-lg border border-white/15 shrink-0 transition-transform duration-300"
-                />
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold truncate whitespace-nowrap">{queue[currentIndex].title}</p>
-                  <p className="text-[11px] text-slate-400 truncate whitespace-nowrap">{enriched?.artist || meta.artist}</p>
-                  <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                    {enriched?.genre && (
-                      <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-200 border border-indigo-400/20 whitespace-nowrap transition-all duration-300">
-                        <Disc3 className="w-3 h-3" /> {enriched.genre}
-                      </span>
-                    )}
-                    {enriched?.releaseYear && (
-                      <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-slate-300 border border-white/10 whitespace-nowrap transition-all duration-300">
-                        <Calendar className="w-3 h-3" /> {enriched.releaseYear}
-                      </span>
-                    )}
+              <RgbBorder trackId={currentUrl} isPlaying={isPlaying} isBuffering={isBuffering} className="rounded-2xl">
+                <div className="flex items-center gap-3 mb-3 p-2">
+                  <img
+                    src={enriched?.albumArtUrl || meta.artwork}
+                    alt="Album art"
+                    className="w-16 h-16 rounded-2xl object-cover shadow-lg border border-white/15 shrink-0 transition-transform duration-300"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold truncate whitespace-nowrap">{queue[currentIndex].title}</p>
+                    <p className="text-[11px] text-slate-400 truncate whitespace-nowrap">{enriched?.artist || meta.artist}</p>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                      {enriched?.genre && (
+                        <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-200 border border-indigo-400/20 whitespace-nowrap transition-all duration-300">
+                          <Disc3 className="w-3 h-3" /> {enriched.genre}
+                        </span>
+                      )}
+                      {enriched?.releaseYear && (
+                        <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-slate-300 border border-white/10 whitespace-nowrap transition-all duration-300">
+                          <Calendar className="w-3 h-3" /> {enriched.releaseYear}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </RgbBorder>
 
               {/* Lyrics — scrollable glass container */}
               <div className="bg-black/20 border border-white/10 rounded-2xl p-4 shadow-inner transition-all duration-300">

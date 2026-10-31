@@ -3,6 +3,7 @@ import { Plus, Trash2, LogOut, Menu, X, Music, Library } from 'lucide-react';
 import type { Song } from '../types';
 import { TrackThumbnail } from './TrackThumbnail';
 import { UserAvatar } from './UserAvatar';
+import { RgbBorder } from './RgbBorder';
 
 interface SidebarProps {
   songs: Song[];
@@ -12,10 +13,12 @@ interface SidebarProps {
   handleSignOut: () => void;
   loading: boolean;
   displayName?: string | null;
+  currentTrackUrl?: string | null;
+  isPlaying?: boolean;
   className?: string;
 }
 
-export function Sidebar({ songs, handleAdd, handleRemove, handlePlay, handleSignOut, loading, displayName = null, className = '' }: SidebarProps) {
+export function Sidebar({ songs, handleAdd, handleRemove, handlePlay, handleSignOut, loading, displayName = null, currentTrackUrl = null, isPlaying = false, className = '' }: SidebarProps) {
   const [inputUrl, setInputUrl] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
@@ -99,31 +102,49 @@ export function Sidebar({ songs, handleAdd, handleRemove, handlePlay, handleSign
           {songs.length === 0 && (
             <li className="text-[11px] text-slate-500 text-center py-8">Your library is empty. Add a link above.</li>
           )}
-          {songs.map((song, i) => (
-            <li
-              key={song.url}
-              className="group flex items-center justify-between gap-2 p-2.5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/15 transition-all duration-300"
-            >
-              <div
-                role="button"
-                tabIndex={0}
-                aria-label={`Play ${song.title}`}
-                onClick={() => handlePlay(song.url)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePlay(song.url); } }}
-                className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg"
+          {songs.map((song, i) => {
+            const isCurrent = currentTrackUrl === song.url;
+            const content = (
+              <>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Play ${song.title}`}
+                  onClick={() => handlePlay(song.url)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePlay(song.url); } }}
+                  className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg"
+                >
+                  <span className="text-[11px] font-mono text-slate-500 w-4 shrink-0 whitespace-nowrap">{i + 1}</span>
+                  <TrackThumbnail title={song.title} className="w-10 h-10 rounded-xl shadow-md" />
+                  <span className="text-xs font-medium text-slate-200 truncate whitespace-nowrap min-w-0">{song.title}</span>
+                </div>
+                <button
+                  onClick={() => handleRemove(song.url)}
+                  className="shrink-0 p-1.5 text-slate-500 hover:text-red-300 hover:bg-white/5 rounded-lg transition-all duration-300 opacity-100 lg:opacity-0 group-hover:opacity-100"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </>
+            );
+            return (
+              <li
+                key={song.url}
+                className="group list-none"
               >
-                <span className="text-[11px] font-mono text-slate-500 w-4 shrink-0 whitespace-nowrap">{i + 1}</span>
-                <TrackThumbnail title={song.title} className="w-10 h-10 rounded-xl shadow-md" />
-                <span className="text-xs font-medium text-slate-200 truncate whitespace-nowrap min-w-0">{song.title}</span>
-              </div>
-              <button
-                onClick={() => handleRemove(song.url)}
-                className="shrink-0 p-1.5 text-slate-500 hover:text-red-300 hover:bg-white/5 rounded-lg transition-all duration-300 opacity-100 lg:opacity-0 group-hover:opacity-100"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </li>
-          ))}
+                {isCurrent ? (
+                  <RgbBorder trackId={song.url} isPlaying={isPlaying} isBuffering={false} className="rounded-2xl">
+                    <div className="flex items-center justify-between gap-2 p-2.5 rounded-2xl border border-transparent bg-white/10 transition-all duration-300">
+                      {content}
+                    </div>
+                  </RgbBorder>
+                ) : (
+                  <div className="flex items-center justify-between gap-2 p-2.5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/15 transition-all duration-300">
+                    {content}
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </aside>
 

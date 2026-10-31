@@ -1,4 +1,5 @@
 import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, Loader2, Info, ListMusic } from 'lucide-react';
+import { RgbBorder } from './RgbBorder';
 
 interface PlayerViewProps {
   player: any;
@@ -33,8 +34,11 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
   };
 
   const currentTitle = currentIndex !== -1 && queue[currentIndex] ? queue[currentIndex].title : 'No track selected';
+  const currentUrl = currentIndex !== -1 && queue[currentIndex] ? queue[currentIndex].url : '';
+  const hasTrack = currentIndex !== -1 && !!queue[currentIndex];
+  const rgbActive = hasTrack && (isPlaying || isBuffering);
 
-  return (
+  const inner = (
     <main className={`flex flex-col min-w-0 min-h-0 overflow-hidden bg-white/5 backdrop-blur-xl border border-white/15 rounded-3xl p-4 md:p-6 shadow-2xl transition-all duration-300 ${className}`}>
       {/* Central album art — grows/shrinks with panel */}
       <div className="flex-1 min-h-0 flex flex-col items-center justify-center w-full">
@@ -143,6 +147,14 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
       </div>
     </main>
   );
+
+  return rgbActive ? (
+    <RgbBorder trackId={currentUrl} isPlaying={isPlaying} isBuffering={isBuffering} className="rounded-3xl">
+      {inner}
+    </RgbBorder>
+  ) : (
+    inner
+  );
 }
 
 interface QueueProps {
@@ -151,7 +163,7 @@ interface QueueProps {
 }
 
 PlayerView.Queue = function Queue({ player, className = '' }: QueueProps) {
-  const { queue, currentIndex, mode, playSong } = player;
+  const { queue, currentIndex, mode, playSong, isPlaying, isBuffering } = player;
 
   return (
     <section className={`flex flex-col min-h-0 bg-white/5 backdrop-blur-xl border border-white/15 rounded-3xl p-4 shadow-2xl overflow-hidden transition-all duration-300 ${className}`}>
@@ -163,20 +175,34 @@ PlayerView.Queue = function Queue({ player, className = '' }: QueueProps) {
         {queue.length === 0 && (
           <li className="text-[11px] text-slate-500 text-center py-8">Queue is empty.</li>
         )}
-        {queue.map((song: any, i: number) => (
-          <li
-            key={i}
-            onClick={() => playSong(i)}
-            className={`group flex items-center gap-3 p-2.5 rounded-2xl cursor-pointer border transition-all duration-300 ${
-              currentIndex === i
-                ? 'bg-indigo-500/20 border-indigo-400/30 text-indigo-100'
+        {queue.map((song: any, i: number) => {
+          const isCurrent = currentIndex === i;
+          const item = (
+            <div className={`flex items-center gap-3 p-2.5 rounded-2xl cursor-pointer border transition-all duration-300 ${
+              isCurrent
+                ? 'bg-indigo-500/20 border-transparent text-indigo-100'
                 : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/15 text-slate-300'
-            }`}
-          >
-            <span className="text-[11px] font-mono text-slate-500 w-4 shrink-0 whitespace-nowrap">{i + 1}</span>
-            <span className="text-[11px] font-medium truncate whitespace-nowrap min-w-0">{song.title}</span>
-          </li>
-        ))}
+            }`}>
+              <span className="text-[11px] font-mono text-slate-500 w-4 shrink-0 whitespace-nowrap">{i + 1}</span>
+              <span className="text-[11px] font-medium truncate whitespace-nowrap min-w-0">{song.title}</span>
+            </div>
+          );
+          return (
+            <li
+              key={i}
+              onClick={() => playSong(i)}
+              className="list-none"
+            >
+              {isCurrent ? (
+                <RgbBorder trackId={song.url} isPlaying={isPlaying} isBuffering={isBuffering} className="rounded-2xl">
+                  {item}
+                </RgbBorder>
+              ) : (
+                item
+              )}
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

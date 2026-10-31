@@ -208,6 +208,8 @@ export default function App() {
                   handleSignOut={handleSignOutRequest}
                   loading={loading}
                   displayName={onboarding.displayName}
+                  currentTrackUrl={player.currentIndex >= 0 ? player.queue[player.currentIndex]?.url ?? null : null}
+                  isPlaying={player.isPlaying}
                   className="h-full"
                 />
               </Panel>
@@ -242,6 +244,8 @@ export default function App() {
               handleSignOut={handleSignOutRequest}
               loading={loading}
               displayName={onboarding.displayName}
+              currentTrackUrl={player.currentIndex >= 0 ? player.queue[player.currentIndex]?.url ?? null : null}
+              isPlaying={player.isPlaying}
             />
             <PlayerView player={player} onOpenInfo={() => setDrawerOpen(true)} />
           </div>

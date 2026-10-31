@@ -50,3 +50,89 @@ input[type=range]::-webkit-slider-thumb:hover {
 }
 
 .-z-5 { z-index: -5; }
+
+/* ── RGB neon border for the currently playing track ── */
+
+@keyframes rgb-rotate {
+    to { --rgb-angle: 360deg; }
+}
+
+@property --rgb-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+.rgb-border {
+    position: relative;
+    isolation: isolate;
+}
+
+.rgb-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: conic-gradient(
+        from var(--rgb-angle, 0deg),
+        var(--rgb-c1, #3b82f6),
+        var(--rgb-c2, #06b6d4),
+        var(--rgb-c3, #8b5cf6),
+        var(--rgb-c4, #ec4899),
+        var(--rgb-c5, #6366f1),
+        var(--rgb-c1, #3b82f6)
+    );
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    animation: rgb-rotate var(--rgb-duration, 4s) linear infinite;
+    animation-direction: var(--rgb-direction, normal);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Outer neon glow */
+.rgb-border::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    background: conic-gradient(
+        from var(--rgb-angle, 0deg),
+        var(--rgb-c1, #3b82f6),
+        var(--rgb-c2, #06b6d4),
+        var(--rgb-c3, #8b5cf6),
+        var(--rgb-c4, #ec4899),
+        var(--rgb-c5, #6366f1),
+        var(--rgb-c1, #3b82f6)
+    );
+    filter: blur(8px);
+    opacity: 0.5;
+    animation: rgb-rotate var(--rgb-duration, 4s) linear infinite;
+    animation-direction: var(--rgb-direction, normal);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.rgb-border.rgb-paused::before,
+.rgb-border.rgb-paused::after {
+    animation-play-state: paused;
+    opacity: 0.3;
+}
+
+.rgb-border.rgb-paused::after {
+    opacity: 0.15;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rgb-border::before,
+    .rgb-border::after {
+        animation: none;
+    }
+}
