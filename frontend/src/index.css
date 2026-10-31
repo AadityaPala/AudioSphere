@@ -98,7 +98,7 @@ input[type=range]::-webkit-slider-thumb:hover {
     z-index: 2;
 }
 
-/* Outer neon glow — soft halo just outside the border */
+/* Outer neon glow — soft halo just outside the border, BEHIND the card */
 .rgb-border::after {
     content: '';
     position: absolute;
@@ -113,12 +113,12 @@ input[type=range]::-webkit-slider-thumb:hover {
         var(--rgb-c5, #6366f1),
         var(--rgb-c1, #3b82f6)
     );
-    filter: blur(10px);
-    opacity: 0.45;
+    filter: blur(12px);
+    opacity: 0.5;
     animation: rgb-rotate var(--rgb-duration, 4s) linear infinite;
     animation-direction: var(--rgb-direction, normal);
     pointer-events: none;
-    z-index: 1;
+    z-index: -1;
 }
 
 /* When paused: stop the rotation, dim the glow, keep the border visible */
