@@ -166,7 +166,7 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
   );
 
   return rgbActive ? (
-    <RgbBorder trackId={currentUrl} isPlaying={isPlaying} isBuffering={isBuffering} className="rounded-3xl h-full w-full flex">
+    <RgbBorder trackId={currentUrl} isPlaying={isPlaying} isBuffering={isBuffering} className="rounded-3xl h-full w-full">
       {inner}
     </RgbBorder>
   ) : (

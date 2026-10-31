@@ -104,6 +104,7 @@ input[type=range]::-webkit-slider-thumb:hover {
     position: absolute;
     inset: -4px;
     border-radius: inherit;
+    padding: 4px;
     background: conic-gradient(
         from var(--rgb-angle, 0deg),
         var(--rgb-c1, #3b82f6),
@@ -113,8 +114,16 @@ input[type=range]::-webkit-slider-thumb:hover {
         var(--rgb-c5, #6366f1),
         var(--rgb-c1, #3b82f6)
     );
-    filter: blur(12px);
-    opacity: 0.5;
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    filter: blur(3px);
+    opacity: 0.7;
     animation: rgb-rotate var(--rgb-duration, 4s) linear infinite;
     animation-direction: var(--rgb-direction, normal);
     pointer-events: none;
