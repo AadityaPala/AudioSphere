@@ -178,3 +178,9 @@ input[type=range]::-webkit-slider-thumb:hover {
     border-radius: 8px;
     background: linear-gradient(to top, rgba(99, 102, 241, 0.3), rgba(255, 255, 255, 0.1));
 }
+
+
+/* The vinyl player intentionally lets its record protrude above the pocket. */
+.rgb-border.player-rgb {
+    overflow: visible;
+}
