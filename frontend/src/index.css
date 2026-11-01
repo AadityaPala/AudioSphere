@@ -184,3 +184,44 @@ input[type=range]::-webkit-slider-thumb:hover {
 .rgb-border.player-rgb {
     overflow: visible;
 }
+
+
+/* Stable vinyl artwork spin and cross-browser vertical volume control. */
+@keyframes vinyl-spin {
+  from { transform: translateX(-50%) rotate(0deg); }
+  to { transform: translateX(-50%) rotate(360deg); }
+}
+.vinyl-spin {
+  animation: vinyl-spin 8s linear infinite;
+  transform-origin: center;
+}
+.vol-slider-vertical {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 80px !important;
+  height: 6px !important;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  border-radius: 999px;
+  cursor: pointer;
+  accent-color: #67e8f9;
+  flex: none;
+}
+.vol-slider-vertical::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #e0f2fe;
+  border: 2px solid rgba(99,102,241,.9);
+  box-shadow: 0 0 8px rgba(34,211,238,.55);
+}
+.vol-slider-vertical::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e0f2fe;
+  border: 2px solid rgba(99,102,241,.9);
+  box-shadow: 0 0 8px rgba(34,211,238,.55);
+}
