@@ -39,7 +39,6 @@ input[type=range]::-webkit-slider-thumb:hover {
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 10px; }
 
-/* react-resizable-panels handle sizing fallback */
 [data-panel-resize-handle-id] {
     position: relative;
 }
@@ -51,30 +50,25 @@ input[type=range]::-webkit-slider-thumb:hover {
 
 .-z-5 { z-index: -5; }
 
-/* ── RGB neon border for the currently playing track ── */
-
+/* ── RGB neon border ── */
 @keyframes rgb-rotate {
     to { --rgb-angle: 360deg; }
 }
-
 @property --rgb-angle {
     syntax: '<angle>';
     initial-value: 0deg;
     inherits: false;
 }
-
 .rgb-border {
     position: relative;
     isolation: isolate;
     overflow: hidden;
     box-sizing: border-box;
 }
-
 .rgb-border > * {
     position: relative;
     z-index: 2;
 }
-
 .rgb-border::before {
     content: '';
     position: absolute;
@@ -90,20 +84,15 @@ input[type=range]::-webkit-slider-thumb:hover {
         var(--rgb-c5, #6366f1),
         var(--rgb-c1, #3b82f6)
     );
-    -webkit-mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
-    mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     mask-composite: exclude;
     animation: rgb-rotate var(--rgb-duration, 4s) linear infinite;
     animation-direction: var(--rgb-direction, normal);
     pointer-events: none;
     z-index: 3;
 }
-
 .rgb-border::after {
     content: '';
     position: absolute;
@@ -120,13 +109,9 @@ input[type=range]::-webkit-slider-thumb:hover {
         var(--rgb-c5, #6366f1),
         var(--rgb-c1, #3b82f6)
     );
-    -webkit-mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
-    mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     mask-composite: exclude;
     filter: blur(4px);
     opacity: 0.8;
@@ -135,141 +120,66 @@ input[type=range]::-webkit-slider-thumb:hover {
     pointer-events: none;
     z-index: 1;
 }
-
-.rgb-border.rgb-paused::before {
-    animation-play-state: paused;
-    opacity: 0.5;
-}
-
-.rgb-border.rgb-paused::after {
-    animation-play-state: paused;
-    opacity: 0.15;
-}
-
+.rgb-border.rgb-paused::before { animation-play-state: paused; opacity: 0.5; }
+.rgb-border.rgb-paused::after { animation-play-state: paused; opacity: 0.15; }
 @media (prefers-reduced-motion: reduce) {
-    .rgb-border::before,
-    .rgb-border::after {
-        animation: none;
-    }
+    .rgb-border::before, .rgb-border::after { animation: none; }
 }
 
-.vol-slider-vertical {
-    -webkit-appearance: slider-vertical;
-    writing-mode: bt-lr;
-    appearance: slider-vertical;
-    width: 4px;
-    height: 80px;
-    cursor: pointer;
-    accent-color: #6366f1;
-    border-radius: 8px;
-    background: linear-gradient(to top, rgba(99, 102, 241, 0.3), rgba(255, 255, 255, 0.1));
-}
-
-.rgb-border.player-rgb {
-    overflow: visible;
-}
-
-@keyframes vinyl-spin {
-  from { transform: translateX(-50%) rotate(0deg); }
-  to { transform: translateX(-50%) rotate(360deg); }
-}
-.vinyl-spin {
-  animation: vinyl-spin 8s linear infinite;
-  transform-origin: center;
-}
-.vol-slider-vertical {
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  width: 80px !important;
-  height: 6px !important;
-  transform: rotate(-90deg);
-  transform-origin: center;
-  border-radius: 999px;
-  cursor: pointer;
-  accent-color: #67e8f9;
-  flex: none;
-}
-.vol-slider-vertical::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: #e0f2fe;
-  border: 2px solid rgba(99,102,241,.9);
-  box-shadow: 0 0 8px rgba(34,211,238,.55);
-}
-.vol-slider-vertical::-moz-range-thumb {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #e0f2fe;
-  border: 2px solid rgba(99,102,241,.9);
-  box-shadow: 0 0 8px rgba(34,211,238,.55);
-}
-
+.rgb-border.player-rgb { overflow: visible; }
 
 /* ═══════════════════════════════════════════════════════════════
-   Pocket CD player — desktop-first scale
+   POCKET PLAYER — laptop-first
 
-   Figma spirit:
-   - Disc ≈ shell width
-   - ~50% of disc visible above the pocket
-   - Disc sits deep into a TALL shell (pocket more high)
-   - Soft rounded card, thin slot at the seam
-   - Scales up on laptop; compact on mobile
+   Outer .pocket-player fills the panel and centers the stage.
+   .pocket-stage is the hardware unit (disc + tall shell).
+   Disc diameter ≈ shell width; 50% of disc sits above the shell.
    ═══════════════════════════════════════════════════════════════ */
 
 .pocket-player {
-  /* Desktop / laptop defaults: large disc, tall pocket */
-  --disc-size: clamp(260px, min(42cqh, 48cqw), 420px);
-  --shell-width: clamp(280px, min(78cqw, calc(var(--disc-size) * 1.02)), 440px);
-  /* Tall body under the disc */
-  --shell-height: clamp(340px, min(58cqh, calc(var(--disc-size) * 1.35)), 520px);
-  /* 50% of disc above the shell top edge */
-  --shell-top: calc(var(--disc-size) * 0.50);
-  --shell-radius: 48px;
-  container-type: size;
-  isolation: isolate;
-  overflow: visible;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  position: relative;
+  /* Large defaults aimed at laptop center panel */
+  --disc: 380px;
+  --shell-w: 400px;
+  --shell-h: 480px;
+  --nest: 0.50; /* fraction of disc above the shell top */
+  --radius: 44px;
+
   width: 100%;
   height: 100%;
   min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  isolation: isolate;
+  position: relative;
 }
 
+/* The hardware unit: height = disc protrusion + shell */
+.pocket-stage {
+  position: relative;
+  width: var(--shell-w);
+  height: calc(var(--disc) * var(--nest) + var(--shell-h));
+  flex-shrink: 0;
+}
+
+/* Disc layer */
 .pocket-disc-stage {
   position: absolute;
-  inset: 0 0 auto;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--disc);
+  height: var(--disc);
   z-index: 20;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  height: var(--disc-size);
-  overflow: visible;
   pointer-events: none;
 }
-
 .pocket-vinyl {
-  position: relative;
-  flex: 0 0 var(--disc-size);
-  width: var(--disc-size);
-  height: var(--disc-size);
-  min-width: var(--disc-size);
-  min-height: var(--disc-size);
-  max-width: none;
-  max-height: none;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   transform-origin: center;
   will-change: transform;
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.5),
-    0 0 28px rgba(119, 128, 255, 0.16);
 }
 .pocket-vinyl.is-spinning {
   animation: pocket-vinyl-spin 8s linear infinite;
@@ -278,27 +188,107 @@ input[type=range]::-webkit-slider-thumb:hover {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+.pocket-vinyl-face {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.55),
+    0 0 32px rgba(119, 128, 255, 0.2);
+}
+.pocket-vinyl-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.pocket-vinyl-fallback {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #0f172a, #d946ef);
+}
+.pocket-vinyl-grooves {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.14) 0px,
+    rgba(255, 255, 255, 0.04) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  pointer-events: none;
+}
+.pocket-vinyl-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 20deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent 22%,
+    rgba(34, 211, 238, 0.08),
+    transparent 58%,
+    rgba(217, 70, 239, 0.1),
+    transparent
+  );
+  box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+.pocket-vinyl-hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 28%;
+  height: 28%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e2e8f0, #94a3b8, #64748b);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5), 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+.pocket-vinyl-hub-core {
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f8fafc, #cbd5e1);
+}
+.pocket-vinyl-hub-ring {
+  position: absolute;
+  inset: -6%;
+  border-radius: 50%;
+  padding: 2px;
+  background: conic-gradient(from 0deg, #f472b6, #fbbf24, #34d399, #22d3ee, #818cf8, #f472b6);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
 
+/* Shell */
 .pocket-shell-frame.rgb-border {
   position: absolute;
-  z-index: 30;
-  top: var(--shell-top);
+  top: calc(var(--disc) * var(--nest));
   left: 50%;
-  right: auto;
-  bottom: auto;
   transform: translateX(-50%);
-  width: var(--shell-width);
-  height: var(--shell-height);
-  margin: 0;
+  width: var(--shell-w);
+  height: var(--shell-h);
+  border-radius: var(--radius);
+  z-index: 30;
   overflow: visible;
   isolation: isolate;
-  border-radius: var(--shell-radius);
   background: transparent;
 }
 .pocket-shell-frame.rgb-border::before {
   padding: 2px;
   border-radius: inherit;
-  opacity: 1;
 }
 .pocket-shell-frame.rgb-border::after {
   padding: 6px;
@@ -317,16 +307,14 @@ input[type=range]::-webkit-slider-thumb:hover {
   animation-play-state: running;
 }
 
-.pocket-shell-frame > .pocket-shell {
+.pocket-shell {
   position: relative;
   z-index: 2;
   width: 100%;
   height: 100%;
-  min-height: 0;
-  overflow: hidden;
-  box-sizing: border-box;
-  border: 1px solid rgba(148, 163, 255, 0.22);
   border-radius: inherit;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 255, 0.22);
   background:
     radial-gradient(ellipse 90% 28% at 50% 0%, rgba(139, 92, 246, 0.2), transparent 100%),
     radial-gradient(ellipse 70% 40% at 100% 100%, rgba(34, 211, 238, 0.08), transparent 100%),
@@ -337,9 +325,8 @@ input[type=range]::-webkit-slider-thumb:hover {
     0 28px 64px rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(28px);
 }
-
-/* Thin slot at disc–shell seam */
-.pocket-shell-frame > .pocket-shell::before {
+/* Slot at seam */
+.pocket-shell::before {
   content: "";
   position: absolute;
   z-index: 8;
@@ -350,70 +337,214 @@ input[type=range]::-webkit-slider-thumb:hover {
   border-radius: 999px;
   background: linear-gradient(180deg, #1a1d2a 0%, #0a0c14 50%, #252a3c 100%);
   border: 1px solid rgba(180, 190, 220, 0.22);
-  box-shadow:
-    0 1px 4px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+}
+.pocket-shell-gloss {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.12), transparent 40%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 48%);
   pointer-events: none;
 }
 
 .pocket-content {
-  min-height: 0;
-  /* Deep top padding: disc sits inside, text starts below the nested half */
-  padding: clamp(88px, calc(var(--disc-size) * 0.42), 140px) clamp(28px, 6cqw, 52px) 7%;
-  gap: clamp(12px, 2cqh, 22px);
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  /* Top padding clears the nested half of the disc */
+  padding: calc(var(--disc) * 0.42) 40px 28px;
+  gap: 16px;
   color: #f1f5ff;
+  box-sizing: border-box;
 }
-.pocket-content h2 { color: #f5f3ff !important; }
-.pocket-content p { color: #a5b4d0 !important; }
-.pocket-content .text-slate-400,
-.pocket-content .text-slate-300 { color: #9aa8c5 !important; }
-.pocket-content button { color: #dbeafe; }
-.pocket-content button:hover { background: rgba(139, 92, 246, 0.14); }
-.pocket-content input[type="range"] { background-color: rgba(148, 163, 184, 0.32); }
+
+.pocket-meta { width: 100%; flex-shrink: 0; }
+.pocket-now {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+.pocket-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+.pocket-eq i {
+  display: block;
+  width: 3px;
+  border-radius: 1px;
+  background: #67e8f9;
+}
+.pocket-eq i:nth-child(1) { height: 8px; }
+.pocket-eq i:nth-child(2) { height: 13px; opacity: 0.9; }
+.pocket-eq i:nth-child(3) { height: 10px; opacity: 0.8; }
+.pocket-eq i:nth-child(4) { height: 16px; }
+.pocket-eq i:nth-child(5) { height: 6px; opacity: 0.8; }
+
+.pocket-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pocket-artist {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pocket-progress {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.pocket-time {
+  width: 36px;
+  flex-shrink: 0;
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  tabular-nums: true;
+  color: #94a3b8;
+}
+.pocket-time:last-child { text-align: right; }
+.pocket-seek {
+  flex: 1;
+  min-width: 0;
+  height: 5px;
+  border-radius: 999px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  accent-color: #67e8f9;
+}
+
+.pocket-transport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  flex-shrink: 0;
+}
+.pocket-icon-btn {
+  padding: 10px;
+  border-radius: 999px;
+  color: #cbd5e1;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+.pocket-icon-btn:hover {
+  background: rgba(139, 92, 246, 0.16);
+  color: #fff;
+}
+.pocket-icon-btn:active { transform: scale(0.92); }
+.pocket-icon-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.pocket-icon-btn.is-active {
+  background: rgba(103, 232, 249, 0.15);
+  color: #a5f3fc;
+}
 
 .pocket-play-btn {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  cursor: pointer;
   background:
     radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.35), transparent 55%),
     conic-gradient(from 200deg, #22d3ee, #818cf8, #f472b6, #fbbf24, #34d399, #22d3ee);
   box-shadow:
-    0 10px 28px rgba(79, 70, 229, 0.35),
+    0 12px 32px rgba(79, 70, 229, 0.4),
     inset 0 1px 2px rgba(255, 255, 255, 0.35),
-    inset 0 -4px 10px rgba(0, 0, 0, 0.25);
+    inset 0 -4px 12px rgba(0, 0, 0, 0.25);
+  transition: filter 0.15s, transform 0.1s;
 }
-.pocket-play-btn:hover {
-  filter: brightness(1.08);
+.pocket-play-btn:hover { filter: brightness(1.1); }
+.pocket-play-btn:active { transform: scale(0.95); }
+.pocket-play-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.pocket-secondary {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding: 0 8px;
 }
 
+.pocket-info-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+  font-size: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.pocket-info-btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+/* Volume */
 .pocket-volume {
   position: absolute;
-  z-index: 40;
-  top: calc(var(--shell-top) + 14%);
-  right: max(1%, calc((100% - var(--shell-width)) / 2 - 40px));
+  top: calc(var(--disc) * var(--nest) + 48px);
+  right: -48px;
   display: flex;
-  width: 28px;
-  height: 140px;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  z-index: 40;
+  width: 32px;
 }
-.pocket-volume > button {
-  position: relative;
-  z-index: 2;
-  flex: 0 0 auto;
-  padding: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+.pocket-vol-mute {
+  padding: 6px;
   border-radius: 999px;
-  background: rgba(30, 34, 52, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(30, 34, 52, 0.8);
   color: #c7d2fe;
+  cursor: pointer;
   backdrop-filter: blur(8px);
 }
+.pocket-vol-mute:hover {
+  color: #a5f3fc;
+  background: rgba(40, 48, 70, 0.9);
+}
 .pocket-volume-range {
-  position: relative;
-  flex: 0 0 auto;
-  width: 96px !important;
+  width: 100px !important;
   height: 6px !important;
-  margin: 36px 0 0;
+  margin-top: 40px;
   border-radius: 999px;
   transform: rotate(-90deg);
   transform-origin: center;
@@ -441,43 +572,87 @@ input[type=range]::-webkit-slider-thumb:hover {
   box-shadow: 0 0 8px rgba(99, 102, 241, 0.45);
 }
 
-/* Mobile / narrow: compact but same 50% nest ratio */
-@container (max-width: 700px) {
+.pocket-active-glow {
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  bottom: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(to right, transparent, rgba(34, 211, 238, 0.7), transparent);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.55);
+  pointer-events: none;
+  z-index: 40;
+}
+
+/* ── Desktop XL: even larger ── */
+@media (min-width: 1280px) {
   .pocket-player {
-    --disc-size: min(46cqh, 62cqw, 300px);
-    --shell-width: min(calc(var(--disc-size) * 1.04), 320px);
-    --shell-height: clamp(300px, 54cqh, 400px);
-    --shell-top: calc(var(--disc-size) * 0.50);
-    --shell-radius: 40px;
+    --disc: 420px;
+    --shell-w: 440px;
+    --shell-h: 520px;
+    --nest: 0.50;
+    --radius: 48px;
   }
-  .pocket-content {
-    padding: clamp(72px, calc(var(--disc-size) * 0.40), 110px) 7% 6%;
-  }
-  .pocket-volume {
-    right: 1%;
-    top: calc(var(--shell-top) + 12%);
+  .pocket-title { font-size: 1.5rem; }
+  .pocket-play-btn { width: 72px; height: 72px; }
+  .pocket-transport { gap: 44px; }
+  .pocket-content { padding-left: 48px; padding-right: 48px; }
+}
+
+/* ── Large desktop ── */
+@media (min-width: 1536px) {
+  .pocket-player {
+    --disc: 460px;
+    --shell-w: 480px;
+    --shell-h: 560px;
+    --radius: 52px;
   }
 }
 
-@container (max-height: 480px) {
+/* ── Tablet / smaller center column ── */
+@media (max-width: 1279px) {
   .pocket-player {
-    --disc-size: min(40cqh, 40cqw, 240px);
-    --shell-width: min(calc(var(--disc-size) * 1.06), 300px);
-    --shell-height: clamp(260px, 52cqh, 340px);
-    --shell-top: calc(var(--disc-size) * 0.48);
-    --shell-radius: 36px;
+    --disc: 280px;
+    --shell-w: 300px;
+    --shell-h: 380px;
+    --nest: 0.50;
+    --radius: 36px;
   }
   .pocket-content {
-    padding-top: clamp(60px, calc(var(--disc-size) * 0.38), 90px);
-    gap: 8px;
+    padding: calc(var(--disc) * 0.40) 24px 20px;
+    gap: 12px;
   }
-  .pocket-content > button:last-child {
-    display: none;
+  .pocket-title { font-size: 1.1rem; }
+  .pocket-play-btn { width: 56px; height: 56px; }
+  .pocket-transport { gap: 28px; }
+  .pocket-volume { right: -40px; }
+}
+
+/* Short height: shrink to fit */
+@media (max-height: 720px) {
+  .pocket-player {
+    --disc: min(var(--disc), 300px);
+    --shell-w: min(var(--shell-w), 320px);
+    --shell-h: min(var(--shell-h), 360px);
   }
+}
+
+@media (max-height: 560px) {
+  .pocket-player {
+    --disc: 220px;
+    --shell-w: 240px;
+    --shell-h: 280px;
+    --radius: 28px;
+  }
+  .pocket-content {
+    padding: calc(var(--disc) * 0.36) 16px 12px;
+    gap: 6px;
+  }
+  .pocket-info-btn { display: none; }
+  .pocket-play-btn { width: 48px; height: 48px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pocket-vinyl.is-spinning {
-    animation-duration: 30s;
-  }
+  .pocket-vinyl.is-spinning { animation-duration: 30s; }
 }
