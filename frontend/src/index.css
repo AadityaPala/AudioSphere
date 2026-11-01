@@ -439,3 +439,14 @@ input[type=range]::-webkit-slider-thumb:hover {
   }
   .pocket-volume { top: 35%; }
 }
+
+
+/* 60% of the disc remains exposed above the pocket (disc diameter is
+   container-relative, so pocket overlap is calculated from that diameter). */
+.pocket-shell-frame.rgb-border { top: 32.4%; }
+@container (max-width: 620px) {
+  .pocket-shell-frame.rgb-border { top: 32.4%; }
+}
+@container (max-height: 430px) {
+  .pocket-shell-frame.rgb-border { top: 28.8%; }
+}
