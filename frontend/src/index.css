@@ -228,11 +228,12 @@ input[type=range]::-webkit-slider-thumb:hover {
 
 
 
-/* Pocket CD player — one responsive sizing system keeps the disc circular
-   and lets the shell overlap exactly 40% of its diameter. */
+
+/* Pocket CD player — cohesive responsive geometry, based on the supplied
+   Figma reference. The record is centered behind a wider rounded housing. */
 .pocket-player {
-  --pocket-disc-size: min(54cqh, 48cqw, 390px);
-  --pocket-shell-overlap: min(32.4cqh, 28.8cqw, 234px);
+  --disc-size: min(54cqh, 48cqw, 390px);
+  --shell-top: calc(var(--disc-size) * .50);
   container-type: size;
   isolation: isolate;
   overflow: visible;
@@ -245,27 +246,26 @@ input[type=range]::-webkit-slider-thumb:hover {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  height: var(--pocket-disc-size);
-  padding: 0;
+  height: var(--disc-size);
   overflow: visible;
   pointer-events: none;
 }
 
 .pocket-vinyl {
   position: relative;
-  flex: 0 0 var(--pocket-disc-size);
-  width: var(--pocket-disc-size);
-  height: var(--pocket-disc-size);
-  min-width: var(--pocket-disc-size);
-  min-height: var(--pocket-disc-size);
+  flex: 0 0 var(--disc-size);
+  width: var(--disc-size);
+  height: var(--disc-size);
+  min-width: var(--disc-size);
+  min-height: var(--disc-size);
   max-width: none;
   max-height: none;
   aspect-ratio: 1 / 1;
-  border-radius: 50%;
   overflow: hidden;
-  transform-origin: 50% 50%;
+  border-radius: 50%;
+  transform-origin: center;
   will-change: transform;
-  box-shadow: 0 18px 42px rgba(0,0,0,.38), 0 0 24px rgba(119,128,255,.14);
+  box-shadow: 0 12px 32px rgba(0,0,0,.36), 0 0 18px rgba(119,128,255,.12);
 }
 
 .pocket-vinyl.is-spinning {
@@ -279,26 +279,29 @@ input[type=range]::-webkit-slider-thumb:hover {
 
 .pocket-shell-frame.rgb-border {
   position: absolute;
-  inset-inline: 0;
-  top: var(--pocket-shell-overlap);
+  z-index: 30;
+  top: var(--shell-top);
+  right: 0;
   bottom: 0;
-  width: min(72%, 700px);
+  left: 0;
+  width: min(calc(var(--disc-size) * 1.28), 500px);
   height: auto;
   margin-inline: auto;
-  box-sizing: border-box;
-  border-radius: 34px;
   overflow: visible;
   isolation: isolate;
+  border-radius: 46px 46px 34px 34px;
   background: transparent;
 }
 
 .pocket-shell-frame.rgb-border::before {
   padding: 2px;
+  border-radius: inherit;
   opacity: 1;
 }
 
 .pocket-shell-frame.rgb-border::after {
-  padding: 4px;
+  padding: 5px;
+  border-radius: inherit;
   filter: blur(5px);
   opacity: .65;
 }
@@ -317,19 +320,43 @@ input[type=range]::-webkit-slider-thumb:hover {
 
 .pocket-shell-frame > .pocket-shell {
   position: relative;
-  inset: auto;
   z-index: 2;
   width: 100%;
   height: 100%;
   min-height: 0;
-  box-sizing: border-box;
   overflow: hidden;
+  box-sizing: border-box;
+  border: 1px solid rgba(255,255,255,.2);
   border-radius: inherit;
+  background:
+    radial-gradient(ellipse 90% 24% at 50% 0%, rgba(255,255,255,.17), transparent 100%),
+    linear-gradient(180deg, #303442 0%, #222631 34%, #171a24 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(255,255,255,.14),
+    inset 0 -8px 20px rgba(0,0,0,.22),
+    0 22px 54px rgba(0,0,0,.38);
+}
+
+/* Solid retaining rail: a broad, uninterrupted bar across the full pocket
+   width, placed exactly where the record disappears behind the housing. */
+.pocket-shell-frame > .pocket-shell::before {
+  content: "";
+  position: absolute;
+  z-index: 8;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(180deg, #e0e5ef 0%, #aeb9cb 38%, #68748a 100%);
+  border-top: 1px solid rgba(255,255,255,.9);
+  border-bottom: 1px solid rgba(5,9,18,.8);
+  box-shadow: 0 2px 0 rgba(0,0,0,.42), 0 4px 8px rgba(0,0,0,.32);
+  pointer-events: none;
 }
 
 .pocket-content {
   min-height: 0;
-  padding: clamp(92px, 21cqh, 150px) clamp(24px, 5cqw, 56px) 4%;
+  padding: clamp(92px, 20cqh, 146px) clamp(24px, 5cqw, 56px) 4%;
   gap: clamp(8px, 1.8cqh, 20px);
 }
 
@@ -337,7 +364,7 @@ input[type=range]::-webkit-slider-thumb:hover {
   position: absolute;
   z-index: 40;
   top: 38%;
-  right: max(2.5%, calc((100% - 700px) / 2 + 18px));
+  right: max(2.5%, calc((100% - 500px) / 2 + 16px));
   display: flex;
   width: 30px;
   height: 132px;
@@ -353,7 +380,7 @@ input[type=range]::-webkit-slider-thumb:hover {
   padding: 5px;
   border: 1px solid rgba(255,255,255,.12);
   border-radius: 999px;
-  background: rgba(19,22,32,.78);
+  background: rgba(19,22,32,.82);
 }
 
 .pocket-volume-range {
@@ -393,22 +420,26 @@ input[type=range]::-webkit-slider-thumb:hover {
 
 @container (max-width: 620px) {
   .pocket-player {
-    --pocket-disc-size: min(53cqh, 55cqw, 310px);
-    --pocket-shell-overlap: min(31.8cqh, 33cqw, 186px);
+    --disc-size: min(53cqh, 55cqw, 310px);
+    --shell-top: calc(var(--disc-size) * .50);
   }
-  .pocket-shell-frame.rgb-border { width: 88%; }
-  .pocket-content {
-    padding: clamp(84px, 22cqh, 128px) 7% 4%;
+  .pocket-shell-frame.rgb-border {
+    width: min(calc(var(--disc-size) * 1.28), 440px);
+    border-radius: 38px 38px 30px 30px;
   }
+  .pocket-content { padding: clamp(86px, 21cqh, 128px) 7% 4%; }
   .pocket-volume { right: 3%; top: 37%; }
 }
 
 @container (max-height: 430px) {
   .pocket-player {
-    --pocket-disc-size: min(48cqh, 40cqw, 250px);
-    --pocket-shell-overlap: min(28.8cqh, 24cqw, 150px);
+    --disc-size: min(48cqh, 40cqw, 250px);
+    --shell-top: calc(var(--disc-size) * .50);
   }
-  .pocket-shell-frame.rgb-border { width: min(82%, 700px); }
+  .pocket-shell-frame.rgb-border {
+    width: min(calc(var(--disc-size) * 1.28), 400px);
+    border-radius: 32px 32px 26px 26px;
+  }
   .pocket-content {
     padding-top: clamp(76px, 19cqh, 100px);
     padding-bottom: 2%;
@@ -420,137 +451,4 @@ input[type=range]::-webkit-slider-thumb:hover {
 
 @media (prefers-reduced-motion: reduce) {
   .pocket-vinyl.is-spinning { animation-duration: 30s; }
-}
-
-
-/* Natural pocket silhouette: keep the shell close to the record's diameter,
-   with raised rounded shoulders that meet the disc around its midpoint. */
-.pocket-shell-frame.rgb-border {
-  --pocket-disc-size: min(54cqh, 48cqw, 390px);
-  top: calc(var(--pocket-disc-size) * .50);
-  width: min(86%, 470px);
-  border-radius: 48% 48% 34px 34px / 18% 18% 34px 34px;
-}
-.pocket-shell-frame.rgb-border > .pocket-shell {
-  border-radius: inherit;
-  border-top-left-radius: 48% 18%;
-  border-top-right-radius: 48% 18%;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.14), transparent 48%),
-    linear-gradient(180deg, #292d3b 0%, #1b1e29 42%, #131620 100%);
-  box-shadow:
-    inset 0 2px 3px rgba(255,255,255,.2),
-    inset 0 -4px 12px rgba(0,0,0,.3),
-    0 24px 60px rgba(0,0,0,.42);
-}
-.pocket-shell-frame.rgb-border::before {
-  border-radius: inherit;
-}
-.pocket-shell-frame.rgb-border::after {
-  border-radius: inherit;
-}
-.pocket-content {
-  padding-top: clamp(86px, 19cqh, 140px);
-}
-@container (max-width: 620px) {
-  .pocket-shell-frame.rgb-border {
-    top: calc(min(53cqh, 55cqw, 310px) * .50);
-    width: min(90%, 420px);
-  }
-}
-@container (max-height: 430px) {
-  .pocket-shell-frame.rgb-border {
-    top: calc(min(48cqh, 40cqw, 250px) * .50);
-    width: min(88%, 430px);
-  }
-}
-
-
-/* A slim metallic retaining lip makes the record look seated in the pocket. */
-.pocket-shell-frame > .pocket-shell::before {
-  content: "";
-  position: absolute;
-  z-index: 5;
-  top: 0;
-  left: 50%;
-  width: min(var(--pocket-disc-size, 390px), 100%);
-  height: 5px;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  background: linear-gradient(90deg,
-    rgba(255,255,255,0) 0%,
-    rgba(190,205,235,.55) 12%,
-    rgba(245,250,255,.92) 50%,
-    rgba(190,205,235,.55) 88%,
-    rgba(255,255,255,0) 100%);
-  box-shadow: 0 1px 5px rgba(210,225,255,.3), 0 2px 8px rgba(0,0,0,.5);
-  pointer-events: none;
-}
-
-
-/* Final pocket seam: a continuous, softly arched shoulder and a substantial
-   retaining rail make the record look physically captured by the housing. */
-.pocket-shell-frame.rgb-border {
-  --pocket-disc-size: min(54cqh, 48cqw, 390px);
-  top: calc(var(--pocket-disc-size) * .50);
-  width: min(calc(var(--pocket-disc-size) * 1.12), 470px);
-  border-radius: 50% 50% 34px 34px / 17% 17% 34px 34px;
-  clip-path: none;
-}
-
-.pocket-shell-frame.rgb-border > .pocket-shell {
-  border-radius: inherit;
-  border-top-left-radius: 50% 17%;
-  border-top-right-radius: 50% 17%;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse 85% 34% at 50% 0%, rgba(255,255,255,.16), transparent 100%),
-    linear-gradient(180deg, #292d3b 0%, #1b1e29 42%, #131620 100%);
-}
-
-/* Replace the previous hairline with a thick, solid retaining bar exactly
-   across the CD/pocket join. */
-.pocket-shell-frame > .pocket-shell::before {
-  content: "";
-  position: absolute;
-  z-index: 8;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  height: 11px;
-  transform: none;
-  border-radius: 0;
-  background: linear-gradient(180deg,
-    #dce4f2 0%,
-    #aab7ce 24%,
-    #65738e 55%,
-    #30394c 100%);
-  border-top: 1px solid rgba(255,255,255,.9);
-  border-bottom: 1px solid rgba(5,9,18,.9);
-  box-shadow:
-    0 2px 0 rgba(0,0,0,.42),
-    0 4px 9px rgba(0,0,0,.48),
-    inset 0 1px 0 rgba(255,255,255,.7);
-  pointer-events: none;
-}
-
-.pocket-content {
-  padding-top: clamp(90px, 20cqh, 148px);
-}
-
-@container (max-width: 620px) {
-  .pocket-shell-frame.rgb-border {
-    --pocket-disc-size: min(53cqh, 55cqw, 310px);
-    top: calc(var(--pocket-disc-size) * .50);
-    width: min(calc(var(--pocket-disc-size) * 1.12), 420px);
-  }
-}
-
-@container (max-height: 430px) {
-  .pocket-shell-frame.rgb-border {
-    --pocket-disc-size: min(48cqh, 40cqw, 250px);
-    top: calc(var(--pocket-disc-size) * .50);
-    width: min(calc(var(--pocket-disc-size) * 1.12), 430px);
-  }
 }
