@@ -64,7 +64,7 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
     </div>
   );
 
-  return active ? <RgbBorder trackId={url} isPlaying={isPlaying} isBuffering={isBuffering} className="h-full w-full overflow-visible rounded-3xl">{playerCard}</RgbBorder> : playerCard;
+  return active ? <RgbBorder trackId={url} isPlaying={isPlaying} isBuffering={isBuffering} className="player-rgb h-full w-full overflow-visible rounded-3xl">{playerCard}</RgbBorder> : playerCard;
 }
 
 interface QueueProps { player: any; className?: string; }
