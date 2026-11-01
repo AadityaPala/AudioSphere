@@ -1,4 +1,4 @@
-import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, VolumeX, Loader2, Info, ListMusic, AudioLines } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, VolumeX, Loader2, Info, ListMusic } from 'lucide-react';
 import { RgbBorder } from './RgbBorder';
 import { useScrollRestore } from '../hooks/useScrollRestore';
 
@@ -27,8 +27,8 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
 
   return (
     <div className={`pocket-player relative isolate h-full min-h-0 w-full min-w-0 overflow-visible ${className}`}>
-      {/* The disc is a separate top layer, centered over the pocket slot. Its full
-          circle stays in the player viewport at every resize breakpoint. */}
+      {/* Full-bleed circular artwork sits behind the pocket; the shell masks
+          its lower edge to create the natural protruding-record composition. */}
       <div className="pocket-disc-stage pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-center">
         <div className={`pocket-vinyl relative aspect-square shrink-0 rounded-full ${isPlaying ? 'is-spinning' : ''}`}>
           <div className="absolute inset-0 overflow-hidden rounded-full border border-white/65 shadow-[0_14px_42px_rgba(0,0,0,.58),0_0_24px_rgba(119,128,255,.20)]">
@@ -49,8 +49,7 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
         </div>
       </div>
 
-      {/* Pocket shell follows Figma's proportions: a recessed rounded card with
-          the vinyl overlapping its upper edge. Content uses a shrink-safe stack. */}
+      {/* Recessed glass pocket overlaps the lower 40% of the circular record. */}
       <RgbBorder trackId={url} isPlaying={isPlaying} isBuffering={isBuffering} className="pocket-shell-frame absolute inset-x-0 bottom-0 z-30 mx-auto">
       <div className="pocket-shell relative flex h-full w-full min-h-0 flex-col overflow-hidden rounded-[34px] border border-white/25 bg-gradient-to-b from-[#262936] via-[#1b1e29] to-[#131620] shadow-[0_24px_60px_rgba(0,0,0,.42),inset_0_2px_3px_rgba(255,255,255,.18),inset_0_-4px_12px_rgba(0,0,0,.28)] backdrop-blur-2xl">
         <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,.18),transparent_42%),linear-gradient(180deg,rgba(255,255,255,.06),transparent_45%)]" />
