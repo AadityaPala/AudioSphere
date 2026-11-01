@@ -66,6 +66,13 @@ input[type=range]::-webkit-slider-thumb:hover {
 .rgb-border {
     position: relative;
     isolation: isolate;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.rgb-border > * {
+    position: relative;
+    z-index: 2;
 }
 
 /*
@@ -75,8 +82,8 @@ input[type=range]::-webkit-slider-thumb:hover {
  * The mask uses two layers: one clipped to content-box (the "hole"), one to
  * border-box (the "fill"). With mask-composite: exclude (standard) /
  * -webkit-mask-composite: xor (WebKit), the inner area is subtracted.
- * The card's own background sits at z-index 0 (the element's content),
- * so the gradient never touches the card interior.
+ * The card's own content sits above the glow, while the mask keeps both
+ * gradients restricted to the inside perimeter.
  */
 .rgb-border::before {
     content: '';
@@ -111,9 +118,10 @@ input[type=range]::-webkit-slider-thumb:hover {
 .rgb-border::after {
     content: '';
     position: absolute;
-    inset: -3px;
+    inset: 0;
     border-radius: inherit;
     padding: 5.5px;
+    box-sizing: border-box;
     background: conic-gradient(
         from var(--rgb-angle, 0deg),
         var(--rgb-c1, #3b82f6),

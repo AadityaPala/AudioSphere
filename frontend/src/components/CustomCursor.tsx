@@ -56,23 +56,27 @@ export function CustomCursor() {
         glow.style.opacity = '0.3';
       }
 
-      const el = e.target as Element;
-      const isInteractive = el.closest('button, a, [role="button"], select, [data-cursor="pointer"]');
-      const isInput = el.closest('input, textarea, [contenteditable]');
+      const el = e.target instanceof Element ? e.target : null;
+      const isInput = !!el?.closest('input, textarea, [contenteditable="true"]');
+      const isInteractive = !!el?.closest(
+        'button, a, select, [role="button"], [data-cursor="pointer"], [class*="cursor-pointer"]'
+      );
 
       if (isInput) {
         arrow.style.opacity = '0';
         glow.style.opacity = '0';
-        document.body.style.cursor = 'text';
+        document.documentElement.style.cursor = 'auto';
+        document.body.style.cursor = '';
       } else {
         arrow.style.opacity = '1';
         glow.style.opacity = isInteractive ? '0.5' : '0.25';
         arrow.style.filter = isInteractive
           ? 'drop-shadow(0 0 8px rgba(34,211,238,0.8)) drop-shadow(0 0 3px rgba(168,85,247,0.5))'
           : 'drop-shadow(0 0 4px rgba(59,130,246,0.5))';
+        document.documentElement.style.cursor = 'none';
         document.body.style.cursor = isInteractive ? 'pointer' : 'none';
       }
-      hovering = !!isInteractive;
+      hovering = isInteractive && !isInput;
     };
 
     const onDown = () => { clicking = true; };
@@ -94,6 +98,7 @@ export function CustomCursor() {
     window.addEventListener('pointermove', onMove, { passive: true });
     window.addEventListener('pointerdown', onDown, { passive: true });
     window.addEventListener('pointerup', onUp, { passive: true });
+    window.addEventListener('pointercancel', onUp, { passive: true });
     document.addEventListener('pointerleave', onLeave);
     document.addEventListener('pointerenter', onEnter);
 
@@ -104,6 +109,7 @@ export function CustomCursor() {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerdown', onDown);
       window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
       document.removeEventListener('pointerleave', onLeave);
       document.removeEventListener('pointerenter', onEnter);
       document.documentElement.style.cursor = '';

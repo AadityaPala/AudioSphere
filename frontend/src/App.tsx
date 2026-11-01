@@ -213,13 +213,13 @@ export default function App() {
               </Panel>
               <HSeparator />
 
-              <Panel id="center" minSize="30%">
-                <Group orientation="vertical" className="flex w-full h-full gap-2">
-                  <Panel id="player" defaultSize="65%" minSize="40%" maxSize="85%">
+              <Panel id="center" minSize="30%" className="min-h-0 overflow-hidden">
+                <Group orientation="vertical" className="flex w-full h-full min-h-0 gap-2 overflow-hidden">
+                  <Panel id="player" defaultSize="65%" minSize="40%" maxSize="85%" className="min-h-0 overflow-hidden">
                     <PlayerView player={player} onOpenInfo={() => setDrawerOpen(true)} className="h-full" />
                   </Panel>
                   <VSeparator />
-                  <Panel id="queue" defaultSize="35%" minSize="15%" maxSize="60%">
+                  <Panel id="queue" defaultSize="35%" minSize="15%" maxSize="60%" className="min-h-0 overflow-hidden">
                     <PlayerView.Queue player={player} className="h-full" />
                   </Panel>
                 </Group>
