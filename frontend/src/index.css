@@ -227,57 +227,150 @@ input[type=range]::-webkit-slider-thumb:hover {
 }
 
 
-/* Figma pocket CD player: size all layers from the player viewport, not the
-   resizable panel's child flow, so the disc and transport never overlap. */
+
+/* Pocket CD player — one responsive sizing system keeps the disc circular
+   and lets the shell overlap exactly 40% of its diameter. */
 .pocket-player {
+  --pocket-disc-size: min(54cqh, 48cqw, 390px);
+  --pocket-shell-overlap: min(32.4cqh, 28.8cqw, 234px);
   container-type: size;
   isolation: isolate;
-}
-.pocket-disc-stage {
-  height: 62%;
-  padding-top: 5%;
   overflow: visible;
 }
+
+.pocket-disc-stage {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: var(--pocket-disc-size);
+  padding: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
 .pocket-vinyl {
-  width: min(54cqh, 48cqw, 390px);
-  max-width: calc(100% - 48px);
-  box-shadow: 0 18px 46px rgba(0,0,0,.42);
-  transform-origin: center center;
+  position: relative;
+  flex: 0 0 var(--pocket-disc-size);
+  width: var(--pocket-disc-size);
+  height: var(--pocket-disc-size);
+  min-width: var(--pocket-disc-size);
+  min-height: var(--pocket-disc-size);
+  max-width: none;
+  max-height: none;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  overflow: hidden;
+  transform-origin: 50% 50%;
   will-change: transform;
+  box-shadow: 0 18px 42px rgba(0,0,0,.38), 0 0 24px rgba(119,128,255,.14);
 }
+
 .pocket-vinyl.is-spinning {
-  animation: pocket-vinyl-spin 7.5s linear infinite;
+  animation: pocket-vinyl-spin 8s linear infinite;
 }
+
 @keyframes pocket-vinyl-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
-.pocket-shell {
-  top: 31%;
+
+.pocket-shell-frame.rgb-border {
+  position: absolute;
+  inset-inline: 0;
+  top: var(--pocket-shell-overlap);
+  bottom: 0;
   width: min(72%, 700px);
-  height: 69%;
+  height: auto;
+  margin-inline: auto;
   box-sizing: border-box;
+  border-radius: 34px;
+  overflow: visible;
+  isolation: isolate;
+  background: transparent;
 }
+
+.pocket-shell-frame.rgb-border::before {
+  padding: 2px;
+  opacity: 1;
+}
+
+.pocket-shell-frame.rgb-border::after {
+  padding: 4px;
+  filter: blur(5px);
+  opacity: .65;
+}
+
+.pocket-shell-frame.rgb-border.rgb-paused::before,
+.pocket-shell-frame.rgb-border.rgb-paused::after {
+  opacity: 0;
+  animation-play-state: paused;
+}
+
+.pocket-shell-frame.rgb-border:not(.rgb-paused)::before,
+.pocket-shell-frame.rgb-border:not(.rgb-paused)::after {
+  opacity: 1;
+  animation-play-state: running;
+}
+
+.pocket-shell-frame > .pocket-shell {
+  position: relative;
+  inset: auto;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
 .pocket-content {
-  padding: clamp(94px, 22cqh, 160px) clamp(22px, 6cqw, 60px) 4%;
-  gap: clamp(8px, 2cqh, 22px);
+  min-height: 0;
+  padding: clamp(92px, 21cqh, 150px) clamp(24px, 5cqw, 56px) 4%;
+  gap: clamp(8px, 1.8cqh, 20px);
 }
+
 .pocket-volume {
+  position: absolute;
+  z-index: 40;
+  top: 38%;
   right: max(2.5%, calc((100% - 700px) / 2 + 18px));
-  top: 39%;
+  display: flex;
+  width: 30px;
+  height: 132px;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
+
+.pocket-volume > button {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  padding: 5px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  background: rgba(19,22,32,.78);
+}
+
 .pocket-volume-range {
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  width: 94px !important;
+  position: relative;
+  flex: 0 0 auto;
+  width: 88px !important;
   height: 6px !important;
-  flex: none;
+  margin: 35px 0 0;
   border-radius: 999px;
   transform: rotate(-90deg);
   transform-origin: center;
   cursor: pointer;
   outline: none;
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }
+
 .pocket-volume-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
@@ -286,167 +379,45 @@ input[type=range]::-webkit-slider-thumb:hover {
   border: 2px solid rgba(255,255,255,.85);
   border-radius: 50%;
   background: #72d9f3;
-  box-shadow: 0 0 12px rgba(66,186,234,.65);
+  box-shadow: 0 0 12px rgba(66,186,234,.55);
 }
+
 .pocket-volume-range::-moz-range-thumb {
   width: 10px;
   height: 10px;
   border: 2px solid rgba(255,255,255,.85);
   border-radius: 50%;
   background: #72d9f3;
-  box-shadow: 0 0 12px rgba(66,186,234,.65);
-}
-@container (max-width: 620px) {
-  .pocket-shell { width: 88%; }
-  .pocket-vinyl { width: min(53cqh, 55cqw, 310px); }
-  .pocket-content { padding-left: 7%; padding-right: 7%; padding-top: clamp(84px, 23cqh, 128px); }
-  .pocket-volume { right: 3%; top: 38%; }
-}
-@container (max-height: 430px) {
-  .pocket-shell { top: 29%; height: 71%; }
-  .pocket-vinyl { width: min(48cqh, 40cqw, 250px); }
-  .pocket-content { padding-top: clamp(76px, 20cqh, 100px); gap: 5px; padding-bottom: 2%; }
-  .pocket-content > button:last-child { display: none; }
-  .pocket-volume { top: 36%; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .pocket-vinyl.is-spinning { animation-duration: 30s; }
+  box-shadow: 0 0 12px rgba(66,186,234,.55);
 }
 
-
-/* Final pocket layering: the pocket face masks the lower half of the record,
-   leaving only the exposed upper arc visible. RGB ring remains visible inside
-   the pocket perimeter without clipping the vinyl stage. */
-.pocket-shell-frame.rgb-border {
-  top: 31%;
-  width: min(72%, 700px);
-  height: 69%;
-  overflow: visible;
-  box-sizing: border-box;
-  border-radius: 34px;
-  background: transparent;
-}
-.pocket-shell-frame.rgb-border::before {
-  padding: 2.5px;
-  opacity: .95;
-}
-.pocket-shell-frame.rgb-border::after {
-  padding: 5px;
-  filter: blur(5px);
-  opacity: .72;
-}
-.pocket-shell-frame > .pocket-shell {
-  top: auto;
-  width: 100%;
-  height: 100%;
-  z-index: 2;
-}
-.pocket-disc-stage {
-  z-index: 20;
-}
-.pocket-shell-frame {
-  z-index: 30;
-}
-.pocket-volume {
-  z-index: 40;
-}
 @container (max-width: 620px) {
+  .pocket-player {
+    --pocket-disc-size: min(53cqh, 55cqw, 310px);
+    --pocket-shell-overlap: min(31.8cqh, 33cqw, 186px);
+  }
   .pocket-shell-frame.rgb-border { width: 88%; }
-}
-@container (max-height: 430px) {
-  .pocket-shell-frame.rgb-border { top: 29%; height: 71%; }
-}
-
-
-/* Pocket player refinements: expose 75% of the circular record above the
-   pocket, preserve a true 1:1 disc at every panel aspect ratio, and keep the
-   volume icon clear of the vertical fader. */
-.pocket-disc-stage {
-  height: 62%;
-  padding-top: 0;
-  align-items: flex-start;
-}
-.pocket-vinyl {
-  width: min(54cqh, 48cqw, 390px);
-  height: auto;
-  aspect-ratio: 1 / 1;
-  flex: 0 0 auto;
-  max-width: min(calc(100% - 48px), 54cqh, 48cqw, 390px);
-  max-height: min(54cqh, 48cqw, 390px);
-  box-sizing: border-box;
-}
-.pocket-vinyl > div {
-  width: 100%;
-  height: 100%;
-  aspect-ratio: 1 / 1;
-}
-.pocket-shell-frame.rgb-border {
-  top: 40.5%;
-}
-.pocket-volume {
-  top: 38%;
-  right: max(2.5%, calc((100% - 700px) / 2 + 18px));
-  width: 28px;
-  height: 132px;
-  display: block;
-}
-.pocket-volume > button {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  padding: 5px;
-  background: rgba(19,22,32,.72);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 999px;
-}
-.pocket-volume-range {
-  position: absolute;
-  top: 64px;
-  left: 50%;
-  width: 94px !important;
-  height: 6px !important;
-  transform: translate(-50%, -50%) rotate(-90deg);
-  transform-origin: center;
-  margin: 0;
-}
-.rgb-border.pocket-shell-frame.rgb-paused::before,
-.rgb-border.pocket-shell-frame.rgb-paused::after {
-  opacity: 0;
-  animation-play-state: paused;
-}
-.rgb-border.pocket-shell-frame:not(.rgb-paused)::before,
-.rgb-border.pocket-shell-frame:not(.rgb-paused)::after {
-  opacity: 1;
-  animation-play-state: running;
-}
-@container (max-width: 620px) {
-  .pocket-shell-frame.rgb-border { top: 40.5%; width: 88%; }
-  .pocket-vinyl {
-    width: min(53cqh, 55cqw, 310px);
-    max-width: min(calc(100% - 36px), 53cqh, 55cqw, 310px);
-    max-height: min(53cqh, 55cqw, 310px);
+  .pocket-content {
+    padding: clamp(84px, 22cqh, 128px) 7% 4%;
   }
   .pocket-volume { right: 3%; top: 37%; }
 }
+
 @container (max-height: 430px) {
-  .pocket-shell-frame.rgb-border { top: 39.5%; height: 71%; }
-  .pocket-vinyl {
-    width: min(48cqh, 40cqw, 250px);
-    max-width: min(calc(100% - 32px), 48cqh, 40cqw, 250px);
-    max-height: min(48cqh, 40cqw, 250px);
+  .pocket-player {
+    --pocket-disc-size: min(48cqh, 40cqw, 250px);
+    --pocket-shell-overlap: min(28.8cqh, 24cqw, 150px);
   }
+  .pocket-shell-frame.rgb-border { width: min(82%, 700px); }
+  .pocket-content {
+    padding-top: clamp(76px, 19cqh, 100px);
+    padding-bottom: 2%;
+    gap: 5px;
+  }
+  .pocket-content > button:last-child { display: none; }
   .pocket-volume { top: 35%; }
 }
 
-
-/* 60% of the disc remains exposed above the pocket (disc diameter is
-   container-relative, so pocket overlap is calculated from that diameter). */
-.pocket-shell-frame.rgb-border { top: 32.4%; }
-@container (max-width: 620px) {
-  .pocket-shell-frame.rgb-border { top: 32.4%; }
-}
-@container (max-height: 430px) {
-  .pocket-shell-frame.rgb-border { top: 28.8%; }
+@media (prefers-reduced-motion: reduce) {
+  .pocket-vinyl.is-spinning { animation-duration: 30s; }
 }
