@@ -225,3 +225,90 @@ input[type=range]::-webkit-slider-thumb:hover {
   border: 2px solid rgba(99,102,241,.9);
   box-shadow: 0 0 8px rgba(34,211,238,.55);
 }
+
+
+/* Figma pocket CD player: size all layers from the player viewport, not the
+   resizable panel's child flow, so the disc and transport never overlap. */
+.pocket-player {
+  container-type: size;
+  isolation: isolate;
+}
+.pocket-disc-stage {
+  height: 62%;
+  padding-top: 5%;
+  overflow: visible;
+}
+.pocket-vinyl {
+  width: min(54cqh, 48cqw, 390px);
+  max-width: calc(100% - 48px);
+  box-shadow: 0 18px 46px rgba(0,0,0,.42);
+  transform-origin: center center;
+  will-change: transform;
+}
+.pocket-vinyl.is-spinning {
+  animation: pocket-vinyl-spin 7.5s linear infinite;
+}
+@keyframes pocket-vinyl-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.pocket-shell {
+  top: 31%;
+  width: min(72%, 700px);
+  height: 69%;
+  box-sizing: border-box;
+}
+.pocket-content {
+  padding: clamp(94px, 22cqh, 160px) clamp(22px, 6cqw, 60px) 4%;
+  gap: clamp(8px, 2cqh, 22px);
+}
+.pocket-volume {
+  right: max(2.5%, calc((100% - 700px) / 2 + 18px));
+  top: 39%;
+}
+.pocket-volume-range {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 94px !important;
+  height: 6px !important;
+  flex: none;
+  border-radius: 999px;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  cursor: pointer;
+  outline: none;
+}
+.pocket-volume-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,.85);
+  border-radius: 50%;
+  background: #72d9f3;
+  box-shadow: 0 0 12px rgba(66,186,234,.65);
+}
+.pocket-volume-range::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 2px solid rgba(255,255,255,.85);
+  border-radius: 50%;
+  background: #72d9f3;
+  box-shadow: 0 0 12px rgba(66,186,234,.65);
+}
+@container (max-width: 620px) {
+  .pocket-shell { width: 88%; }
+  .pocket-vinyl { width: min(53cqh, 55cqw, 310px); }
+  .pocket-content { padding-left: 7%; padding-right: 7%; padding-top: clamp(84px, 23cqh, 128px); }
+  .pocket-volume { right: 3%; top: 38%; }
+}
+@container (max-height: 430px) {
+  .pocket-shell { top: 29%; height: 71%; }
+  .pocket-vinyl { width: min(48cqh, 40cqw, 250px); }
+  .pocket-content { padding-top: clamp(76px, 20cqh, 100px); gap: 5px; padding-bottom: 2%; }
+  .pocket-content > button:last-child { display: none; }
+  .pocket-volume { top: 36%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pocket-vinyl.is-spinning { animation-duration: 30s; }
+}
