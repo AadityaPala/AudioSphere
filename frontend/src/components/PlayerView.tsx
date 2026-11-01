@@ -31,28 +31,28 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
           circle stays in the player viewport at every resize breakpoint. */}
       <div className="pocket-disc-stage pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-center">
         <div className={`pocket-vinyl relative aspect-square shrink-0 rounded-full ${isPlaying ? 'is-spinning' : ''}`}>
-          <div className="absolute inset-0 overflow-hidden rounded-full border border-white/70 bg-[#11131b] shadow-[0_14px_42px_rgba(0,0,0,.58),0_0_24px_rgba(119,128,255,.16)]">
+          <div className="absolute inset-0 overflow-hidden rounded-full border border-white/65 shadow-[0_14px_42px_rgba(0,0,0,.58),0_0_24px_rgba(119,128,255,.20)]">
+            {artwork ? (
+              <img src={artwork} alt={`${title} artist artwork`} className="absolute inset-0 h-full w-full rounded-full object-cover" />
+            ) : (
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 via-slate-900 to-fuchsia-500" />
+            )}
             <div className="absolute inset-0 rounded-full bg-[repeating-radial-gradient(circle_at_center,rgba(255,255,255,.20)_0px,rgba(255,255,255,.055)_1px,transparent_2px,transparent_4px)]" />
-            <div className="absolute inset-[3%] rounded-full border border-white/15" />
-            <div className="absolute inset-[8%] rounded-full border border-white/10" />
-            <div className="absolute inset-[13%] rounded-full border border-white/10" />
-            <div className="absolute inset-[18%] rounded-full border border-white/10" />
-            <div className="absolute inset-[23%] rounded-full border border-white/10" />
-            <div className="absolute inset-[28%] rounded-full border border-white/20 bg-[#171923] p-[2px]">
-              <div className="relative h-full w-full overflow-hidden rounded-full bg-gradient-to-br from-indigo-500/50 to-fuchsia-500/40">
-                {artwork && <img src={artwork} alt={`${title} album artwork`} className="h-full w-full object-cover" />}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/25 via-transparent to-black/35" />
-              </div>
-            </div>
-            <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_25deg,transparent,rgba(255,255,255,.26),transparent_24%,rgba(34,211,238,.12),transparent_62%,rgba(217,70,239,.15),transparent)]" />
-            <div className="absolute inset-0 rounded-full border border-white/20 shadow-[inset_0_0_28px_rgba(255,255,255,.12)]" />
+            <div className="absolute inset-[3%] rounded-full border border-white/25" />
+            <div className="absolute inset-[8%] rounded-full border border-white/20" />
+            <div className="absolute inset-[13%] rounded-full border border-white/15" />
+            <div className="absolute inset-[18%] rounded-full border border-white/15" />
+            <div className="absolute inset-[23%] rounded-full border border-white/15" />
+            <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_25deg,transparent,rgba(255,255,255,.25),transparent_24%,rgba(34,211,238,.10),transparent_62%,rgba(217,70,239,.13),transparent)]" />
+            <div className="absolute inset-0 rounded-full border border-white/25 shadow-[inset_0_0_28px_rgba(255,255,255,.18)]" />
           </div>
         </div>
       </div>
 
       {/* Pocket shell follows Figma's proportions: a recessed rounded card with
           the vinyl overlapping its upper edge. Content uses a shrink-safe stack. */}
-      <div className="pocket-shell absolute inset-x-0 bottom-0 mx-auto flex min-h-0 flex-col overflow-hidden rounded-[34px] border border-white/25 bg-gradient-to-b from-[#262936] via-[#1b1e29] to-[#131620] shadow-[0_24px_60px_rgba(0,0,0,.42),inset_0_2px_3px_rgba(255,255,255,.18),inset_0_-4px_12px_rgba(0,0,0,.28)] backdrop-blur-2xl">
+      <RgbBorder trackId={url} isPlaying={isPlaying} isBuffering={isBuffering} className="pocket-shell-frame absolute inset-x-0 bottom-0 z-30 mx-auto">
+      <div className="pocket-shell relative flex h-full w-full min-h-0 flex-col overflow-hidden rounded-[34px] border border-white/25 bg-gradient-to-b from-[#262936] via-[#1b1e29] to-[#131620] shadow-[0_24px_60px_rgba(0,0,0,.42),inset_0_2px_3px_rgba(255,255,255,.18),inset_0_-4px_12px_rgba(0,0,0,.28)] backdrop-blur-2xl">
         <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,.18),transparent_42%),linear-gradient(180deg,rgba(255,255,255,.06),transparent_45%)]" />
         <div className="pocket-content relative flex min-h-0 flex-1 flex-col items-center justify-between text-center">
           <div className="w-full shrink-0">
@@ -111,9 +111,10 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
           </button>
         </div>
       </div>
+      </RgbBorder>
 
       {/* Dedicated volume fader beside the record, not in the transport row. */}
-      <div className="pocket-volume absolute z-30 flex flex-col items-center gap-2" aria-label="Volume control">
+      <div className="pocket-volume absolute z-40 flex flex-col items-center gap-2" aria-label="Volume control">
         <button onClick={() => changeVolume(muted ? 80 : 0)} className="rounded-full p-1.5 text-slate-300 transition hover:bg-white/10 hover:text-cyan-200" aria-label={muted ? 'Unmute' : 'Mute'}>
           {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
         </button>
