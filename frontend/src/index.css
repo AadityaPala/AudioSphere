@@ -75,11 +75,6 @@ input[type=range]::-webkit-slider-thumb:hover {
     z-index: 2;
 }
 
-/*
- * Border-only technique using a masked pseudo-element.
- * The ::before fills the full element area with the animated conic-gradient,
- * then a CSS mask cuts out the centre, leaving only a thin ring visible.
- */
 .rgb-border::before {
     content: '';
     position: absolute;
@@ -109,7 +104,6 @@ input[type=range]::-webkit-slider-thumb:hover {
     z-index: 3;
 }
 
-/* Outer neon glow — same ring shape but larger, blurred, behind the card */
 .rgb-border::after {
     content: '';
     position: absolute;
@@ -142,7 +136,6 @@ input[type=range]::-webkit-slider-thumb:hover {
     z-index: 1;
 }
 
-/* When paused: stop the rotation, dim the glow, keep the border visible */
 .rgb-border.rgb-paused::before {
     animation-play-state: paused;
     opacity: 0.5;
@@ -160,8 +153,6 @@ input[type=range]::-webkit-slider-thumb:hover {
     }
 }
 
-/* ── Vertical volume slider ── */
-
 .vol-slider-vertical {
     -webkit-appearance: slider-vertical;
     writing-mode: bt-lr;
@@ -174,14 +165,10 @@ input[type=range]::-webkit-slider-thumb:hover {
     background: linear-gradient(to top, rgba(99, 102, 241, 0.3), rgba(255, 255, 255, 0.1));
 }
 
-
-/* The vinyl player intentionally lets its record protrude above the pocket. */
 .rgb-border.player-rgb {
     overflow: visible;
 }
 
-
-/* Stable vinyl artwork spin and cross-browser vertical volume control. */
 @keyframes vinyl-spin {
   from { transform: translateX(-50%) rotate(0deg); }
   to { transform: translateX(-50%) rotate(360deg); }
@@ -223,21 +210,25 @@ input[type=range]::-webkit-slider-thumb:hover {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   Pocket CD player — Figma-aligned proportions + dark glass theme
+   Pocket CD player — desktop-first scale
 
-   Goal: disc diameter ≈ shell width, ~45% of disc above the shell
-   top edge, soft rounded-rect pocket (not extreme organic shape),
-   clean thin slot at the seam. Works on mobile and laptop.
+   Figma spirit:
+   - Disc ≈ shell width
+   - ~50% of disc visible above the pocket
+   - Disc sits deep into a TALL shell (pocket more high)
+   - Soft rounded card, thin slot at the seam
+   - Scales up on laptop; compact on mobile
    ═══════════════════════════════════════════════════════════════ */
 
 .pocket-player {
-  /* Disc nearly as wide as the shell so the top silhouette matches Figma */
-  --disc-size: clamp(220px, min(38cqh, 42cqw), 320px);
-  --shell-width: clamp(260px, min(72cqw, calc(var(--disc-size) * 1.08)), 360px);
-  --shell-height: clamp(300px, 52cqh, 380px);
-  /* How far down the shell starts — larger value = more disc visible above */
-  --shell-top: calc(var(--disc-size) * 0.48);
-  --shell-radius: 42px;
+  /* Desktop / laptop defaults: large disc, tall pocket */
+  --disc-size: clamp(260px, min(42cqh, 48cqw), 420px);
+  --shell-width: clamp(280px, min(78cqw, calc(var(--disc-size) * 1.02)), 440px);
+  /* Tall body under the disc */
+  --shell-height: clamp(340px, min(58cqh, calc(var(--disc-size) * 1.35)), 520px);
+  /* 50% of disc above the shell top edge */
+  --shell-top: calc(var(--disc-size) * 0.50);
+  --shell-radius: 48px;
   container-type: size;
   isolation: isolate;
   overflow: visible;
@@ -245,6 +236,9 @@ input[type=range]::-webkit-slider-thumb:hover {
   justify-content: center;
   align-items: flex-start;
   position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 
 .pocket-disc-stage {
@@ -274,8 +268,8 @@ input[type=range]::-webkit-slider-thumb:hover {
   transform-origin: center;
   will-change: transform;
   box-shadow:
-    0 14px 36px rgba(0, 0, 0, 0.45),
-    0 0 22px rgba(119, 128, 255, 0.14);
+    0 16px 40px rgba(0, 0, 0, 0.5),
+    0 0 28px rgba(119, 128, 255, 0.16);
 }
 .pocket-vinyl.is-spinning {
   animation: pocket-vinyl-spin 8s linear infinite;
@@ -285,7 +279,6 @@ input[type=range]::-webkit-slider-thumb:hover {
   to { transform: rotate(360deg); }
 }
 
-/* Shell frame: centered under the disc, clean rounded rect */
 .pocket-shell-frame.rgb-border {
   position: absolute;
   z-index: 30;
@@ -308,9 +301,9 @@ input[type=range]::-webkit-slider-thumb:hover {
   opacity: 1;
 }
 .pocket-shell-frame.rgb-border::after {
-  padding: 5px;
+  padding: 6px;
   border-radius: inherit;
-  filter: blur(5px);
+  filter: blur(6px);
   opacity: 0.55;
 }
 .pocket-shell-frame.rgb-border.rgb-paused::before,
@@ -335,44 +328,39 @@ input[type=range]::-webkit-slider-thumb:hover {
   border: 1px solid rgba(148, 163, 255, 0.22);
   border-radius: inherit;
   background:
-    radial-gradient(ellipse 90% 32% at 50% 0%, rgba(139, 92, 246, 0.18), transparent 100%),
-    radial-gradient(ellipse 70% 45% at 100% 100%, rgba(34, 211, 238, 0.08), transparent 100%),
-    linear-gradient(160deg, rgba(38, 41, 58, 0.97) 0%, rgba(24, 26, 40, 0.98) 55%, rgba(14, 16, 26, 0.99) 100%);
+    radial-gradient(ellipse 90% 28% at 50% 0%, rgba(139, 92, 246, 0.2), transparent 100%),
+    radial-gradient(ellipse 70% 40% at 100% 100%, rgba(34, 211, 238, 0.08), transparent 100%),
+    linear-gradient(165deg, rgba(38, 41, 58, 0.97) 0%, rgba(22, 24, 38, 0.98) 55%, rgba(12, 14, 24, 0.99) 100%);
   box-shadow:
-    inset 0 2px 4px rgba(255, 255, 255, 0.08),
-    inset 0 -6px 18px rgba(0, 0, 0, 0.28),
-    0 24px 56px rgba(0, 0, 0, 0.42);
-  backdrop-filter: blur(24px);
+    inset 0 2px 5px rgba(255, 255, 255, 0.08),
+    inset 0 -8px 22px rgba(0, 0, 0, 0.3),
+    0 28px 64px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(28px);
 }
 
-/* Thin dark slot / retaining rail at the disc–shell seam (Figma detail) */
+/* Thin slot at disc–shell seam */
 .pocket-shell-frame > .pocket-shell::before {
   content: "";
   position: absolute;
   z-index: 8;
   top: 0;
-  left: 6%;
-  right: 6%;
-  height: 5px;
+  left: 5%;
+  right: 5%;
+  height: 6px;
   border-radius: 999px;
-  background: linear-gradient(
-    180deg,
-    #1a1d2a 0%,
-    #0c0e16 45%,
-    #2a2f42 100%
-  );
-  border: 1px solid rgba(180, 190, 220, 0.25);
+  background: linear-gradient(180deg, #1a1d2a 0%, #0a0c14 50%, #252a3c 100%);
+  border: 1px solid rgba(180, 190, 220, 0.22);
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 1px 4px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   pointer-events: none;
 }
 
 .pocket-content {
   min-height: 0;
-  /* Extra top padding so text clears the overlapping disc + slot */
-  padding: clamp(72px, 16cqh, 100px) clamp(22px, 5cqw, 40px) 6%;
-  gap: clamp(10px, 1.8cqh, 18px);
+  /* Deep top padding: disc sits inside, text starts below the nested half */
+  padding: clamp(88px, calc(var(--disc-size) * 0.42), 140px) clamp(28px, 6cqw, 52px) 7%;
+  gap: clamp(12px, 2cqh, 22px);
   color: #f1f5ff;
 }
 .pocket-content h2 { color: #f5f3ff !important; }
@@ -383,7 +371,6 @@ input[type=range]::-webkit-slider-thumb:hover {
 .pocket-content button:hover { background: rgba(139, 92, 246, 0.14); }
 .pocket-content input[type="range"] { background-color: rgba(148, 163, 184, 0.32); }
 
-/* Rainbow play button (Figma accent, adapted to dark theme) */
 .pocket-play-btn {
   border: 1px solid rgba(255, 255, 255, 0.28);
   background:
@@ -401,11 +388,11 @@ input[type=range]::-webkit-slider-thumb:hover {
 .pocket-volume {
   position: absolute;
   z-index: 40;
-  top: calc(var(--shell-top) + 12%);
-  right: max(2%, calc((100% - var(--shell-width)) / 2 - 36px));
+  top: calc(var(--shell-top) + 14%);
+  right: max(1%, calc((100% - var(--shell-width)) / 2 - 40px));
   display: flex;
   width: 28px;
-  height: 120px;
+  height: 140px;
   flex-direction: column;
   align-items: center;
   gap: 10px;
@@ -424,9 +411,9 @@ input[type=range]::-webkit-slider-thumb:hover {
 .pocket-volume-range {
   position: relative;
   flex: 0 0 auto;
-  width: 88px !important;
+  width: 96px !important;
   height: 6px !important;
-  margin: 32px 0 0;
+  margin: 36px 0 0;
   border-radius: 999px;
   transform: rotate(-90deg);
   transform-origin: center;
@@ -454,41 +441,38 @@ input[type=range]::-webkit-slider-thumb:hover {
   box-shadow: 0 0 8px rgba(99, 102, 241, 0.45);
 }
 
-/* Narrow / mobile: slightly smaller but same silhouette ratios */
-@container (max-width: 620px) {
+/* Mobile / narrow: compact but same 50% nest ratio */
+@container (max-width: 700px) {
   .pocket-player {
-    --disc-size: min(48cqh, 58cqw, 280px);
+    --disc-size: min(46cqh, 62cqw, 300px);
+    --shell-width: min(calc(var(--disc-size) * 1.04), 320px);
+    --shell-height: clamp(300px, 54cqh, 400px);
+    --shell-top: calc(var(--disc-size) * 0.50);
+    --shell-radius: 40px;
+  }
+  .pocket-content {
+    padding: clamp(72px, calc(var(--disc-size) * 0.40), 110px) 7% 6%;
+  }
+  .pocket-volume {
+    right: 1%;
+    top: calc(var(--shell-top) + 12%);
+  }
+}
+
+@container (max-height: 480px) {
+  .pocket-player {
+    --disc-size: min(40cqh, 40cqw, 240px);
     --shell-width: min(calc(var(--disc-size) * 1.06), 300px);
-    --shell-height: clamp(280px, 50cqh, 360px);
+    --shell-height: clamp(260px, 52cqh, 340px);
     --shell-top: calc(var(--disc-size) * 0.48);
     --shell-radius: 36px;
   }
   .pocket-content {
-    padding: clamp(64px, 18cqh, 92px) 7% 5%;
-  }
-  .pocket-volume {
-    right: 2%;
-    top: calc(var(--shell-top) + 10%);
-  }
-}
-
-@container (max-height: 430px) {
-  .pocket-player {
-    --disc-size: min(42cqh, 36cqw, 220px);
-    --shell-width: min(calc(var(--disc-size) * 1.08), 280px);
-    --shell-height: clamp(240px, 48cqh, 300px);
-    --shell-top: calc(var(--disc-size) * 0.46);
-    --shell-radius: 32px;
-  }
-  .pocket-content {
-    padding-top: clamp(56px, 16cqh, 80px);
-    gap: 6px;
+    padding-top: clamp(60px, calc(var(--disc-size) * 0.38), 90px);
+    gap: 8px;
   }
   .pocket-content > button:last-child {
     display: none;
-  }
-  .pocket-volume {
-    top: calc(var(--shell-top) + 8%);
   }
 }
 
