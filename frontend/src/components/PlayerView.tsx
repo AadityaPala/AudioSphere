@@ -1,4 +1,4 @@
-import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, VolumeX, Loader2, Info, ListMusic } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, VolumeX, Loader2, Info, ListMusic, AudioLines } from 'lucide-react';
 import { RgbBorder } from './RgbBorder';
 import { useScrollRestore } from '../hooks/useScrollRestore';
 
@@ -29,9 +29,9 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
   } = player;
 
   const formatTime = (secs: number) => {
-    const m = Math.floor(secs / 60);
-    const s = Math.floor(secs % 60);
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
+    const minutes = Math.floor(secs / 60);
+    const seconds = Math.floor(secs % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
   const currentTitle = currentIndex !== -1 && queue[currentIndex] ? queue[currentIndex].title : 'No track selected';
@@ -39,103 +39,93 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
   const hasTrack = currentIndex !== -1 && !!queue[currentIndex];
   const rgbActive = hasTrack && (isPlaying || isBuffering);
   const isMuted = volume === 0;
+  const artwork = enriched?.albumArtUrl || meta.artwork;
 
   const inner = (
-    <main className={`flex flex-col min-w-0 min-h-0 overflow-hidden bg-white/[0.04] backdrop-blur-xl border border-white/[0.12] rounded-3xl p-4 md:p-6 shadow-2xl transition-all duration-300 ${className}`}>
-      {/* Central album art — grows/shrinks with panel */}
-      <div className="flex-1 min-h-0 flex flex-col items-center justify-center w-full">
-        <div className="relative group w-full max-w-[200px] flex-1 min-h-0 mb-3 rounded-2xl overflow-hidden shadow-2xl border border-white/20 transition-all duration-300">
-          <img
-            src={enriched?.albumArtUrl || meta.artwork}
-            alt="Artwork"
-            className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
-          />
-          {isBuffering && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm transition-opacity duration-300">
-              <Loader2 className="w-7 h-7 text-indigo-300 animate-spin" />
+    <main className={`relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl border border-white/[0.12] bg-white/[0.04] p-4 shadow-2xl backdrop-blur-xl transition-all duration-300 md:p-6 ${className}`}>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_4%,rgba(59,130,246,0.16),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent_38%)]" />
+
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        {/* Raised artwork and divider inspired by the reference player */}
+        <div className="relative flex h-[39%] min-h-[150px] shrink-0 items-end justify-center overflow-hidden pb-4">
+          <div className="absolute left-1/2 top-[-46%] aspect-square w-[min(58%,220px)] -translate-x-1/2 rounded-full border border-white/30 bg-black/30 p-1 shadow-[0_12px_35px_rgba(0,0,0,0.45)]">
+            <div className="relative h-full w-full overflow-hidden rounded-full border border-white/20 bg-black/40">
+              <img src={artwork} alt="Artwork" className="h-full w-full object-cover" />
+              <div className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-br from-white/20 via-transparent to-black/35" />
+              {isBuffering && (
+                <div className="absolute inset-0 grid place-items-center bg-black/55 backdrop-blur-sm">
+                  <Loader2 className="h-7 w-7 animate-spin text-cyan-200" />
+                </div>
+              )}
             </div>
-          )}
+          </div>
+          <div className="relative z-10 h-1.5 w-full rounded-full bg-slate-950/90 shadow-[0_0_12px_rgba(15,23,42,0.8)]" />
         </div>
 
-        {/* Metadata + title */}
-        <div className="shrink-0 flex flex-col items-center w-full">
-          <div className="flex flex-wrap items-center justify-center gap-1.5 mb-1.5 max-w-full">
-            {enriched?.genre && (
-              <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-400/20 whitespace-nowrap transition-all duration-300">
-                {enriched.genre}
-              </span>
-            )}
-            {enriched?.releaseYear && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-slate-300 border border-white/10 whitespace-nowrap transition-all duration-300">
-                {enriched.releaseYear}
-              </span>
+        <div className="relative flex min-h-0 flex-1 flex-col items-center justify-between pt-1 text-center">
+          <div className="shrink-0">
+            <div className="mb-2 flex items-center justify-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+              <AudioLines className="h-4 w-4 text-cyan-300" />
+              <span>Now Spinning</span>
+            </div>
+            <h2 className="max-w-full truncate text-xl font-bold tracking-tight text-slate-100 sm:text-2xl">{currentTitle}</h2>
+            <p className="mt-1 truncate text-xs text-slate-400">{enriched?.artist || meta.artist || 'Select a track to begin'}</p>
+            {(enriched?.genre || enriched?.releaseYear) && (
+              <div className="mt-2 flex items-center justify-center gap-1.5">
+                {enriched?.genre && <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2 py-0.5 text-[10px] text-cyan-100">{enriched.genre}</span>}
+                {enriched?.releaseYear && <span className="rounded-full border border-white/10 bg-white/10 px-2 py-0.5 text-[10px] text-slate-300">{enriched.releaseYear}</span>}
+              </div>
             )}
           </div>
-          <h2 className="text-base sm:text-lg font-bold text-center max-w-full truncate whitespace-nowrap">{currentTitle}</h2>
-          <p className="text-[11px] text-slate-400 text-center max-w-full truncate whitespace-nowrap">{meta.artist}</p>
-        </div>
-      </div>
 
-      {/* Bottom control area */}
-      <div className="shrink-0 flex flex-col gap-3 mt-3 w-full">
-        {/* Progress Bar */}
-        <div className="flex items-center gap-2.5 w-full">
-          <span className="text-[10px] font-mono text-slate-400 w-9 text-right shrink-0 whitespace-nowrap">{formatTime(currentTime)}</span>
-          <input
-            type="range"
-            min="0"
-            max={duration || 100}
-            value={currentTime}
-            onChange={(e) => seekTo(Number(e.target.value))}
-            className="flex-1 min-w-0 h-1.5 cursor-pointer accent-indigo-500 transition-all duration-300"
-          />
-          <span className="text-[10px] font-mono text-slate-400 w-9 shrink-0 whitespace-nowrap">{formatTime(duration)}</span>
-        </div>
+          <div className="w-full max-w-xl shrink-0 pb-1 pt-5">
+            <div className="flex items-center gap-3">
+              <span className="w-9 shrink-0 text-right font-mono text-[10px] text-slate-400">{formatTime(currentTime)}</span>
+              <input
+                type="range"
+                min="0"
+                max={duration || 100}
+                value={currentTime}
+                onChange={(e) => seekTo(Number(e.target.value))}
+                className="h-1.5 min-w-0 flex-1 cursor-pointer accent-cyan-400"
+                style={{ background: `linear-gradient(to right, rgba(34,211,238,0.9) 0%, rgba(99,102,241,0.8) ${duration ? (currentTime / duration) * 100 : 0}%, rgba(255,255,255,0.14) ${duration ? (currentTime / duration) * 100 : 0}%, rgba(255,255,255,0.14) 100%)` }}
+                aria-label="Track progress"
+              />
+              <span className="w-9 shrink-0 font-mono text-[10px] text-slate-400">{formatTime(duration)}</span>
+            </div>
+          </div>
 
-        {/* Controls + Vertical Volume */}
-        <div className="flex items-center justify-between w-full">
-          {/* Shuffle button */}
-          <button
-            onClick={toggleShuffle}
-            className={`p-2 rounded-full border transition-all duration-300 ${
-              mode === 'shuffle'
-                ? 'border-indigo-400/40 text-indigo-200 bg-indigo-500/10'
-                : 'border-transparent text-slate-400 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <Shuffle className="w-3.5 h-3.5" />
-          </button>
-
-          {/* Transport controls */}
-          <div className="flex items-center gap-3">
-            <button onClick={prevSong} className="p-2 text-slate-300 hover:text-white transition-all duration-300 active:scale-90">
-              <SkipBack className="w-5 h-5 fill-current" />
+          <div className="flex w-full shrink-0 items-center justify-center gap-7 pb-1 pt-3 sm:gap-10">
+            <button onClick={prevSong} className="rounded-full p-2 text-slate-300 transition hover:bg-white/10 hover:text-white active:scale-90" aria-label="Previous track">
+              <SkipBack className="h-5 w-5 fill-current" />
             </button>
             <button
               onClick={togglePlay}
-              className="grid place-items-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-cyan-400 hover:brightness-110 text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 active:scale-95"
+              className="grid h-14 w-14 place-items-center rounded-full border border-white/25 bg-gradient-to-br from-cyan-300 via-blue-500 to-fuchsia-500 text-white shadow-[0_8px_25px_rgba(59,130,246,0.35)] transition hover:brightness-110 active:scale-95"
+              aria-label={isPlaying ? 'Pause' : 'Play'}
             >
-              {isPlaying && !isBuffering ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-0.5" />}
+              {isPlaying && !isBuffering ? <Pause className="h-6 w-6 fill-current" /> : <Play className="ml-0.5 h-6 w-6 fill-current" />}
             </button>
-            <button onClick={nextSong} className="p-2 text-slate-300 hover:text-white transition-all duration-300 active:scale-90">
-              <SkipForward className="w-5 h-5 fill-current" />
+            <button onClick={nextSong} className="rounded-full p-2 text-slate-300 transition hover:bg-white/10 hover:text-white active:scale-90" aria-label="Next track">
+              <SkipForward className="h-5 w-5 fill-current" />
             </button>
           </div>
 
-          {/* Repeat + Vertical Volume */}
-          <div className="flex items-center gap-2">
-            <button className="p-2 rounded-full border border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300">
-              <Repeat className="w-3.5 h-3.5" />
+          <div className="flex w-full shrink-0 items-center justify-between pt-2">
+            <button
+              onClick={toggleShuffle}
+              className={`rounded-full p-2 transition ${mode === 'shuffle' ? 'bg-cyan-300/15 text-cyan-200' : 'text-slate-500 hover:bg-white/10 hover:text-white'}`}
+              aria-label="Toggle shuffle"
+            >
+              <Shuffle className="h-3.5 w-3.5" />
             </button>
-            {/* Vertical volume slider */}
-            <div className="flex flex-col items-center gap-1 group/vol">
-              <button
-                onClick={() => changeVolume(isMuted ? 80 : 0)}
-                className="text-slate-400 hover:text-white transition-colors duration-200"
-                title={isMuted ? 'Unmute' : 'Mute'}
-              >
-                {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-                </button>
+            <button className="rounded-full p-2 text-slate-500 transition hover:bg-white/10 hover:text-white" aria-label="Repeat">
+              <Repeat className="h-3.5 w-3.5" />
+            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={() => changeVolume(isMuted ? 80 : 0)} className="text-slate-400 transition hover:text-white" aria-label={isMuted ? 'Unmute' : 'Mute'}>
+                {isMuted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+              </button>
               <input
                 type="range"
                 min="0"
@@ -143,35 +133,25 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
                 value={volume}
                 onChange={(e) => changeVolume(Number(e.target.value))}
                 className="vol-slider-vertical"
-                style={{
-                  background: `linear-gradient(to top, rgba(99,102,241,0.6) 0%, rgba(34,211,238,0.4) ${volume}%, rgba(255,255,255,0.08) ${volume}%)`,
-                }}
+                style={{ background: `linear-gradient(to top, rgba(34,211,238,0.8) 0%, rgba(99,102,241,0.65) ${volume}%, rgba(255,255,255,0.1) ${volume}%)` }}
+                aria-label="Volume"
               />
             </div>
           </div>
-        </div>
 
-        {/* Mobile info button */}
-        <button
-          onClick={onOpenInfo}
-          className="xl:hidden mx-auto grid place-items-center h-9 px-4 gap-2 rounded-2xl bg-white/10 border border-white/15 text-slate-200 hover:bg-white/15 transition-all duration-300"
-          title="Lyrics & recommendations"
-        >
-          <span className="flex items-center gap-2 text-xs whitespace-nowrap">
-            <Info className="w-4 h-4" /> Lyrics & Discover
-          </span>
-        </button>
+          <button onClick={onOpenInfo} className="mx-auto mt-2 grid h-8 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/5 px-3 text-slate-300 transition hover:bg-white/10 hover:text-white xl:hidden" title="Lyrics and recommendations">
+            <span className="flex items-center gap-2 text-[11px]"><Info className="h-3.5 w-3.5" /> Lyrics & Discover</span>
+          </button>
+        </div>
       </div>
     </main>
   );
 
   return rgbActive ? (
-    <RgbBorder trackId={currentUrl} isPlaying={isPlaying} isBuffering={isBuffering} className="rounded-3xl h-full w-full">
+    <RgbBorder trackId={currentUrl} isPlaying={isPlaying} isBuffering={isBuffering} className="h-full w-full rounded-3xl">
       {inner}
     </RgbBorder>
-  ) : (
-    inner
-  );
+  ) : inner;
 }
 
 interface QueueProps {
@@ -184,43 +164,24 @@ PlayerView.Queue = function Queue({ player, className = '' }: QueueProps) {
   const scrollRef = useScrollRestore('queue', queue.length > 0);
 
   return (
-    <section className={`flex flex-col min-h-0 bg-white/[0.04] backdrop-blur-xl border border-white/[0.12] rounded-3xl p-4 shadow-2xl overflow-hidden transition-all duration-300 ${className}`}>
-      <h3 className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase mb-2.5 shrink-0 whitespace-nowrap">
-        <ListMusic className="w-3.5 h-3.5" />
+    <section className={`flex min-h-0 flex-col overflow-hidden rounded-3xl border border-white/[0.12] bg-white/[0.04] p-4 shadow-2xl backdrop-blur-xl ${className}`}>
+      <h3 className="mb-2.5 flex shrink-0 items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+        <ListMusic className="h-3.5 w-3.5" />
         {mode === 'shuffle' ? 'Shuffled Queue' : 'Current Queue'}
       </h3>
-      <ul
-        ref={scrollRef as React.RefObject<HTMLUListElement>}
-        className="flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar"
-      >
-        {queue.length === 0 && (
-          <li className="text-[11px] text-slate-500 text-center py-8">Queue is empty.</li>
-        )}
+      <ul ref={scrollRef as React.RefObject<HTMLUListElement>} className="custom-scrollbar min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
+        {queue.length === 0 && <li className="py-8 text-center text-[11px] text-slate-500">Queue is empty.</li>}
         {queue.map((song: any, i: number) => {
           const isCurrent = currentIndex === i;
           const item = (
-            <div className={`flex items-center gap-3 p-2.5 rounded-2xl cursor-pointer border transition-all duration-300 ${
-              isCurrent
-                ? 'bg-indigo-500/20 border-transparent text-indigo-100'
-                : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/15 text-slate-300'
-            }`}>
-              <span className="text-[11px] font-mono text-slate-500 w-4 shrink-0 whitespace-nowrap">{i + 1}</span>
-              <span className="text-[11px] font-medium truncate whitespace-nowrap min-w-0">{song.title}</span>
+            <div className={`flex cursor-pointer items-center gap-3 rounded-2xl border p-2.5 transition ${isCurrent ? 'border-transparent bg-indigo-500/20 text-indigo-100' : 'border-white/5 bg-white/5 text-slate-300 hover:border-white/15 hover:bg-white/10'}`}>
+              <span className="w-4 shrink-0 font-mono text-[11px] text-slate-500">{i + 1}</span>
+              <span className="min-w-0 truncate text-[11px] font-medium">{song.title}</span>
             </div>
           );
           return (
-            <li
-              key={i}
-              onClick={() => playSong(i)}
-              className="list-none"
-            >
-              {isCurrent ? (
-                <RgbBorder trackId={song.url} isPlaying={isPlaying} isBuffering={isBuffering} className="rounded-2xl">
-                  {item}
-                </RgbBorder>
-              ) : (
-                item
-              )}
+            <li key={i} onClick={() => playSong(i)} className="list-none">
+              {isCurrent ? <RgbBorder trackId={song.url} isPlaying={isPlaying} isBuffering={isBuffering} className="rounded-2xl">{item}</RgbBorder> : item}
             </li>
           );
         })}
