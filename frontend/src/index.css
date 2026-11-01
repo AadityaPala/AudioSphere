@@ -486,3 +486,71 @@ input[type=range]::-webkit-slider-thumb:hover {
   box-shadow: 0 1px 5px rgba(210,225,255,.3), 0 2px 8px rgba(0,0,0,.5);
   pointer-events: none;
 }
+
+
+/* Final pocket seam: a continuous, softly arched shoulder and a substantial
+   retaining rail make the record look physically captured by the housing. */
+.pocket-shell-frame.rgb-border {
+  --pocket-disc-size: min(54cqh, 48cqw, 390px);
+  top: calc(var(--pocket-disc-size) * .50);
+  width: min(calc(var(--pocket-disc-size) * 1.12), 470px);
+  border-radius: 50% 50% 34px 34px / 17% 17% 34px 34px;
+  clip-path: none;
+}
+
+.pocket-shell-frame.rgb-border > .pocket-shell {
+  border-radius: inherit;
+  border-top-left-radius: 50% 17%;
+  border-top-right-radius: 50% 17%;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 85% 34% at 50% 0%, rgba(255,255,255,.16), transparent 100%),
+    linear-gradient(180deg, #292d3b 0%, #1b1e29 42%, #131620 100%);
+}
+
+/* Replace the previous hairline with a thick, solid retaining bar exactly
+   across the CD/pocket join. */
+.pocket-shell-frame > .pocket-shell::before {
+  content: "";
+  position: absolute;
+  z-index: 8;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 11px;
+  transform: none;
+  border-radius: 0;
+  background: linear-gradient(180deg,
+    #dce4f2 0%,
+    #aab7ce 24%,
+    #65738e 55%,
+    #30394c 100%);
+  border-top: 1px solid rgba(255,255,255,.9);
+  border-bottom: 1px solid rgba(5,9,18,.9);
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.42),
+    0 4px 9px rgba(0,0,0,.48),
+    inset 0 1px 0 rgba(255,255,255,.7);
+  pointer-events: none;
+}
+
+.pocket-content {
+  padding-top: clamp(90px, 20cqh, 148px);
+}
+
+@container (max-width: 620px) {
+  .pocket-shell-frame.rgb-border {
+    --pocket-disc-size: min(53cqh, 55cqw, 310px);
+    top: calc(var(--pocket-disc-size) * .50);
+    width: min(calc(var(--pocket-disc-size) * 1.12), 420px);
+  }
+}
+
+@container (max-height: 430px) {
+  .pocket-shell-frame.rgb-border {
+    --pocket-disc-size: min(48cqh, 40cqw, 250px);
+    top: calc(var(--pocket-disc-size) * .50);
+    width: min(calc(var(--pocket-disc-size) * 1.12), 430px);
+  }
+}
