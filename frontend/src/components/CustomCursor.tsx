@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 
-const ARROW_SIZE = 26;
-const GLOW_SIZE = 70;
-const LERP = 0.2;
+const ARROW_SIZE = 32;
+const GLOW_SIZE = 80;
+const LERP = 0.22;
 
 export function CustomCursor() {
   const arrowRef = useRef<HTMLDivElement>(null);
@@ -39,9 +39,9 @@ export function CustomCursor() {
         glowY = mouseY;
       }
 
-      // Hotspot at arrow tip — the SVG arrow tip is near (1.5, 1.5) in a 26px viewBox
-      arrow.style.transform = `translate(${mouseX - 2}px, ${mouseY - 2}px) scale(${clicking ? 0.85 : 1})`;
-      glow.style.transform = `translate(${glowX - GLOW_SIZE / 2}px, ${glowY - GLOW_SIZE / 2}px) scale(${hovering ? 1.35 : 1})`;
+      // Hotspot at the arrow tip which is at ~(2, 2) in the 32px viewBox
+      arrow.style.transform = `translate(${mouseX - 2}px, ${mouseY - 2}px) scale(${clicking ? 0.82 : 1})`;
+      glow.style.transform = `translate(${glowX - GLOW_SIZE / 2}px, ${glowY - GLOW_SIZE / 2}px) scale(${hovering ? 1.4 : 1})`;
     };
 
     raf = requestAnimationFrame(update);
@@ -53,7 +53,7 @@ export function CustomCursor() {
       if (!visible) {
         visible = true;
         arrow.style.opacity = '1';
-        glow.style.opacity = '0.35';
+        glow.style.opacity = '0.3';
       }
 
       const el = e.target as Element;
@@ -66,10 +66,10 @@ export function CustomCursor() {
         document.body.style.cursor = 'text';
       } else {
         arrow.style.opacity = '1';
-        glow.style.opacity = isInteractive ? '0.55' : '0.3';
+        glow.style.opacity = isInteractive ? '0.5' : '0.25';
         arrow.style.filter = isInteractive
-          ? 'drop-shadow(0 0 6px rgba(34,211,238,0.7))'
-          : 'drop-shadow(0 0 3px rgba(59,130,246,0.4))';
+          ? 'drop-shadow(0 0 8px rgba(34,211,238,0.8)) drop-shadow(0 0 3px rgba(168,85,247,0.5))'
+          : 'drop-shadow(0 0 4px rgba(59,130,246,0.5))';
         document.body.style.cursor = isInteractive ? 'pointer' : 'none';
       }
       hovering = !!isInteractive;
@@ -88,7 +88,7 @@ export function CustomCursor() {
     const onEnter = () => {
       visible = true;
       arrow.style.opacity = '1';
-      glow.style.opacity = '0.3';
+      glow.style.opacity = '0.25';
     };
 
     window.addEventListener('pointermove', onMove, { passive: true });
@@ -123,7 +123,7 @@ export function CustomCursor() {
           height: GLOW_SIZE,
           opacity: 0,
           transition: 'opacity 0.2s',
-          background: 'radial-gradient(circle, rgba(59,130,246,0.15) 0%, rgba(168,85,247,0.06) 45%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(59,130,246,0.18) 0%, rgba(168,85,247,0.08) 45%, transparent 70%)',
           willChange: 'transform, opacity',
         }}
       />
@@ -137,34 +137,37 @@ export function CustomCursor() {
           height: ARROW_SIZE,
           opacity: 0,
           transition: 'opacity 0.15s, filter 0.15s',
-          filter: 'drop-shadow(0 0 3px rgba(59,130,246,0.4))',
+          filter: 'drop-shadow(0 0 4px rgba(59,130,246,0.5))',
           willChange: 'transform, opacity',
         }}
       >
-        <svg width={ARROW_SIZE} height={ARROW_SIZE} viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width={ARROW_SIZE} height={ARROW_SIZE} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="cursor-body" x1="2" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#0f172a" />
-              <stop offset="0.5" stopColor="#1e1b4b" />
-              <stop offset="1" stopColor="#0f172a" />
+            <linearGradient id="as-cursor-body" x1="3" y1="2" x2="24" y2="28" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#0b0f1e" />
+              <stop offset="0.45" stopColor="#1e1b4b" />
+              <stop offset="1" stopColor="#0b0f1e" />
             </linearGradient>
-            <linearGradient id="cursor-edge" x1="0" y1="0" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+            <linearGradient id="as-cursor-edge" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
               <stop stopColor="#22d3ee" />
-              <stop offset="0.4" stopColor="#3b82f6" />
-              <stop offset="1" stopColor="#a855f7" />
+              <stop offset="0.35" stopColor="#3b82f6" />
+              <stop offset="0.7" stopColor="#a855f7" />
+              <stop offset="1" stopColor="#ec4899" />
             </linearGradient>
           </defs>
-          {/* Arrow body — classic pointer silhouette */}
+          {/* Main arrow — classic pointer silhouette, larger and sharper */}
           <path
-            d="M3 2 L3 19 L8 15 L11 23 L14.5 21.5 L11.5 13.5 L18 13.5 Z"
-            fill="url(#cursor-body)"
-            stroke="url(#cursor-edge)"
-            strokeWidth="1.2"
+            d="M4 2.5 L4 23 L10 18 L13.5 28.5 L18 26.5 L14.5 16.5 L22 16.5 Z"
+            fill="url(#as-cursor-body)"
+            stroke="url(#as-cursor-edge)"
+            strokeWidth="1.3"
             strokeLinejoin="round"
+            strokeLinecap="round"
           />
-          {/* Sound-wave accent on the tail */}
-          <path d="M17 16 Q18.5 17.5 17 19" stroke="url(#cursor-edge)" strokeWidth="0.7" strokeLinecap="round" fill="none" opacity="0.6" />
-          <path d="M20 15 Q22 17 20 19.5" stroke="url(#cursor-edge)" strokeWidth="0.7" strokeLinecap="round" fill="none" opacity="0.4" />
+          {/* Sound-wave accent lines on the tail */}
+          <path d="M20 19 Q22 21 20 23" stroke="url(#as-cursor-edge)" strokeWidth="0.8" strokeLinecap="round" fill="none" opacity="0.65" />
+          <path d="M24 17.5 Q26.5 20 24 23.5" stroke="url(#as-cursor-edge)" strokeWidth="0.8" strokeLinecap="round" fill="none" opacity="0.45" />
+          <path d="M28 16 Q31 19 28 23" stroke="url(#as-cursor-edge)" strokeWidth="0.8" strokeLinecap="round" fill="none" opacity="0.3" />
         </svg>
       </div>
     </>

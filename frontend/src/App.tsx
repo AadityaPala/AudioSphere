@@ -215,11 +215,11 @@ export default function App() {
 
               <Panel id="center" minSize="30%">
                 <Group orientation="vertical" className="flex w-full h-full gap-2">
-                  <Panel id="player" defaultSize="52%" minSize="28%" maxSize="80%">
+                  <Panel id="player" defaultSize="65%" minSize="40%" maxSize="85%">
                     <PlayerView player={player} onOpenInfo={() => setDrawerOpen(true)} className="h-full" />
                   </Panel>
                   <VSeparator />
-                  <Panel id="queue" minSize="15%">
+                  <Panel id="queue" defaultSize="35%" minSize="15%" maxSize="60%">
                     <PlayerView.Queue player={player} className="h-full" />
                   </Panel>
                 </Group>

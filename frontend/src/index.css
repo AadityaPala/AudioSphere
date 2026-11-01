@@ -68,13 +68,22 @@ input[type=range]::-webkit-slider-thumb:hover {
     isolation: isolate;
 }
 
-/* Main RGB outline — thin, bright, well-defined border only */
+/*
+ * Border-only technique using a masked pseudo-element.
+ * The ::before fills the full element area with the animated conic-gradient,
+ * then a CSS mask cuts out the centre, leaving only a thin ring visible.
+ * The mask uses two layers: one clipped to content-box (the "hole"), one to
+ * border-box (the "fill"). With mask-composite: exclude (standard) /
+ * -webkit-mask-composite: xor (WebKit), the inner area is subtracted.
+ * The card's own background sits at z-index 0 (the element's content),
+ * so the gradient never touches the card interior.
+ */
 .rgb-border::before {
     content: '';
     position: absolute;
-    inset: -2px;
+    inset: 0;
     border-radius: inherit;
-    padding: 2px;
+    padding: 2.5px;
     background: conic-gradient(
         from var(--rgb-angle, 0deg),
         var(--rgb-c1, #3b82f6),
@@ -85,26 +94,26 @@ input[type=range]::-webkit-slider-thumb:hover {
         var(--rgb-c1, #3b82f6)
     );
     -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
     mask-composite: exclude;
     animation: rgb-rotate var(--rgb-duration, 4s) linear infinite;
     animation-direction: var(--rgb-direction, normal);
     pointer-events: none;
-    z-index: 2;
+    z-index: 3;
 }
 
-/* Outer neon glow — soft halo just outside the border, BEHIND the card */
+/* Outer neon glow — same ring shape but larger, blurred, behind the card */
 .rgb-border::after {
     content: '';
     position: absolute;
-    inset: -4px;
+    inset: -3px;
     border-radius: inherit;
-    padding: 4px;
+    padding: 5.5px;
     background: conic-gradient(
         from var(--rgb-angle, 0deg),
         var(--rgb-c1, #3b82f6),
@@ -115,30 +124,30 @@ input[type=range]::-webkit-slider-thumb:hover {
         var(--rgb-c1, #3b82f6)
     );
     -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
     mask-composite: exclude;
-    filter: blur(3px);
-    opacity: 0.7;
+    filter: blur(4px);
+    opacity: 0.8;
     animation: rgb-rotate var(--rgb-duration, 4s) linear infinite;
     animation-direction: var(--rgb-direction, normal);
     pointer-events: none;
-    z-index: -1;
+    z-index: 1;
 }
 
 /* When paused: stop the rotation, dim the glow, keep the border visible */
-.rgb-border.rgb-paused::before,
-.rgb-border.rgb-paused::after {
+.rgb-border.rgb-paused::before {
     animation-play-state: paused;
-    opacity: 0.4;
+    opacity: 0.5;
 }
 
 .rgb-border.rgb-paused::after {
-    opacity: 0.12;
+    animation-play-state: paused;
+    opacity: 0.15;
 }
 
 @media (prefers-reduced-motion: reduce) {
