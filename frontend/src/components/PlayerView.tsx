@@ -111,6 +111,9 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
           </div>
         </RgbBorder>
 
+        {/* Dark slot lip: sits above the disc edge and the glass shell */}
+        <div className="pocket-slot-overlay" aria-hidden="true" />
+
         {/* Volume — beside the shell */}
         <div className="pocket-volume" aria-label="Volume control">
           <button onClick={() => changeVolume(muted ? 80 : 0)} className="pocket-vol-mute" aria-label={muted ? 'Unmute' : 'Mute'}>
