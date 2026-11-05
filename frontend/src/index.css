@@ -128,620 +128,679 @@ input[type=range]::-webkit-slider-thumb:hover {
 
 .rgb-border.player-rgb { overflow: visible; }
 
-/* ═══════════════════════════════════════════════════════════════
-   POCKET PLAYER — laptop-first
 
-   Outer .pocket-player fills the panel and centers the stage.
-   .pocket-stage is the hardware unit (disc + tall shell).
-   Disc diameter ≈ shell width; 50% of disc sits above the shell.
+/* ═══════════════════════════════════════════════════════════════
+   AUDIO SPHERE — SLOT VINYL PLAYER
+   The complete record sits behind the shell. A synchronized
+   foreground copy is visible only up to the slot line. This lets
+   the shell genuinely cover the lower half of the record.
    ═══════════════════════════════════════════════════════════════ */
 
-.pocket-player {
-  /* Large defaults aimed at laptop center panel */
-  --disc: 380px;
-  --shell-w: 400px;
-  --shell-h: 480px;
-  --nest: 0.50; /* fraction of disc above the shell top */
-  --radius: 44px;
-
+.vinyl-player {
   width: 100%;
   height: 100%;
   min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+  padding: 10px;
   overflow: visible;
   isolation: isolate;
   position: relative;
 }
 
-/* The hardware unit: height = disc protrusion + shell */
-.pocket-stage {
-  position: relative;
-  width: var(--shell-w);
-  height: calc(var(--disc) * var(--nest) + var(--shell-h));
-  flex-shrink: 0;
+.vinyl-player,
+.vinyl-player * {
+  box-sizing: border-box;
 }
 
-/* Disc layer */
-.pocket-disc-stage {
+.vinyl-player__scene {
+  position: relative;
+  width: min(100%, 578px, calc(82dvh * 0.793));
+  aspect-ratio: 578 / 729;
+  flex-shrink: 0;
+  container-type: inline-size;
+  isolation: isolate;
+  overflow: visible;
+}
+
+/* The lower copy of the record is always behind the glass shell. */
+.vinyl-player__disc {
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: var(--disc);
-  height: var(--disc);
-  z-index: 20;
+  left: 10.52%;
+  width: 78.95%;
+  aspect-ratio: 1;
   pointer-events: none;
 }
-.pocket-vinyl {
+
+.vinyl-player__disc--back {
+  z-index: 1;
+}
+
+.vinyl-player__disc--front {
+  z-index: 3;
+  /*
+   * The original scene is 578 × 729. The slot is at 30.7% of
+   * scene height; relative to the 78.95%-wide disc this is ~49.05%.
+   * Keep only that upper portion in front of the shell.
+   */
+  clip-path: inset(0 0 50.95% 0);
+}
+
+.vinyl-player__disc-rotation {
   width: 100%;
   height: 100%;
   border-radius: 50%;
   transform-origin: center;
   will-change: transform;
 }
-.pocket-vinyl.is-spinning {
-  animation: pocket-vinyl-spin 8s linear infinite;
+
+.vinyl-player__disc-rotation.is-spinning {
+  animation: vinyl-player-spin 12s linear infinite;
 }
-@keyframes pocket-vinyl-spin {
+
+@keyframes vinyl-player-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
-.pocket-vinyl-face {
+
+.vinyl-player__disc-face {
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 50%;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  border: max(1px, .395cqw) solid rgba(226, 232, 255, .58);
+  border-radius: 50%;
+  background: #090b14;
   box-shadow:
-    0 18px 48px rgba(0, 0, 0, 0.55),
-    0 0 32px rgba(119, 128, 255, 0.2);
+    0 1.2cqw 3.2cqw rgba(0, 0, 0, .58),
+    0 0 2.8cqw rgba(129, 140, 248, .22),
+    inset 0 0 1.6cqw rgba(255, 255, 255, .12);
 }
-.pocket-vinyl-art {
+
+.vinyl-player__artwork,
+.vinyl-player__artwork-fallback {
   position: absolute;
   inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
+  border-radius: 50%;
   object-fit: cover;
-  border-radius: 50%;
 }
-.pocket-vinyl-fallback {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1, #0f172a, #d946ef);
+
+.vinyl-player__artwork-fallback {
+  background:
+    radial-gradient(circle at 35% 28%, rgba(34, 211, 238, .5), transparent 30%),
+    radial-gradient(circle at 70% 75%, rgba(139, 92, 246, .5), transparent 38%),
+    linear-gradient(145deg, #252849, #080b15 68%);
 }
-.pocket-vinyl-grooves {
+
+.vinyl-player__grooves {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   background: repeating-radial-gradient(
     circle at center,
-    rgba(255, 255, 255, 0.14) 0px,
-    rgba(255, 255, 255, 0.04) 1px,
+    rgba(255, 255, 255, .12) 0,
+    rgba(255, 255, 255, .035) 1px,
     transparent 2px,
     transparent 4px
   );
+  mix-blend-mode: screen;
   pointer-events: none;
 }
-.pocket-vinyl-shine {
+
+.vinyl-player__sheen {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: conic-gradient(
-    from 20deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent 22%,
-    rgba(34, 211, 238, 0.08),
-    transparent 58%,
-    rgba(217, 70, 239, 0.1),
-    transparent
-  );
-  box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.12);
+  background:
+    conic-gradient(
+      from 20deg,
+      transparent 0deg,
+      rgba(255, 255, 255, .2) 48deg,
+      transparent 92deg,
+      rgba(34, 211, 238, .1) 155deg,
+      transparent 218deg,
+      rgba(167, 139, 250, .13) 285deg,
+      transparent 360deg
+    ),
+    linear-gradient(120deg, rgba(255, 255, 255, .12), transparent 38%);
   pointer-events: none;
 }
-.pocket-vinyl-hub {
+
+.vinyl-player__label {
   position: absolute;
-  left: 50%;
   top: 50%;
-  width: 28%;
-  height: 28%;
+  left: 50%;
+  width: 29.33%;
+  aspect-ratio: 1;
   transform: translate(-50%, -50%);
+  border: 1px solid rgba(255, 255, 255, .46);
   border-radius: 50%;
-  background: linear-gradient(135deg, #e2e8f0, #94a3b8, #64748b);
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5), 0 2px 8px rgba(0, 0, 0, 0.35);
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, .7), transparent 24%),
+    linear-gradient(145deg, #d8deee, #737e99 60%, #343b52);
+  box-shadow:
+    0 .5cqw 1.5cqw rgba(0, 0, 0, .42),
+    inset 0 1px .7cqw rgba(255, 255, 255, .55);
 }
-.pocket-vinyl-hub-core {
+
+.vinyl-player__label-ring {
   position: absolute;
-  inset: 18%;
+  inset: -5%;
+  border: .7cqw solid transparent;
   border-radius: 50%;
-  background: linear-gradient(135deg, #f8fafc, #cbd5e1);
-}
-.pocket-vinyl-hub-ring {
-  position: absolute;
-  inset: -6%;
-  border-radius: 50%;
-  padding: 2px;
-  background: conic-gradient(from 0deg, #f472b6, #fbbf24, #34d399, #22d3ee, #818cf8, #f472b6);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  background: conic-gradient(
+    #22d3ee,
+    #818cf8,
+    #d946ef,
+    #fbbf24,
+    #34d399,
+    #22d3ee
+  ) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
 }
 
-/* Shell */
-.pocket-shell-frame.rgb-border {
+.vinyl-player__label-core {
   position: absolute;
-  top: calc(var(--disc) * var(--nest));
+  inset: 18%;
+  border: 1px solid rgba(255, 255, 255, .56);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f8fafc, #a8b1c6);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, .65);
+}
+
+.vinyl-player__label-hole {
+  position: absolute;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  width: var(--shell-w);
-  height: var(--shell-h);
-  border-radius: var(--radius);
-  z-index: 30;
+  width: 12.67%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(0, 0, 0, .38);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #343b4e, #070910 72%);
+  box-shadow: 0 0 0 .35cqw rgba(255, 255, 255, .18);
+}
+
+/* The shell starts above the slot line and covers the lower disc copy. */
+.vinyl-player__shell-frame.rgb-border {
+  position: absolute;
+  z-index: 2;
+  inset: 20.3% 0 0;
+  width: auto;
+  height: auto;
+  border-radius: 20.75cqw;
   overflow: visible;
   isolation: isolate;
   background: transparent;
 }
-.pocket-shell-frame.rgb-border::before {
-  padding: 2px;
+
+.vinyl-player__shell-frame.rgb-border::before {
+  padding: max(1px, .35cqw);
   border-radius: inherit;
-}
-.pocket-shell-frame.rgb-border::after {
-  padding: 6px;
-  border-radius: inherit;
-  filter: blur(6px);
-  opacity: 0.55;
-}
-.pocket-shell-frame.rgb-border.rgb-paused::before,
-.pocket-shell-frame.rgb-border.rgb-paused::after {
-  opacity: 0;
-  animation-play-state: paused;
-}
-.pocket-shell-frame.rgb-border:not(.rgb-paused)::before,
-.pocket-shell-frame.rgb-border:not(.rgb-paused)::after {
-  opacity: 1;
-  animation-play-state: running;
 }
 
-.pocket-shell {
+.vinyl-player__shell-frame.rgb-border::after {
+  padding: .9cqw;
+  border-radius: inherit;
+  filter: blur(1.1cqw);
+  opacity: .42;
+}
+
+.vinyl-player__shell {
   position: relative;
   z-index: 2;
   width: 100%;
   height: 100%;
-  border-radius: inherit;
   overflow: hidden;
-  border: 1px solid rgba(148, 163, 255, 0.22);
+  border: 1px solid rgba(171, 185, 255, .2);
+  border-radius: inherit;
   background:
-    radial-gradient(ellipse 90% 28% at 50% 0%, rgba(139, 92, 246, 0.2), transparent 100%),
-    radial-gradient(ellipse 70% 40% at 100% 100%, rgba(34, 211, 238, 0.08), transparent 100%),
-    linear-gradient(165deg, rgba(38, 41, 58, 0.97) 0%, rgba(22, 24, 38, 0.98) 55%, rgba(12, 14, 24, 0.99) 100%);
+    radial-gradient(ellipse 88% 28% at 50% 0%, rgba(99, 102, 241, .19), transparent 100%),
+    radial-gradient(ellipse 70% 40% at 100% 100%, rgba(34, 211, 238, .09), transparent 100%),
+    linear-gradient(
+      155deg,
+      rgba(24, 28, 47, .985) 0%,
+      rgba(13, 16, 30, .99) 55%,
+      rgba(7, 9, 18, .995) 100%
+    );
   box-shadow:
-    inset 0 2px 5px rgba(255, 255, 255, 0.08),
-    inset 0 -8px 22px rgba(0, 0, 0, 0.3),
-    0 28px 64px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(28px);
+    inset 0 1px 0 rgba(255, 255, 255, .12),
+    inset 0 -1.4cqw 3.8cqw rgba(0, 0, 0, .38),
+    0 3cqw 7cqw rgba(0, 0, 0, .48),
+    0 0 4.5cqw rgba(99, 102, 241, .09);
+  backdrop-filter: blur(28px) saturate(145%);
+  -webkit-backdrop-filter: blur(28px) saturate(145%);
 }
-/* Slot at seam */
-.pocket-shell::before {
-  content: "";
-  position: absolute;
-  z-index: 8;
-  top: 0;
-  left: 5%;
-  right: 5%;
-  height: 6px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #1a1d2a 0%, #0a0c14 50%, #252a3c 100%);
-  border: 1px solid rgba(180, 190, 220, 0.22);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  pointer-events: none;
-}
-.pocket-shell-gloss {
+
+.vinyl-player__shell-gloss {
   position: absolute;
   inset: 0;
   border-radius: inherit;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.12), transparent 40%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 48%);
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, .13), transparent 40%),
+    linear-gradient(145deg, rgba(255, 255, 255, .065), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, .035), transparent 50%);
   pointer-events: none;
 }
 
-.pocket-content {
-  position: relative;
-  z-index: 2;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  text-align: center;
-  /* Top padding clears the nested half of the disc */
-  padding: calc(var(--disc) * 0.42) 40px 28px;
-  gap: 16px;
-  color: #f1f5ff;
-  box-sizing: border-box;
-}
-
-.pocket-meta { width: 100%; flex-shrink: 0; }
-.pocket-now {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 10px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #94a3b8;
-}
-.pocket-eq {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 14px;
-}
-.pocket-eq i {
-  display: block;
-  width: 3px;
-  border-radius: 1px;
-  background: #67e8f9;
-}
-.pocket-eq i:nth-child(1) { height: 8px; }
-.pocket-eq i:nth-child(2) { height: 13px; opacity: 0.9; }
-.pocket-eq i:nth-child(3) { height: 10px; opacity: 0.8; }
-.pocket-eq i:nth-child(4) { height: 16px; }
-.pocket-eq i:nth-child(5) { height: 6px; opacity: 0.8; }
-
-.pocket-title {
-  margin: 0;
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: #f8fafc;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.pocket-artist {
-  margin: 6px 0 0;
-  font-size: 0.8rem;
-  color: #94a3b8;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.pocket-progress {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
-.pocket-time {
-  width: 36px;
-  flex-shrink: 0;
-  font-family: ui-monospace, monospace;
-  font-size: 10px;
-  tabular-nums: true;
-  color: #94a3b8;
-}
-.pocket-time:last-child { text-align: right; }
-.pocket-seek {
-  flex: 1;
-  min-width: 0;
-  height: 5px;
-  border-radius: 999px;
-  cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
-  accent-color: #67e8f9;
-}
-
-.pocket-transport {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 36px;
-  flex-shrink: 0;
-}
-.pocket-icon-btn {
-  padding: 10px;
-  border-radius: 999px;
-  color: #cbd5e1;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, transform 0.1s;
-}
-.pocket-icon-btn:hover {
-  background: rgba(139, 92, 246, 0.16);
-  color: #fff;
-}
-.pocket-icon-btn:active { transform: scale(0.92); }
-.pocket-icon-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.pocket-icon-btn.is-active {
-  background: rgba(103, 232, 249, 0.15);
-  color: #a5f3fc;
-}
-
-.pocket-play-btn {
-  width: 64px;
-  height: 64px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  color: #fff;
-  cursor: pointer;
-  background:
-    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.35), transparent 55%),
-    conic-gradient(from 200deg, #22d3ee, #818cf8, #f472b6, #fbbf24, #34d399, #22d3ee);
-  box-shadow:
-    0 12px 32px rgba(79, 70, 229, 0.4),
-    inset 0 1px 2px rgba(255, 255, 255, 0.35),
-    inset 0 -4px 12px rgba(0, 0, 0, 0.25);
-  transition: filter 0.15s, transform 0.1s;
-}
-.pocket-play-btn:hover { filter: brightness(1.1); }
-.pocket-play-btn:active { transform: scale(0.95); }
-.pocket-play-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.pocket-secondary {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  flex-shrink: 0;
-  padding: 0 8px;
-}
-
-.pocket-info-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  color: #cbd5e1;
-  font-size: 10px;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-.pocket-info-btn:hover { background: rgba(255, 255, 255, 0.1); }
-
-/* Volume */
-.pocket-volume {
+/* The slot line is positioned on the same scene coordinate as the disc cut. */
+.vinyl-player__slot {
   position: absolute;
-  top: calc(var(--disc) * var(--nest) + 48px);
-  right: -48px;
+  z-index: 4;
+  top: 30.7%;
+  left: 6.58%;
+  width: 86.85%;
+  height: 1.46%;
+  min-height: 5px;
+  border: 1px solid rgba(204, 213, 235, .2);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #292d3a 0%, #080a11 52%, #34394a 100%);
+  box-shadow:
+    0 .25cqw .55cqw rgba(0, 0, 0, .75),
+    0 0 0 .18cqw rgba(255, 255, 255, .045),
+    inset 0 .18cqw .3cqw rgba(255, 255, 255, .18);
+  pointer-events: none;
+}
+
+.vinyl-player__content {
+  position: absolute;
+  top: 22.8%;
+  left: 10.26%;
+  bottom: 4.6%;
+  width: 79%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  z-index: 40;
-  width: 32px;
+  justify-content: space-between;
+  gap: 3cqw;
+  padding-bottom: 0;
+  color: #f1f5ff;
+  text-align: center;
 }
-.pocket-vol-mute {
-  padding: 6px;
+
+.vinyl-player__track-info {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 4.1cqw;
+  flex-shrink: 0;
+}
+
+.vinyl-player__now {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.8cqw;
+  color: #9ba6bf;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 2.5cqw;
+  font-weight: 600;
+  letter-spacing: .34cqw;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.vinyl-player__equalizer {
+  display: flex;
+  height: 3.2cqw;
+  align-items: flex-end;
+  gap: .55cqw;
+}
+
+.vinyl-player__equalizer i {
+  display: block;
+  width: .55cqw;
+  min-width: 2px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(30, 34, 52, 0.8);
-  color: #c7d2fe;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, #67e8f9, #22a7e2);
+  transform-origin: bottom;
+  animation: vinyl-player-eq .95s ease-in-out infinite alternate;
+  animation-play-state: paused;
 }
-.pocket-vol-mute:hover {
-  color: #a5f3fc;
-  background: rgba(40, 48, 70, 0.9);
+
+.vinyl-player__equalizer.is-active i {
+  animation-play-state: running;
 }
-.pocket-volume-range {
-  width: 100px !important;
-  height: 6px !important;
-  margin-top: 40px;
+
+.vinyl-player__equalizer i:nth-child(1) { height: 42%; animation-delay: -.2s; }
+.vinyl-player__equalizer i:nth-child(2) { height: 83%; animation-delay: -.55s; }
+.vinyl-player__equalizer i:nth-child(3) { height: 58%; animation-delay: -.8s; }
+.vinyl-player__equalizer i:nth-child(4) { height: 100%; animation-delay: -.35s; }
+.vinyl-player__equalizer i:nth-child(5) { height: 33%; animation-delay: -.7s; }
+
+@keyframes vinyl-player-eq {
+  from { transform: scaleY(.3); }
+  to { transform: scaleY(1); }
+}
+
+.vinyl-player__heading {
+  width: 100%;
+  min-width: 0;
+}
+
+.vinyl-player__title {
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  color: #f8faff;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(17px, 5.4cqw, 32px);
+  font-weight: 750;
+  letter-spacing: -.035em;
+  line-height: 1.08;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 .35cqw 1.2cqw rgba(0, 0, 0, .32);
+}
+
+.vinyl-player__artist {
+  max-width: 100%;
+  margin: 1.5cqw 0 0;
+  overflow: hidden;
+  color: #9ca8c1;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 2.65cqw;
+  font-weight: 450;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vinyl-player__progress {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 2cqw;
+  flex-shrink: 0;
+}
+
+.vinyl-player__time {
+  width: 7.5cqw;
+  flex-shrink: 0;
+  color: #8d98b1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 2.1cqw;
+  font-variant-numeric: tabular-nums;
+}
+
+.vinyl-player__time:last-child {
+  text-align: right;
+}
+
+.vinyl-player__seek,
+.vinyl-player__volume-range {
+  height: .9cqw !important;
+  min-height: 4px;
+  padding: 0;
+  border: 0;
   border-radius: 999px;
-  transform: rotate(-90deg);
-  transform-origin: center;
   cursor: pointer;
   outline: none;
   -webkit-appearance: none !important;
   appearance: none !important;
 }
-.pocket-volume-range::-webkit-slider-thumb {
+
+.vinyl-player__seek {
+  width: 100%;
+  min-width: 0;
+}
+
+.vinyl-player__seek:disabled {
+  cursor: default;
+  opacity: .55;
+}
+
+.vinyl-player__seek::-webkit-slider-thumb,
+.vinyl-player__volume-range::-webkit-slider-thumb {
+  width: 1.9cqw;
+  height: 1.9cqw;
+  min-width: 8px;
+  min-height: 8px;
+  border: 1px solid rgba(255, 255, 255, .9);
+  border-radius: 50%;
+  background: #dff9ff;
+  box-shadow: 0 0 1.2cqw rgba(34, 211, 238, .65);
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  background: #6366f1;
-  box-shadow: 0 0 8px rgba(99, 102, 241, 0.45);
-}
-.pocket-volume-range::-moz-range-thumb {
-  width: 10px;
-  height: 10px;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  background: #6366f1;
-  box-shadow: 0 0 8px rgba(99, 102, 241, 0.45);
 }
 
-.pocket-active-glow {
-  position: absolute;
-  left: 15%;
-  right: 15%;
-  bottom: 0;
-  height: 2px;
+.vinyl-player__seek::-moz-range-thumb,
+.vinyl-player__volume-range::-moz-range-thumb {
+  width: 1.9cqw;
+  height: 1.9cqw;
+  min-width: 8px;
+  min-height: 8px;
+  border: 1px solid rgba(255, 255, 255, .9);
+  border-radius: 50%;
+  background: #dff9ff;
+  box-shadow: 0 0 1.2cqw rgba(34, 211, 238, .65);
+}
+
+.vinyl-player__transport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8cqw;
+  flex-shrink: 0;
+}
+
+.vinyl-player__transport-btn,
+.vinyl-player__utility-btn {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  color: #c4cde0;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    color .18s ease,
+    background .18s ease,
+    border-color .18s ease,
+    transform .18s ease;
+}
+
+.vinyl-player__transport-btn {
+  width: 6.2cqw;
+  height: 6.2cqw;
+}
+
+.vinyl-player__transport-btn:hover,
+.vinyl-player__utility-btn:hover:not(:disabled) {
+  color: #fff;
+  border-color: rgba(165, 180, 252, .2);
+  background: rgba(129, 140, 248, .13);
+}
+
+.vinyl-player__transport-btn:active,
+.vinyl-player__utility-btn:active {
+  transform: scale(.92);
+}
+
+.vinyl-player__transport-btn:disabled {
+  opacity: .3;
+  cursor: not-allowed;
+}
+
+.vinyl-player__play-btn {
+  display: grid;
+  width: 13.7cqw;
+  height: 13.7cqw;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid rgba(224, 231, 255, .46);
+  border-radius: 50%;
+  color: #fff;
+  background:
+    radial-gradient(circle at 34% 25%, rgba(255, 255, 255, .36), transparent 43%),
+    linear-gradient(145deg, rgba(34, 211, 238, .95), rgba(99, 102, 241, .96) 58%, rgba(139, 92, 246, .95));
+  box-shadow:
+    0 1.5cqw 3.8cqw rgba(79, 70, 229, .38),
+    0 0 3.5cqw rgba(34, 211, 238, .16),
+    inset 0 1px 2px rgba(255, 255, 255, .38),
+    inset 0 -1cqw 1.8cqw rgba(0, 0, 0, .2);
+  cursor: pointer;
+  transition: filter .18s ease, transform .18s ease;
+}
+
+.vinyl-player__play-btn:hover:not(:disabled) {
+  filter: brightness(1.12);
+  transform: scale(1.045);
+}
+
+.vinyl-player__play-btn:active:not(:disabled) {
+  transform: scale(.96);
+}
+
+.vinyl-player__play-btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.vinyl-player__utility {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2cqw;
+  flex-shrink: 0;
+}
+
+.vinyl-player__modes,
+.vinyl-player__volume {
+  display: flex;
+  align-items: center;
+  gap: 1cqw;
+}
+
+.vinyl-player__utility-btn {
+  width: 5.6cqw;
+  height: 5.6cqw;
+  color: #98a5c0;
+}
+
+.vinyl-player__utility-btn.is-active {
+  color: #a5f3fc;
+  border-color: rgba(34, 211, 238, .18);
+  background: rgba(34, 211, 238, .1);
+}
+
+.vinyl-player__utility-btn:disabled {
+  opacity: .32;
+  cursor: not-allowed;
+}
+
+.vinyl-player__volume-range {
+  width: 13cqw;
+}
+
+.vinyl-player__lyrics-btn {
+  display: inline-flex;
+  min-height: 5.6cqw;
+  align-items: center;
+  justify-content: center;
+  gap: 1cqw;
+  padding: 0 2cqw;
+  border: 1px solid rgba(255, 255, 255, .1);
   border-radius: 999px;
-  background: linear-gradient(to right, transparent, rgba(34, 211, 238, 0.7), transparent);
-  box-shadow: 0 0 12px rgba(34, 211, 238, 0.55);
-  pointer-events: none;
-  z-index: 40;
+  color: #b9c4db;
+  background: rgba(255, 255, 255, .045);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 2cqw;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color .18s ease, background .18s ease, border-color .18s ease;
 }
 
-/* ── Desktop XL: even larger ── */
-@media (min-width: 1280px) {
-  .pocket-player {
-    --disc: 420px;
-    --shell-w: 440px;
-    --shell-h: 520px;
-    --nest: 0.50;
-    --radius: 48px;
-  }
-  .pocket-title { font-size: 1.5rem; }
-  .pocket-play-btn { width: 72px; height: 72px; }
-  .pocket-transport { gap: 44px; }
-  .pocket-content { padding-left: 48px; padding-right: 48px; }
+.vinyl-player__lyrics-btn:hover {
+  color: #fff;
+  border-color: rgba(129, 140, 248, .32);
+  background: rgba(129, 140, 248, .12);
 }
 
-/* ── Large desktop ── */
-@media (min-width: 1536px) {
-  .pocket-player {
-    --disc: 460px;
-    --shell-w: 480px;
-    --shell-h: 560px;
-    --radius: 52px;
-  }
+.vinyl-player__transport-btn:focus-visible,
+.vinyl-player__play-btn:focus-visible,
+.vinyl-player__utility-btn:focus-visible,
+.vinyl-player__lyrics-btn:focus-visible,
+.vinyl-player__seek:focus-visible,
+.vinyl-player__volume-range:focus-visible {
+  outline: 2px solid #67e8f9;
+  outline-offset: 3px;
 }
 
-/* ── Tablet / smaller center column ── */
-@media (max-width: 1279px) {
-  .pocket-player {
-    --disc: 280px;
-    --shell-w: 300px;
-    --shell-h: 380px;
-    --nest: 0.50;
-    --radius: 36px;
+@media (max-width: 540px) {
+  .vinyl-player {
+    padding: 6px;
   }
-  .pocket-content {
-    padding: calc(var(--disc) * 0.40) 24px 20px;
-    gap: 12px;
-  }
-  .pocket-title { font-size: 1.1rem; }
-  .pocket-play-btn { width: 56px; height: 56px; }
-  .pocket-transport { gap: 28px; }
-  .pocket-volume { right: -40px; }
-}
 
-/* Short height: shrink to fit */
-@media (max-height: 720px) {
-  .pocket-player {
-    --disc: min(var(--disc), 300px);
-    --shell-w: min(var(--shell-w), 320px);
-    --shell-h: min(var(--shell-h), 360px);
+  .vinyl-player__scene {
+    width: min(100%, calc(82dvh * .793));
+  }
+
+  .vinyl-player__shell {
+    background:
+      radial-gradient(ellipse 88% 28% at 50% 0%, rgba(99, 102, 241, .17), transparent 100%),
+      linear-gradient(155deg, rgba(24, 28, 47, .99), rgba(7, 9, 18, .995));
+  }
+
+  .vinyl-player__content {
+    top: 22%;
+    left: 8%;
+    width: 84%;
+    bottom: 4%;
+    gap: 2.4cqw;
+  }
+
+  .vinyl-player__track-info {
+    gap: 3cqw;
+  }
+
+  .vinyl-player__transport {
+    gap: 7cqw;
   }
 }
 
-@media (max-height: 560px) {
-  .pocket-player {
-    --disc: 220px;
-    --shell-w: 240px;
-    --shell-h: 280px;
-    --radius: 28px;
+@media (max-height: 650px) {
+  .vinyl-player__scene {
+    width: min(100%, calc(72dvh * .793));
   }
-  .pocket-content {
-    padding: calc(var(--disc) * 0.36) 16px 12px;
-    gap: 6px;
+
+  .vinyl-player__content {
+    top: 21%;
+    bottom: 3.5%;
+    gap: 2.2cqw;
   }
-  .pocket-info-btn { display: none; }
-  .pocket-play-btn { width: 48px; height: 48px; }
+
+  .vinyl-player__track-info {
+    gap: 2.8cqw;
+  }
+
+  .vinyl-player__play-btn {
+    width: 12.5cqw;
+    height: 12.5cqw;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pocket-vinyl.is-spinning { animation-duration: 30s; }
-}
-
-
-/* ═══════════════════════════════════════════════════════════════
-   VINYL PLAYER LAYERING + DARK GLASS FINISH
-   The record sits behind the shell. Its upper half protrudes above
-   the shell's top edge, while the lower half is covered by the glass body.
-   ═══════════════════════════════════════════════════════════════ */
-
-/* Keep the complete disc behind the shell. Since the shell starts
-   at the disc midpoint, only the upper half remains exposed. */
-.pocket-disc-stage {
-  z-index: 20;
-  clip-path: none;
-}
-
-/* Keep the glass body in front of the lower portion of the record. */
-.pocket-shell-frame.rgb-border {
-  z-index: 30;
-}
-
-/* The seam is a separate top layer so it stays crisp over both surfaces. */
-.pocket-shell::before {
-  display: none;
-}
-
-.pocket-slot-overlay {
-  position: absolute;
-  z-index: 50;
-  top: calc(var(--disc) * var(--nest) - 3px);
-  left: 50%;
-  width: 90%;
-  height: 7px;
-  transform: translateX(-50%);
-  border: 1px solid rgba(190, 200, 225, 0.24);
-  border-radius: 999px;
-  background: linear-gradient(
-    180deg,
-    rgba(8, 10, 18, 0.98) 0%,
-    rgba(3, 5, 12, 1) 52%,
-    rgba(37, 43, 62, 0.96) 100%
-  );
-  box-shadow:
-    0 1px 5px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(255, 255, 255, 0.035),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  pointer-events: none;
-}
-
-/* A slightly more translucent, layered glass shell to match AudioSphere. */
-.pocket-shell {
-  border-color: rgba(181, 193, 255, 0.2);
-  background:
-    radial-gradient(ellipse 88% 30% at 50% 0%, rgba(129, 140, 248, 0.2), transparent 100%),
-    radial-gradient(ellipse 72% 42% at 100% 100%, rgba(34, 211, 238, 0.11), transparent 100%),
-    linear-gradient(
-      150deg,
-      rgba(36, 40, 65, 0.84) 0%,
-      rgba(20, 23, 40, 0.9) 56%,
-      rgba(9, 11, 21, 0.94) 100%
-    );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 -10px 28px rgba(0, 0, 0, 0.32),
-    0 28px 64px rgba(0, 0, 0, 0.48),
-    0 0 42px rgba(99, 102, 241, 0.08);
-  backdrop-filter: blur(32px) saturate(145%);
-  -webkit-backdrop-filter: blur(32px) saturate(145%);
-}
-
-.pocket-shell-gloss {
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.15), transparent 42%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.075), transparent 42%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 52%);
-}
-
-.pocket-vinyl-face {
-  border-color: rgba(221, 229, 255, 0.5);
-  box-shadow:
-    0 18px 48px rgba(0, 0, 0, 0.58),
-    0 0 32px rgba(129, 140, 248, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pocket-vinyl.is-spinning {
+  .vinyl-player__disc-rotation.is-spinning,
+  .vinyl-player__equalizer i {
     animation: none;
+  }
+
+  .vinyl-player__transport-btn,
+  .vinyl-player__play-btn,
+  .vinyl-player__utility-btn,
+  .vinyl-player__lyrics-btn {
+    transition: none;
   }
 }
