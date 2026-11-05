@@ -664,14 +664,11 @@ input[type=range]::-webkit-slider-thumb:hover {
    Everything below that seam is naturally hidden by the shell.
    ═══════════════════════════════════════════════════════════════ */
 
-.pocket-player {
-  --disc-visible: 50%;
-}
-
-/* Bring only the upper half of the record in front of the shell. */
+/* Keep the complete disc behind the shell. Since the shell starts
+   at the disc midpoint, only the upper half remains exposed. */
 .pocket-disc-stage {
-  z-index: 40;
-  clip-path: inset(0 0 calc(100% - var(--disc-visible)) 0);
+  z-index: 20;
+  clip-path: none;
 }
 
 /* Keep the glass body behind the clipped record. */
