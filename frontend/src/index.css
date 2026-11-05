@@ -142,7 +142,7 @@ input[type=range]::-webkit-slider-thumb:hover {
   min-height: 0;
   display: grid;
   place-items: center;
-  padding: 10px;
+  padding: 10px 34px 10px 10px;
   overflow: visible;
   isolation: isolate;
   position: relative;
@@ -679,6 +679,38 @@ input[type=range]::-webkit-slider-thumb:hover {
   width: 13cqw;
 }
 
+.vinyl-player__volume-rail {
+  position: absolute;
+  z-index: 6;
+  top: 50%;
+  right: 4px;
+  display: flex;
+  height: min(46%, 270px);
+  min-height: 150px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 8px;
+  transform: translateY(-50%);
+  flex-direction: column;
+  border: 1px solid rgba(171, 185, 255, .16);
+  border-radius: 999px;
+  background: rgba(10, 13, 26, .58);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter: blur(16px);
+}
+
+.vinyl-player__volume-range--vertical {
+  width: 8px;
+  height: 100% !important;
+  min-height: 90px;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  -webkit-appearance: slider-vertical !important;
+  appearance: slider-vertical !important;
+  cursor: pointer;
+}
+
 .vinyl-player__lyrics-btn {
   display: inline-flex;
   min-height: 5.6cqw;
@@ -715,11 +747,19 @@ input[type=range]::-webkit-slider-thumb:hover {
 
 @media (max-width: 540px) {
   .vinyl-player {
-    padding: 6px;
+    padding: 6px 30px 6px 6px;
   }
 
   .vinyl-player__scene {
     width: min(100%, calc(82dvh * .793));
+  }
+
+  .vinyl-player__volume-rail {
+    right: 0;
+    height: min(40%, 210px);
+    min-height: 130px;
+    gap: 8px;
+    padding: 8px 5px;
   }
 
   .vinyl-player__shell {
@@ -748,6 +788,11 @@ input[type=range]::-webkit-slider-thumb:hover {
 @media (max-height: 650px) {
   .vinyl-player__scene {
     width: min(100%, calc(72dvh * .793));
+  }
+
+  .vinyl-player__volume-rail {
+    height: min(36%, 180px);
+    min-height: 110px;
   }
 
   .vinyl-player__content {
