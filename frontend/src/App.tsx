@@ -195,7 +195,7 @@ export default function App() {
 
       {view === 'player' && (
         <>
-          {/* Desktop resizable layout */}
+          {/* Desktop resizable layout — player panel must allow disc to protrude (overflow visible) */}
           <div className="hidden xl:flex flex-1 min-h-0 w-full p-3 lg:p-4 xl:pt-3">
             <Group orientation="horizontal" className="flex w-full h-full gap-2">
               <Panel id="sidebar" defaultSize="22%" minSize="16%" maxSize="32%">
@@ -213,13 +213,15 @@ export default function App() {
               </Panel>
               <HSeparator />
 
-              <Panel id="center" minSize="30%" className="min-h-0 overflow-hidden">
-                <Group orientation="vertical" className="flex w-full h-full min-h-0 gap-2 overflow-hidden">
-                  <Panel id="player" defaultSize="65%" minSize="40%" maxSize="85%" className="min-h-0 overflow-hidden">
-                    <PlayerView player={player} onOpenInfo={() => setDrawerOpen(true)} className="h-full" />
+              <Panel id="center" minSize="30%" className="min-h-0 overflow-visible">
+                <Group orientation="vertical" className="flex w-full h-full min-h-0 gap-2 overflow-visible">
+                  <Panel id="player" defaultSize="68%" minSize="45%" maxSize="85%" className="min-h-0 overflow-visible">
+                    <div className="h-full min-h-0 w-full overflow-visible pt-2">
+                      <PlayerView player={player} onOpenInfo={() => setDrawerOpen(true)} className="h-full" />
+                    </div>
                   </Panel>
                   <VSeparator />
-                  <Panel id="queue" defaultSize="35%" minSize="15%" maxSize="60%" className="min-h-0 overflow-hidden">
+                  <Panel id="queue" defaultSize="32%" minSize="15%" maxSize="55%" className="min-h-0 overflow-hidden">
                     <PlayerView.Queue player={player} className="h-full" />
                   </Panel>
                 </Group>

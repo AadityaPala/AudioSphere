@@ -39,7 +39,6 @@ input[type=range]::-webkit-slider-thumb:hover {
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 10px; }
 
-/* react-resizable-panels handle sizing fallback */
 [data-panel-resize-handle-id] {
     position: relative;
 }
@@ -51,40 +50,25 @@ input[type=range]::-webkit-slider-thumb:hover {
 
 .-z-5 { z-index: -5; }
 
-/* ── RGB neon border for the currently playing track ── */
-
+/* ── RGB neon border ── */
 @keyframes rgb-rotate {
     to { --rgb-angle: 360deg; }
 }
-
 @property --rgb-angle {
     syntax: '<angle>';
     initial-value: 0deg;
     inherits: false;
 }
-
 .rgb-border {
     position: relative;
     isolation: isolate;
     overflow: hidden;
     box-sizing: border-box;
 }
-
 .rgb-border > * {
     position: relative;
     z-index: 2;
 }
-
-/*
- * Border-only technique using a masked pseudo-element.
- * The ::before fills the full element area with the animated conic-gradient,
- * then a CSS mask cuts out the centre, leaving only a thin ring visible.
- * The mask uses two layers: one clipped to content-box (the "hole"), one to
- * border-box (the "fill"). With mask-composite: exclude (standard) /
- * -webkit-mask-composite: xor (WebKit), the inner area is subtracted.
- * The card's own content sits above the glow, while the mask keeps both
- * gradients restricted to the inside perimeter.
- */
 .rgb-border::before {
     content: '';
     position: absolute;
@@ -100,21 +84,15 @@ input[type=range]::-webkit-slider-thumb:hover {
         var(--rgb-c5, #6366f1),
         var(--rgb-c1, #3b82f6)
     );
-    -webkit-mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
-    mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     mask-composite: exclude;
     animation: rgb-rotate var(--rgb-duration, 4s) linear infinite;
     animation-direction: var(--rgb-direction, normal);
     pointer-events: none;
     z-index: 3;
 }
-
-/* Outer neon glow — same ring shape but larger, blurred, behind the card */
 .rgb-border::after {
     content: '';
     position: absolute;
@@ -131,13 +109,9 @@ input[type=range]::-webkit-slider-thumb:hover {
         var(--rgb-c5, #6366f1),
         var(--rgb-c1, #3b82f6)
     );
-    -webkit-mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
-    mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     mask-composite: exclude;
     filter: blur(4px);
     opacity: 0.8;
@@ -146,35 +120,662 @@ input[type=range]::-webkit-slider-thumb:hover {
     pointer-events: none;
     z-index: 1;
 }
-
-/* When paused: stop the rotation, dim the glow, keep the border visible */
-.rgb-border.rgb-paused::before {
-    animation-play-state: paused;
-    opacity: 0.5;
+.rgb-border.rgb-paused::before { animation-play-state: paused; opacity: 0.5; }
+.rgb-border.rgb-paused::after { animation-play-state: paused; opacity: 0.15; }
+@media (prefers-reduced-motion: reduce) {
+    .rgb-border::before, .rgb-border::after { animation: none; }
 }
 
-.rgb-border.rgb-paused::after {
-    animation-play-state: paused;
-    opacity: 0.15;
+.rgb-border.player-rgb { overflow: visible; }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   AUDIO SPHERE — SLOT VINYL PLAYER
+   The complete record sits behind the shell. A synchronized
+   foreground copy is visible only up to the slot line. This lets
+   the shell genuinely cover the lower half of the record.
+   ═══════════════════════════════════════════════════════════════ */
+
+.vinyl-player {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  overflow: visible;
+  isolation: isolate;
+  position: relative;
+  container-type: size;
+}
+
+.vinyl-player,
+.vinyl-player * {
+  box-sizing: border-box;
+}
+
+.vinyl-player__scene {
+  position: relative;
+  width: min(100%, 578px, calc(100cqh * 0.793));
+  max-height: 100%;
+  aspect-ratio: 578 / 729;
+  flex-shrink: 1;
+  container-type: inline-size;
+  isolation: isolate;
+  overflow: visible;
+}
+
+/* The lower copy of the record is always behind the glass shell. */
+.vinyl-player__disc {
+  position: absolute;
+  top: 0;
+  left: 10.52%;
+  width: 78.95%;
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+
+.vinyl-player__disc--back {
+  z-index: 1;
+}
+
+.vinyl-player__disc--front {
+  z-index: 3;
+  /*
+   * The original scene is 578 × 729. The slot is at 30.7% of
+   * scene height; relative to the 78.95%-wide disc this is ~49.05%.
+   * Keep only that upper portion in front of the shell.
+   */
+  clip-path: inset(0 0 50.95% 0);
+}
+
+.vinyl-player__disc-rotation {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.vinyl-player__disc-rotation.is-spinning {
+  animation: vinyl-player-spin 12s linear infinite;
+}
+
+@keyframes vinyl-player-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.vinyl-player__disc-face {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: max(1px, .395cqw) solid rgba(226, 232, 255, .58);
+  border-radius: 50%;
+  background: #090b14;
+  box-shadow:
+    0 1.2cqw 3.2cqw rgba(0, 0, 0, .58),
+    0 0 2.8cqw rgba(129, 140, 248, .22),
+    inset 0 0 1.6cqw rgba(255, 255, 255, .12);
+}
+
+.vinyl-player__artwork,
+.vinyl-player__artwork-fallback {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.vinyl-player__artwork-fallback {
+  background:
+    radial-gradient(circle at 35% 28%, rgba(34, 211, 238, .5), transparent 30%),
+    radial-gradient(circle at 70% 75%, rgba(139, 92, 246, .5), transparent 38%),
+    linear-gradient(145deg, #252849, #080b15 68%);
+}
+
+.vinyl-player__grooves {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, .12) 0,
+    rgba(255, 255, 255, .035) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.vinyl-player__sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    conic-gradient(
+      from 20deg,
+      transparent 0deg,
+      rgba(255, 255, 255, .2) 48deg,
+      transparent 92deg,
+      rgba(34, 211, 238, .1) 155deg,
+      transparent 218deg,
+      rgba(167, 139, 250, .13) 285deg,
+      transparent 360deg
+    ),
+    linear-gradient(120deg, rgba(255, 255, 255, .12), transparent 38%);
+  pointer-events: none;
+}
+
+/* Minimal transparent spindle hub: artwork and artist remain unobstructed. */
+.vinyl-player__hub {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8.5%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(235, 244, 255, .62);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(7, 10, 19, .92) 0 17%, transparent 19%),
+    radial-gradient(circle, rgba(255, 255, 255, .48), rgba(176, 191, 216, .18) 48%, rgba(12, 17, 31, .55) 72%);
+  box-shadow:
+    0 0 .8cqw rgba(0, 0, 0, .55),
+    inset 0 0 .45cqw rgba(255, 255, 255, .42);
+  pointer-events: none;
+}
+
+.vinyl-player__hub-hole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 19%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #05070d;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .22);
+}
+
+/* The shell starts above the slot line and covers the lower disc copy. */
+.vinyl-player__shell-frame.rgb-border {
+  position: absolute;
+  z-index: 2;
+  inset: 20.3% 0 0;
+  width: auto;
+  height: auto;
+  border-radius: 20.75cqw;
+  overflow: visible;
+  isolation: isolate;
+  background: transparent;
+}
+
+.vinyl-player__shell-frame.rgb-border::before {
+  padding: max(1px, .35cqw);
+  border-radius: inherit;
+}
+
+.vinyl-player__shell-frame.rgb-border::after {
+  padding: .9cqw;
+  border-radius: inherit;
+  filter: blur(1.1cqw);
+  opacity: .42;
+}
+
+.vinyl-player__shell {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(171, 185, 255, .2);
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 88% 28% at 50% 0%, rgba(99, 102, 241, .19), transparent 100%),
+    radial-gradient(ellipse 70% 40% at 100% 100%, rgba(34, 211, 238, .09), transparent 100%),
+    linear-gradient(
+      155deg,
+      rgba(24, 28, 47, .985) 0%,
+      rgba(13, 16, 30, .99) 55%,
+      rgba(7, 9, 18, .995) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .12),
+    inset 0 -1.4cqw 3.8cqw rgba(0, 0, 0, .38),
+    0 3cqw 7cqw rgba(0, 0, 0, .48),
+    0 0 4.5cqw rgba(99, 102, 241, .09);
+  backdrop-filter: blur(28px) saturate(145%);
+  -webkit-backdrop-filter: blur(28px) saturate(145%);
+}
+
+.vinyl-player__shell-gloss {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, .13), transparent 40%),
+    linear-gradient(145deg, rgba(255, 255, 255, .065), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, .035), transparent 50%);
+  pointer-events: none;
+}
+
+/* The slot line is positioned on the same scene coordinate as the disc cut. */
+.vinyl-player__slot {
+  position: absolute;
+  z-index: 4;
+  top: 30.7%;
+  left: 6.58%;
+  width: 86.85%;
+  height: 1.46%;
+  min-height: 5px;
+  border: 1px solid rgba(204, 213, 235, .2);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #292d3a 0%, #080a11 52%, #34394a 100%);
+  box-shadow:
+    0 .25cqw .55cqw rgba(0, 0, 0, .75),
+    0 0 0 .18cqw rgba(255, 255, 255, .045),
+    inset 0 .18cqw .3cqw rgba(255, 255, 255, .18);
+  pointer-events: none;
+}
+
+.vinyl-player__content {
+  position: absolute;
+  top: 22.8%;
+  left: 10.26%;
+  bottom: 4.6%;
+  width: 79%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3cqw;
+  padding-bottom: 0;
+  color: #f1f5ff;
+  text-align: center;
+}
+
+.vinyl-player__track-info {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 4.1cqw;
+  flex-shrink: 0;
+}
+
+.vinyl-player__now {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.8cqw;
+  color: #9ba6bf;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 2.5cqw;
+  font-weight: 600;
+  letter-spacing: .34cqw;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.vinyl-player__equalizer {
+  display: flex;
+  height: 3.2cqw;
+  align-items: flex-end;
+  gap: .55cqw;
+}
+
+.vinyl-player__equalizer i {
+  display: block;
+  width: .55cqw;
+  min-width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #67e8f9, #22a7e2);
+  transform-origin: bottom;
+  animation: vinyl-player-eq .95s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+
+.vinyl-player__equalizer.is-active i {
+  animation-play-state: running;
+}
+
+.vinyl-player__equalizer i:nth-child(1) { height: 42%; animation-delay: -.2s; }
+.vinyl-player__equalizer i:nth-child(2) { height: 83%; animation-delay: -.55s; }
+.vinyl-player__equalizer i:nth-child(3) { height: 58%; animation-delay: -.8s; }
+.vinyl-player__equalizer i:nth-child(4) { height: 100%; animation-delay: -.35s; }
+.vinyl-player__equalizer i:nth-child(5) { height: 33%; animation-delay: -.7s; }
+
+@keyframes vinyl-player-eq {
+  from { transform: scaleY(.3); }
+  to { transform: scaleY(1); }
+}
+
+.vinyl-player__heading {
+  width: 100%;
+  min-width: 0;
+}
+
+.vinyl-player__title {
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  color: #f8faff;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(17px, 5.4cqw, 32px);
+  font-weight: 750;
+  letter-spacing: -.035em;
+  line-height: 1.08;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 .35cqw 1.2cqw rgba(0, 0, 0, .32);
+}
+
+.vinyl-player__artist {
+  max-width: 100%;
+  margin: 1.5cqw 0 0;
+  overflow: hidden;
+  color: #9ca8c1;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 2.65cqw;
+  font-weight: 450;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vinyl-player__progress {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 2cqw;
+  flex-shrink: 0;
+}
+
+.vinyl-player__time {
+  width: 7.5cqw;
+  flex-shrink: 0;
+  color: #8d98b1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 2.1cqw;
+  font-variant-numeric: tabular-nums;
+}
+
+.vinyl-player__time:last-child {
+  text-align: right;
+}
+
+.vinyl-player__seek,
+.vinyl-player__volume-range {
+  height: .9cqw !important;
+  min-height: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  outline: none;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.vinyl-player__seek {
+  width: 100%;
+  min-width: 0;
+}
+
+.vinyl-player__seek:disabled {
+  cursor: default;
+  opacity: .55;
+}
+
+.vinyl-player__seek::-webkit-slider-thumb,
+.vinyl-player__volume-range::-webkit-slider-thumb {
+  width: 1.9cqw;
+  height: 1.9cqw;
+  min-width: 8px;
+  min-height: 8px;
+  border: 1px solid rgba(255, 255, 255, .9);
+  border-radius: 50%;
+  background: #dff9ff;
+  box-shadow: 0 0 1.2cqw rgba(34, 211, 238, .65);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.vinyl-player__seek::-moz-range-thumb,
+.vinyl-player__volume-range::-moz-range-thumb {
+  width: 1.9cqw;
+  height: 1.9cqw;
+  min-width: 8px;
+  min-height: 8px;
+  border: 1px solid rgba(255, 255, 255, .9);
+  border-radius: 50%;
+  background: #dff9ff;
+  box-shadow: 0 0 1.2cqw rgba(34, 211, 238, .65);
+}
+
+.vinyl-player__transport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8cqw;
+  flex-shrink: 0;
+}
+
+.vinyl-player__transport-btn,
+.vinyl-player__utility-btn {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  color: #c4cde0;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    color .18s ease,
+    background .18s ease,
+    border-color .18s ease,
+    transform .18s ease;
+}
+
+.vinyl-player__transport-btn {
+  width: 6.2cqw;
+  height: 6.2cqw;
+}
+
+.vinyl-player__transport-btn:hover,
+.vinyl-player__utility-btn:hover:not(:disabled) {
+  color: #fff;
+  border-color: rgba(165, 180, 252, .2);
+  background: rgba(129, 140, 248, .13);
+}
+
+.vinyl-player__transport-btn:active,
+.vinyl-player__utility-btn:active {
+  transform: scale(.92);
+}
+
+.vinyl-player__transport-btn:disabled {
+  opacity: .3;
+  cursor: not-allowed;
+}
+
+.vinyl-player__play-btn {
+  display: grid;
+  width: 13.7cqw;
+  height: 13.7cqw;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid rgba(224, 231, 255, .46);
+  border-radius: 50%;
+  color: #fff;
+  background:
+    radial-gradient(circle at 34% 25%, rgba(255, 255, 255, .36), transparent 43%),
+    linear-gradient(145deg, rgba(34, 211, 238, .95), rgba(99, 102, 241, .96) 58%, rgba(139, 92, 246, .95));
+  box-shadow:
+    0 1.5cqw 3.8cqw rgba(79, 70, 229, .38),
+    0 0 3.5cqw rgba(34, 211, 238, .16),
+    inset 0 1px 2px rgba(255, 255, 255, .38),
+    inset 0 -1cqw 1.8cqw rgba(0, 0, 0, .2);
+  cursor: pointer;
+  transition: filter .18s ease, transform .18s ease;
+}
+
+.vinyl-player__play-btn:hover:not(:disabled) {
+  filter: brightness(1.12);
+  transform: scale(1.045);
+}
+
+.vinyl-player__play-btn:active:not(:disabled) {
+  transform: scale(.96);
+}
+
+.vinyl-player__play-btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.vinyl-player__utility {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2cqw;
+  flex-shrink: 0;
+}
+
+.vinyl-player__modes,
+.vinyl-player__volume {
+  display: flex;
+  align-items: center;
+  gap: 1cqw;
+}
+
+.vinyl-player__utility-btn {
+  width: 5.6cqw;
+  height: 5.6cqw;
+  color: #98a5c0;
+}
+
+.vinyl-player__utility-btn.is-active {
+  color: #a5f3fc;
+  border-color: rgba(34, 211, 238, .18);
+  background: rgba(34, 211, 238, .1);
+}
+
+.vinyl-player__utility-btn:disabled {
+  opacity: .32;
+  cursor: not-allowed;
+}
+
+.vinyl-player__volume-range {
+  width: 13cqw;
+}
+
+.vinyl-player__lyrics-btn {
+  display: inline-flex;
+  min-height: 5.6cqw;
+  align-items: center;
+  justify-content: center;
+  gap: 1cqw;
+  padding: 0 2cqw;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 999px;
+  color: #b9c4db;
+  background: rgba(255, 255, 255, .045);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 2cqw;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color .18s ease, background .18s ease, border-color .18s ease;
+}
+
+.vinyl-player__lyrics-btn:hover {
+  color: #fff;
+  border-color: rgba(129, 140, 248, .32);
+  background: rgba(129, 140, 248, .12);
+}
+
+.vinyl-player__transport-btn:focus-visible,
+.vinyl-player__play-btn:focus-visible,
+.vinyl-player__utility-btn:focus-visible,
+.vinyl-player__lyrics-btn:focus-visible,
+.vinyl-player__seek:focus-visible,
+.vinyl-player__volume-range:focus-visible {
+  outline: 2px solid #67e8f9;
+  outline-offset: 3px;
+}
+
+@media (max-width: 540px) {
+  .vinyl-player {
+    padding: 6px;
+  }
+
+  .vinyl-player__scene {
+    width: min(100%, calc(82dvh * .793));
+  }
+
+  .vinyl-player__shell {
+    background:
+      radial-gradient(ellipse 88% 28% at 50% 0%, rgba(99, 102, 241, .17), transparent 100%),
+      linear-gradient(155deg, rgba(24, 28, 47, .99), rgba(7, 9, 18, .995));
+  }
+
+  .vinyl-player__content {
+    top: 22%;
+    left: 8%;
+    width: 84%;
+    bottom: 4%;
+    gap: 2.4cqw;
+  }
+
+  .vinyl-player__track-info {
+    gap: 3cqw;
+  }
+
+  .vinyl-player__transport {
+    gap: 7cqw;
+  }
+}
+
+@media (max-height: 650px) {
+  .vinyl-player__scene {
+    width: min(100%, calc(72dvh * .793));
+  }
+
+  .vinyl-player__content {
+    top: 21%;
+    bottom: 3.5%;
+    gap: 2.2cqw;
+  }
+
+  .vinyl-player__track-info {
+    gap: 2.8cqw;
+  }
+
+  .vinyl-player__play-btn {
+    width: 12.5cqw;
+    height: 12.5cqw;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .rgb-border::before,
-    .rgb-border::after {
-        animation: none;
-    }
-}
+  .vinyl-player__disc-rotation.is-spinning,
+  .vinyl-player__equalizer i {
+    animation: none;
+  }
 
-/* ── Vertical volume slider ── */
-
-.vol-slider-vertical {
-    -webkit-appearance: slider-vertical;
-    writing-mode: bt-lr;
-    appearance: slider-vertical;
-    width: 4px;
-    height: 80px;
-    cursor: pointer;
-    accent-color: #6366f1;
-    border-radius: 8px;
-    background: linear-gradient(to top, rgba(99, 102, 241, 0.3), rgba(255, 255, 255, 0.1));
+  .vinyl-player__transport-btn,
+  .vinyl-player__play-btn,
+  .vinyl-player__utility-btn,
+  .vinyl-player__lyrics-btn {
+    transition: none;
+  }
 }
