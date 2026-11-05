@@ -4,11 +4,9 @@ import {
   SkipBack,
   SkipForward,
   Shuffle,
-  Repeat,
+  ListOrdered,
   Volume2,
-  VolumeX,
   Loader2,
-  Info,
 } from 'lucide-react';
 import { RgbBorder } from './RgbBorder';
 
@@ -207,40 +205,24 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
                   <button
                     onClick={toggleShuffle}
                     className={'vinyl-player__utility-btn' + (mode === 'shuffle' ? ' is-active' : '')}
-                    aria-label="Toggle shuffle"
+                    aria-label="Shuffle order"
                     aria-pressed={mode === 'shuffle'}
+                    title="Shuffle order"
                     type="button"
                   >
                     <Shuffle className="h-4 w-4" />
                   </button>
-                  <button
-                    className="vinyl-player__utility-btn"
-                    aria-label="Repeat"
-                    type="button"
-                    disabled
-                    title="Repeat is not available yet"
-                  >
-                    <Repeat className="h-4 w-4" />
-                  </button>
                 </div>
 
                 <button
-                  onClick={() => changeVolume(muted ? 80 : 0)}
-                  className="vinyl-player__utility-btn"
-                  aria-label={muted ? 'Unmute' : 'Mute'}
+                  onClick={() => { if (mode === 'shuffle') toggleShuffle(); }}
+                  className={'vinyl-player__utility-btn' + (mode !== 'shuffle' ? ' is-active' : '')}
+                  aria-label="Sequential order"
+                  aria-pressed={mode !== 'shuffle'}
+                  title="Play in original order"
                   type="button"
                 >
-                  {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                </button>
-
-                <button
-                  onClick={onOpenInfo}
-                  className="vinyl-player__lyrics-btn"
-                  title="Lyrics and recommendations"
-                  type="button"
-                >
-                  <Info className="h-3.5 w-3.5" />
-                  <span>Lyrics & Discover</span>
+                  <ListOrdered className="h-4 w-4" />
                 </button>
               </div>
             </div>
@@ -253,20 +235,22 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
         {/* The slot is a separate top layer, crossing both the disc and shell. */}
         <div className="vinyl-player__slot" aria-hidden="true" />
 
-        <div className="vinyl-player__volume-rail" aria-label="Volume controls">
-          <Volume2 className="h-4 w-4 text-slate-300" />
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={volume}
-            onChange={(event) => changeVolume(Number(event.target.value))}
-            className="vinyl-player__volume-range vinyl-player__volume-range--vertical"
-            style={{ background: volumeBackground }}
-            aria-label="Volume"
-          />
-          <span className="text-[10px] font-mono text-slate-400">{volume}</span>
-        </div>
+
+      </div>
+
+      <div className="vinyl-player__volume-rail" aria-label="Volume controls">
+        <Volume2 className="h-4 w-4 text-slate-300" />
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={volume}
+          onChange={(event) => changeVolume(Number(event.target.value))}
+          className="vinyl-player__volume-range vinyl-player__volume-range--vertical"
+          style={{ background: volumeBackground }}
+          aria-label="Volume"
+        />
+        <span className="text-[10px] font-mono text-slate-400">{volume}</span>
       </div>
     </div>
   );
