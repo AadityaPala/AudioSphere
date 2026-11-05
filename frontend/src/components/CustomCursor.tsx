@@ -65,16 +65,18 @@ export function CustomCursor() {
       if (isInput) {
         arrow.style.opacity = '0';
         glow.style.opacity = '0';
-        document.documentElement.style.cursor = 'auto';
-        document.body.style.cursor = '';
+        document.documentElement.style.setProperty('cursor', 'auto', 'important');
+        document.body.style.setProperty('cursor', 'auto', 'important');
       } else {
         arrow.style.opacity = '1';
         glow.style.opacity = isInteractive ? '0.5' : '0.25';
         arrow.style.filter = isInteractive
           ? 'drop-shadow(0 0 8px rgba(34,211,238,0.8)) drop-shadow(0 0 3px rgba(168,85,247,0.5))'
           : 'drop-shadow(0 0 4px rgba(59,130,246,0.5))';
-        document.documentElement.style.cursor = 'none';
-        document.body.style.cursor = isInteractive ? 'pointer' : 'none';
+        // Keep the native cursor hidden even when browser styles set cursor:pointer
+        // on links/buttons. The custom arrow itself provides the interactive feedback.
+        document.documentElement.style.setProperty('cursor', 'none', 'important');
+        document.body.style.setProperty('cursor', 'none', 'important');
       }
       hovering = isInteractive && !isInput;
     };
@@ -86,7 +88,7 @@ export function CustomCursor() {
       visible = false;
       arrow.style.opacity = '0';
       glow.style.opacity = '0';
-      document.body.style.cursor = '';
+      document.body.style.setProperty('cursor', 'none', 'important');
     };
 
     const onEnter = () => {
@@ -102,7 +104,8 @@ export function CustomCursor() {
     document.addEventListener('pointerleave', onLeave);
     document.addEventListener('pointerenter', onEnter);
 
-    document.documentElement.style.cursor = 'none';
+    document.documentElement.style.setProperty('cursor', 'none', 'important');
+    document.body.style.setProperty('cursor', 'none', 'important');
 
     return () => {
       cancelAnimationFrame(raf);
@@ -112,8 +115,8 @@ export function CustomCursor() {
       window.removeEventListener('pointercancel', onUp);
       document.removeEventListener('pointerleave', onLeave);
       document.removeEventListener('pointerenter', onEnter);
-      document.documentElement.style.cursor = '';
-      document.body.style.cursor = '';
+      document.documentElement.style.removeProperty('cursor');
+      document.body.style.removeProperty('cursor');
     };
   }, []);
 
