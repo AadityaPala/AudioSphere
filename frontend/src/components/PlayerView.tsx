@@ -89,7 +89,6 @@ export function PlayerView({ player, className = '' }: PlayerViewProps) {
   const year = enriched?.releaseYear || '';
   const artwork = enriched?.albumArtUrl || meta.artwork;
   const hasTrack = !!track;
-  const muted = volume === 0;
   const safeDuration = Number.isFinite(duration) ? Math.max(0, duration) : 0;
   const safeCurrentTime = Number.isFinite(currentTime)
     ? Math.max(0, Math.min(currentTime, safeDuration || currentTime))
