@@ -51,10 +51,8 @@ function DiscLayer({ artwork, title, isPlaying, layer }: DiscLayerProps) {
           )}
           <div className="vinyl-player__grooves" />
           <div className="vinyl-player__sheen" />
-          <div className="vinyl-player__label">
-            <span className="vinyl-player__label-ring" />
-            <span className="vinyl-player__label-core" />
-            <span className="vinyl-player__label-hole" />
+          <div className="vinyl-player__hub">
+            <span className="vinyl-player__hub-hole" />
           </div>
         </div>
       </div>
