@@ -62,7 +62,7 @@ const formatTime = (value: number) => {
   return Math.floor(safe / 60) + ':' + String(safe % 60).padStart(2, '0');
 };
 
-export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewProps) {
+export function PlayerView({ player, className = '' }: PlayerViewProps) {
   const {
     queue,
     currentIndex,
