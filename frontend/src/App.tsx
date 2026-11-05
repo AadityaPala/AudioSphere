@@ -35,14 +35,6 @@ function HSeparator() {
   );
 }
 
-function VSeparator() {
-  return (
-    <Separator className="group flex items-center justify-center h-1.5 my-0.5 transition-all duration-300">
-      <div className="h-1 w-10 rounded-full bg-white/10 group-hover:bg-indigo-400/70 transition-all duration-300" />
-    </Separator>
-  );
-}
-
 export default function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('st-access-token'));
   const [songs, setSongs] = useState<Song[]>([]);
@@ -200,7 +192,8 @@ export default function App() {
             <Group orientation="horizontal" className="flex w-full h-full gap-2">
               <Panel id="sidebar" defaultSize="22%" minSize="16%" maxSize="32%">
                 <Sidebar
-                  songs={songs}
+                  songs={player.queue}
+                  queueMode={player.mode}
                   handleAdd={handleAdd}
                   handleRemove={handleRemove}
                   handlePlay={handlePlayTrack}
@@ -214,17 +207,9 @@ export default function App() {
               <HSeparator />
 
               <Panel id="center" minSize="30%" className="min-h-0 overflow-visible">
-                <Group orientation="vertical" className="flex w-full h-full min-h-0 gap-2 overflow-visible">
-                  <Panel id="player" defaultSize="68%" minSize="45%" maxSize="85%" className="min-h-0 overflow-visible">
-                    <div className="h-full min-h-0 w-full overflow-visible pt-2">
-                      <PlayerView player={player} onOpenInfo={() => setDrawerOpen(true)} className="h-full" />
-                    </div>
-                  </Panel>
-                  <VSeparator />
-                  <Panel id="queue" defaultSize="32%" minSize="15%" maxSize="55%" className="min-h-0 overflow-hidden">
-                    <PlayerView.Queue player={player} className="h-full" />
-                  </Panel>
-                </Group>
+                <div className="h-full min-h-0 w-full overflow-visible">
+                  <PlayerView player={player} onOpenInfo={() => setDrawerOpen(true)} className="h-full" />
+                </div>
               </Panel>
 
               <HSeparator />
@@ -237,7 +222,8 @@ export default function App() {
           {/* Mobile / tablet layout: stacked flex, drawer for info */}
           <div className="xl:hidden flex flex-1 min-h-0 w-full gap-3 p-3 xl:pt-3">
             <Sidebar
-              songs={songs}
+              songs={player.queue}
+              queueMode={player.mode}
               handleAdd={handleAdd}
               handleRemove={handleRemove}
               handlePlay={handlePlayTrack}
