@@ -9,10 +9,8 @@ import {
   VolumeX,
   Loader2,
   Info,
-  ListMusic,
 } from 'lucide-react';
 import { RgbBorder } from './RgbBorder';
-import { useScrollRestore } from '../hooks/useScrollRestore';
 
 interface PlayerViewProps {
   player: any;
@@ -226,26 +224,14 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
                   </button>
                 </div>
 
-                <div className="vinyl-player__volume">
-                  <button
-                    onClick={() => changeVolume(muted ? 80 : 0)}
-                    className="vinyl-player__utility-btn"
-                    aria-label={muted ? 'Unmute' : 'Mute'}
-                    type="button"
-                  >
-                    {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                  </button>
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    value={volume}
-                    onChange={(event) => changeVolume(Number(event.target.value))}
-                    className="vinyl-player__volume-range"
-                    style={{ background: volumeBackground }}
-                    aria-label="Volume"
-                  />
-                </div>
+                <button
+                  onClick={() => changeVolume(muted ? 80 : 0)}
+                  className="vinyl-player__utility-btn"
+                  aria-label={muted ? 'Unmute' : 'Mute'}
+                  type="button"
+                >
+                  {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                </button>
 
                 <button
                   onClick={onOpenInfo}
@@ -266,31 +252,23 @@ export function PlayerView({ player, onOpenInfo, className = '' }: PlayerViewPro
 
         {/* The slot is a separate top layer, crossing both the disc and shell. */}
         <div className="vinyl-player__slot" aria-hidden="true" />
+
+        <div className="vinyl-player__volume-rail" aria-label="Volume controls">
+          <Volume2 className="h-4 w-4 text-slate-300" />
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={volume}
+            onChange={(event) => changeVolume(Number(event.target.value))}
+            className="vinyl-player__volume-range vinyl-player__volume-range--vertical"
+            style={{ background: volumeBackground }}
+            aria-label="Volume"
+          />
+          <span className="text-[10px] font-mono text-slate-400">{volume}</span>
+        </div>
       </div>
     </div>
   );
 }
 
-interface QueueProps { player: any; className?: string; }
-PlayerView.Queue = function Queue({ player, className = '' }: QueueProps) {
-  const { queue, currentIndex, mode, playSong, isPlaying, isBuffering } = player;
-  const scrollRef = useScrollRestore('queue', queue.length > 0);
-  return (
-    <section className={`flex min-h-0 flex-col overflow-hidden rounded-3xl border border-white/[0.12] bg-white/[0.04] p-4 shadow-2xl backdrop-blur-xl ${className}`}>
-      <h3 className="mb-2.5 flex shrink-0 items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-        <ListMusic className="h-3.5 w-3.5" />{mode === 'shuffle' ? 'Shuffled Queue' : 'Current Queue'}
-      </h3>
-      <ul ref={scrollRef as React.RefObject<HTMLUListElement>} className="custom-scrollbar min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
-        {queue.length === 0 && <li className="py-8 text-center text-[11px] text-slate-500">Queue is empty.</li>}
-        {queue.map((song: any, index: number) => {
-          const current = currentIndex === index;
-          const row = <div className={`flex cursor-pointer items-center gap-3 rounded-2xl border p-2.5 transition ${current ? 'border-transparent bg-indigo-500/20 text-indigo-100' : 'border-white/5 bg-white/5 text-slate-300 hover:border-white/15 hover:bg-white/10'}`}>
-            <span className="w-4 shrink-0 font-mono text-[11px] text-slate-500">{index + 1}</span>
-            <span className="min-w-0 truncate text-[11px] font-medium">{song.title}</span>
-          </div>;
-          return <li key={song.url || index} onClick={() => playSong(index)} className="list-none">{current ? <RgbBorder trackId={song.url} isPlaying={isPlaying} isBuffering={isBuffering} className="rounded-2xl">{row}</RgbBorder> : row}</li>;
-        })}
-      </ul>
-    </section>
-  );
-};
