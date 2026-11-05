@@ -136,10 +136,11 @@ export function usePlayer(initialSongs: Song[]) {
         playSong(0);
       }
     } else {
+      const currentUrl = queueRef.current[indexRef.current]?.url;
       setMode('sequential');
       setQueue(songs);
       queueRef.current = songs;
-      const originalIndex = songs.findIndex(s => s.url === queueRef.current[indexRef.current]?.url);
+      const originalIndex = songs.findIndex((song) => song.url === currentUrl);
       const safeIdx = originalIndex !== -1 ? originalIndex : 0;
       setCurrentIndex(safeIdx);
       indexRef.current = safeIdx;
