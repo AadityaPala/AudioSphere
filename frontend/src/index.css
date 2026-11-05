@@ -146,6 +146,7 @@ input[type=range]::-webkit-slider-thumb:hover {
   overflow: visible;
   isolation: isolate;
   position: relative;
+  container-type: size;
 }
 
 .vinyl-player,
@@ -155,9 +156,10 @@ input[type=range]::-webkit-slider-thumb:hover {
 
 .vinyl-player__scene {
   position: relative;
-  width: min(100%, 578px, calc(82dvh * 0.793));
+  width: min(100%, 578px, calc(100cqh * 0.793));
+  max-height: 100%;
   aspect-ratio: 578 / 729;
-  flex-shrink: 0;
+  flex-shrink: 1;
   container-type: inline-size;
   isolation: isolate;
   overflow: visible;
@@ -270,62 +272,35 @@ input[type=range]::-webkit-slider-thumb:hover {
   pointer-events: none;
 }
 
-.vinyl-player__label {
+/* Minimal transparent spindle hub: artwork and artist remain unobstructed. */
+.vinyl-player__hub {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 29.33%;
+  width: 8.5%;
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
-  border: 1px solid rgba(255, 255, 255, .46);
+  border: 1px solid rgba(235, 244, 255, .62);
   border-radius: 50%;
   background:
-    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, .7), transparent 24%),
-    linear-gradient(145deg, #d8deee, #737e99 60%, #343b52);
+    radial-gradient(circle, rgba(7, 10, 19, .92) 0 17%, transparent 19%),
+    radial-gradient(circle, rgba(255, 255, 255, .48), rgba(176, 191, 216, .18) 48%, rgba(12, 17, 31, .55) 72%);
   box-shadow:
-    0 .5cqw 1.5cqw rgba(0, 0, 0, .42),
-    inset 0 1px .7cqw rgba(255, 255, 255, .55);
-}
-
-.vinyl-player__label-ring {
-  position: absolute;
-  inset: -5%;
-  border: .7cqw solid transparent;
-  border-radius: 50%;
-  background: conic-gradient(
-    #22d3ee,
-    #818cf8,
-    #d946ef,
-    #fbbf24,
-    #34d399,
-    #22d3ee
-  ) border-box;
-  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
+    0 0 .8cqw rgba(0, 0, 0, .55),
+    inset 0 0 .45cqw rgba(255, 255, 255, .42);
   pointer-events: none;
 }
 
-.vinyl-player__label-core {
-  position: absolute;
-  inset: 18%;
-  border: 1px solid rgba(255, 255, 255, .56);
-  border-radius: 50%;
-  background: linear-gradient(145deg, #f8fafc, #a8b1c6);
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, .65);
-}
-
-.vinyl-player__label-hole {
+.vinyl-player__hub-hole {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 12.67%;
+  width: 19%;
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
-  border: 1px solid rgba(0, 0, 0, .38);
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #343b4e, #070910 72%);
-  box-shadow: 0 0 0 .35cqw rgba(255, 255, 255, .18);
+  background: #05070d;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .22);
 }
 
 /* The shell starts above the slot line and covers the lower disc copy. */
