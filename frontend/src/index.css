@@ -679,11 +679,11 @@ input[type=range]::-webkit-slider-thumb:hover {
   width: 13cqw;
 }
 
-.vinyl-player__volume-rail {
+ .vinyl-player__volume-rail {
   position: absolute;
   z-index: 6;
   top: 50%;
-  right: 4px;
+  right: 5px;
   display: flex;
   height: min(46%, 270px);
   min-height: 150px;
@@ -755,7 +755,7 @@ input[type=range]::-webkit-slider-thumb:hover {
   }
 
   .vinyl-player__volume-rail {
-    right: 0;
+    right: 2px;
     height: min(40%, 210px);
     min-height: 130px;
     gap: 8px;
