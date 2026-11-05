@@ -8,6 +8,7 @@ import { useScrollRestore } from '../hooks/useScrollRestore';
 
 interface SidebarProps {
   songs: Song[];
+  queueMode?: 'sequential' | 'shuffle';
   handleAdd: (url: string) => Promise<void>;
   handleRemove: (url: string) => void;
   handlePlay: (url: string) => void;
@@ -18,7 +19,7 @@ interface SidebarProps {
   className?: string;
 }
 
-export function Sidebar({ songs, handleAdd, handleRemove, handlePlay, loading, displayName = null, currentTrackUrl = null, isPlaying = false, className = '' }: SidebarProps) {
+export function Sidebar({ songs, queueMode = 'sequential', handleAdd, handleRemove, handlePlay, loading, displayName = null, currentTrackUrl = null, isPlaying = false, className = '' }: SidebarProps) {
   const [inputUrl, setInputUrl] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const scrollRef = useScrollRestore('library', songs.length >= 0);
@@ -67,7 +68,7 @@ export function Sidebar({ songs, handleAdd, handleRemove, handlePlay, loading, d
         {/* Section label */}
         <div className="flex items-center gap-2 mt-4 mb-3">
           <Library className="w-3.5 h-3.5 text-indigo-300" />
-          <h3 className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase whitespace-nowrap">Your Library</h3>
+          <h3 className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase whitespace-nowrap">{queueMode === 'shuffle' ? 'Shuffled Songs' : 'Your Library'}</h3>
         </div>
 
         {/* Add song form */}
@@ -94,7 +95,7 @@ export function Sidebar({ songs, handleAdd, handleRemove, handlePlay, loading, d
           className="flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar"
         >
           {songs.length === 0 && (
-            <li className="text-[11px] text-slate-500 text-center py-8">Your library is empty. Add a link above.</li>
+            <li className="text-[11px] text-slate-500 text-center py-8">No songs yet. Add a YouTube link above.</li>
           )}
           {songs.map((song, i) => {
             const isCurrent = currentTrackUrl === song.url;
