@@ -660,8 +660,8 @@ input[type=range]::-webkit-slider-thumb:hover {
 
 /* ═══════════════════════════════════════════════════════════════
    VINYL PLAYER LAYERING + DARK GLASS FINISH
-   The record sits above the shell only until the slot seam.
-   Everything below that seam is naturally hidden by the shell.
+   The record sits behind the shell. Its upper half protrudes above
+   the shell's top edge, while the lower half is covered by the glass body.
    ═══════════════════════════════════════════════════════════════ */
 
 /* Keep the complete disc behind the shell. Since the shell starts
@@ -671,7 +671,7 @@ input[type=range]::-webkit-slider-thumb:hover {
   clip-path: none;
 }
 
-/* Keep the glass body behind the clipped record. */
+/* Keep the glass body in front of the lower portion of the record. */
 .pocket-shell-frame.rgb-border {
   z-index: 30;
 }
