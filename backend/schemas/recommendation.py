@@ -15,6 +15,7 @@ class RecommendationRequest(BaseModel):
         max_length=100
     )
     limit: int = Field(default=12, ge=1, le=30)
+    preferredGenre: str | None = None
 
 
 class RecommendationResponse(BaseModel):
