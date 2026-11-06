@@ -31,7 +31,14 @@ export interface Recommendation {
   id: string;
   title: string;
   artist: string;
-  artwork: string;
+  artwork: string | null;
+  genre: string | null;
+  releaseYear: string | null;
+  previewUrl: string | null;
+  trackViewUrl: string | null;
+  youtubeSearchUrl: string;
+  score: number;
+  reason: string;
 }
 
 export interface MockArtist {

@@ -13,17 +13,12 @@ import { CustomCursor } from './components/CustomCursor';
 import { ProfileDropdown } from './components/ProfileDropdown';
 import { usePlayer } from './hooks/usePlayer';
 import { useOnboarding } from './hooks/useOnboarding';
-import { CAS_URL, fetchPlaylists, addSong, removeSong } from './services/api';
+import { CAS_URL, fetchPlaylists, addSong, removeSong, fetchRecommendations } from './services/api';
 import type { Song, Recommendation } from './types';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-const MOCK_RECOMMENDATIONS: Recommendation[] = [
-  { id: '1', title: 'As It Was', artist: 'Harry Styles', artwork: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80' },
-  { id: '2', title: 'Blinding Lights', artist: 'The Weeknd', artwork: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80' },
-  { id: '3', title: 'Levitating', artist: 'Dua Lipa', artwork: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80' },
-  { id: '4', title: 'Starboy', artist: 'The Weeknd ft. Daft Punk', artwork: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80' },
-];
+
 
 type View = 'home' | 'player';
 
@@ -38,6 +33,8 @@ function HSeparator() {
 export default function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('st-access-token'));
   const [songs, setSongs] = useState<Song[]>([]);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
@@ -78,6 +75,17 @@ export default function App() {
     try {
       const data = await fetchPlaylists();
       setSongs(data);
+
+      setRecommendationsLoading(true);
+      try {
+        const results = await fetchRecommendations(12);
+        setRecommendations(results);
+      } catch (recommendationError) {
+        console.error('Failed to load recommendations:', recommendationError);
+        setRecommendations([]);
+      } finally {
+        setRecommendationsLoading(false);
+      }
     } catch (error) {
       console.error(error);
       doSignOut();
@@ -92,6 +100,8 @@ export default function App() {
     localStorage.removeItem('st-access-token');
     setToken(null);
     setSongs([]);
+    setRecommendations([]);
+    setRecommendationsLoading(false);
     setView('player');
   };
 
@@ -214,7 +224,7 @@ export default function App() {
 
               <HSeparator />
               <Panel id="info" defaultSize="24%" minSize="16%" maxSize="36%">
-                <InfoPanel player={player} recommendations={MOCK_RECOMMENDATIONS} className="h-full" />
+                <InfoPanel player={player} recommendations={recommendations} recommendationsLoading={recommendationsLoading} className="h-full" />
               </Panel>
             </Group>
           </div>
@@ -241,7 +251,7 @@ export default function App() {
           >
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
             <div className={`absolute top-0 right-0 h-full w-full max-w-md p-3 transition-transform duration-300 ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-              <InfoPanel player={player} recommendations={MOCK_RECOMMENDATIONS} onClose={() => setDrawerOpen(false)} />
+              <InfoPanel player={player} recommendations={recommendations} recommendationsLoading={recommendationsLoading} onClose={() => setDrawerOpen(false)} />
             </div>
           </div>
         </>

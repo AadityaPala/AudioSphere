@@ -1,4 +1,4 @@
-import type { EnrichedMetadata } from '../types';
+import type { EnrichedMetadata, Recommendation } from '../types';
 
 export const CAS_URL = import.meta.env.VITE_CAS_URL;
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
@@ -110,6 +110,22 @@ export async function fetchEnrichedMetadata(
     }
 }
 
+export async function fetchRecommendations(limit: number = 12): Promise<Recommendation[]> {
+    const response = await fetch(
+        `${BACKEND_URL}/recommendations?limit=${encodeURIComponent(limit)}`,
+        { method: 'GET', headers: getAuthHeaders() }
+    );
+
+    if (!response.ok) {
+        const errorBody = await response.text();
+        console.error('[AudioSphere] Recommendation API error:', response.status, errorBody);
+        throw new Error(`Failed to fetch recommendations (HTTP ${response.status}).`);
+    }
+
+    const data: Recommendation[] = await response.json();
+    return Array.isArray(data) ? data : [];
+}
+
 export const fetchPlaylists = async () => {
   const token = localStorage.getItem('st-access-token');
 
@@ -167,6 +183,7 @@ export async function addSong(url: string): Promise<void> {
         body: JSON.stringify({
             url,
             title,
+            artist,
             albumArtUrl: enriched?.albumArtUrl || trackMetadata.artwork,
             genre: enriched?.genre || '',
             releaseYear: enriched?.releaseYear || '',

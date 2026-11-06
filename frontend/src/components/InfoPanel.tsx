@@ -6,11 +6,12 @@ import { useScrollRestore } from '../hooks/useScrollRestore';
 interface InfoPanelProps {
   player: any;
   recommendations: Recommendation[];
+  recommendationsLoading?: boolean;
   className?: string;
   onClose?: () => void;
 }
 
-export function InfoPanel({ player, recommendations, className = '', onClose }: InfoPanelProps) {
+export function InfoPanel({ player, recommendations, recommendationsLoading = false, className = '', onClose }: InfoPanelProps) {
   const { meta, enriched, enriching, currentIndex, queue, isPlaying, isBuffering } = player;
   const hasTrack = currentIndex !== -1 && queue[currentIndex];
   const currentUrl = hasTrack ? queue[currentIndex].url : '';
@@ -106,29 +107,67 @@ export function InfoPanel({ player, recommendations, className = '', onClose }: 
           <h3 className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase mb-3 whitespace-nowrap">
             <Sparkles className="w-3.5 h-3.5" /> Recommended
           </h3>
-          <ul className="space-y-2">
-            {recommendations.map((rec) => (
-              <li
-                key={rec.id}
-                className="group flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/10 hover:border-white/15 transition-all duration-300 cursor-pointer"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <img
-                    src={rec.artwork}
-                    alt={rec.title}
-                    className="w-10 h-10 rounded-xl object-cover shadow-md group-hover:scale-105 transition-transform duration-300 shrink-0"
-                  />
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-200 truncate whitespace-nowrap group-hover:text-indigo-300 transition-colors duration-300">{rec.title}</p>
-                    <p className="text-[10px] text-slate-400 truncate whitespace-nowrap">{rec.artist}</p>
+
+          {recommendationsLoading ? (
+            <div className="flex flex-col items-center justify-center py-8 text-slate-400">
+              <Loader2 className="w-5 h-5 animate-spin mb-2 text-indigo-300" />
+              <p className="text-xs">Finding music for you...</p>
+            </div>
+          ) : recommendations.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center text-slate-500">
+              <Music2 className="w-7 h-7 mb-2 opacity-50" />
+              <p className="text-xs">Add some tracks to your library to discover new music.</p>
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {recommendations.map((rec) => (
+                <li
+                  key={rec.id}
+                  className="group flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/10 hover:border-white/15 transition-all duration-300"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    {rec.artwork ? (
+                      <img
+                        src={rec.artwork}
+                        alt={rec.title}
+                        className="w-10 h-10 rounded-xl object-cover shadow-md group-hover:scale-105 transition-transform duration-300 shrink-0"
+                        onError={(event) => {
+                          event.currentTarget.style.visibility = 'hidden';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-xl bg-white/10 grid place-items-center shrink-0">
+                        <Music2 className="w-4 h-4 text-slate-400" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-200 truncate whitespace-nowrap group-hover:text-indigo-300 transition-colors duration-300">
+                        {rec.title}
+                      </p>
+                      <p className="text-[10px] text-slate-400 truncate whitespace-nowrap">
+                        {rec.artist}
+                      </p>
+                      <p className="text-[9px] text-indigo-300/80 truncate mt-0.5">
+                        {rec.reason}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <button className="shrink-0 grid place-items-center w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-300 opacity-0 group-hover:opacity-100 hover:bg-indigo-500 hover:text-white transition-all duration-300">
-                  <Play className="w-3 h-3 fill-current" />
-                </button>
-              </li>
-            ))}
-          </ul>
+                  <button
+                    type="button"
+                    title="Find on YouTube"
+                    onClick={() => {
+                      if (rec.youtubeSearchUrl) {
+                        window.open(rec.youtubeSearchUrl, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
+                    className="shrink-0 grid place-items-center w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-300 opacity-0 group-hover:opacity-100 hover:bg-indigo-500 hover:text-white transition-all duration-300"
+                  >
+                    <Play className="w-3 h-3 fill-current" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       </div>
     </aside>
