@@ -43,13 +43,54 @@ export async function fetchTrackMetadata(title: string): Promise<{ artist: strin
     };
 }
 
-export async function fetchEnrichedMetadata(artist: string, title: string): Promise<EnrichedMetadata | null> {
+export async function fetchEnrichedMetadata(
+    artist: string,
+    title: string
+): Promise<EnrichedMetadata | null> {
+
+    if (!PYTHON_URL) {
+        console.error('[AudioSphere] VITE_PYTHON_URL is not configured.');
+        return null;
+    }
+
     try {
-        const url = `${PYTHON_URL}/metadata/enrich?artist=${encodeURIComponent(artist)}&title=${encodeURIComponent(title)}`;
-        const res = await fetch(url, { headers: getAuthHeaders() });
-        if (!res.ok) return null;
+        const url =
+            `${PYTHON_URL}/metadata/enrich?artist=${encodeURIComponent(artist)}&title=${encodeURIComponent(title)}`;
+
+        const res = await fetch(url, {
+            headers: getAuthHeaders()
+        });
+
+        if (!res.ok) {
+            const errorBody = await res.text();
+
+            console.error(
+                '[AudioSphere] Python metadata error:',
+                res.status,
+                errorBody
+            );
+
+            return null;
+        }
+
         const data = await res.json();
-        if (!data || !(data.lyrics || data.genre || data.releaseYear || data.albumArtUrl)) return null;
+
+        if (!data || !(
+            data.lyrics ||
+            data.genre ||
+            data.releaseYear ||
+            data.albumArtUrl
+        )) {
+            console.warn(
+                '[AudioSphere] No enriched metadata returned:',
+                artist,
+                title,
+                data
+            );
+
+            return null;
+        }
+
         return {
             artist: data.artist || artist,
             title: data.title || title,
@@ -58,7 +99,13 @@ export async function fetchEnrichedMetadata(artist: string, title: string): Prom
             releaseYear: data.releaseYear || '',
             lyrics: data.lyrics || '',
         };
-    } catch {
+
+    } catch (error) {
+        console.error(
+            '[AudioSphere] Failed to fetch enriched metadata:',
+            error
+        );
+
         return null;
     }
 }
