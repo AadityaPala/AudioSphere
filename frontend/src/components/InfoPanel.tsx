@@ -1,4 +1,4 @@
-import { Sparkles, Play, X, Music2, Loader2, Mic2, Disc3, Calendar } from 'lucide-react';
+import { Sparkles, Play, X, Music2, Loader2, Mic2, Disc3, Calendar, RefreshCw } from 'lucide-react';
 import type { Recommendation } from '../types';
 import { RgbBorder } from './RgbBorder';
 import { useScrollRestore } from '../hooks/useScrollRestore';
@@ -7,11 +7,12 @@ interface InfoPanelProps {
   player: any;
   recommendations: Recommendation[];
   recommendationsLoading?: boolean;
+  onRefreshRecommendations?: () => void;
   className?: string;
   onClose?: () => void;
 }
 
-export function InfoPanel({ player, recommendations, recommendationsLoading = false, className = '', onClose }: InfoPanelProps) {
+export function InfoPanel({ player, recommendations, recommendationsLoading = false, onRefreshRecommendations, className = '', onClose }: InfoPanelProps) {
   const { meta, enriched, enriching, currentIndex, queue, isPlaying, isBuffering } = player;
   const hasTrack = currentIndex !== -1 && queue[currentIndex];
   const currentUrl = hasTrack ? queue[currentIndex].url : '';
@@ -104,9 +105,22 @@ export function InfoPanel({ player, recommendations, recommendationsLoading = fa
 
         {/* Recommendations */}
         <section>
-          <h3 className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase mb-3 whitespace-nowrap">
-            <Sparkles className="w-3.5 h-3.5" /> Recommended
-          </h3>
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <h3 className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase whitespace-nowrap">
+              <Sparkles className="w-3.5 h-3.5" /> Recommended
+            </h3>
+            <button
+              type="button"
+              onClick={onRefreshRecommendations}
+              disabled={recommendationsLoading || !onRefreshRecommendations}
+              title="Refresh recommendations"
+              aria-label="Refresh recommendations"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.05] border border-white/10 text-slate-300 hover:text-white hover:bg-indigo-500/20 hover:border-indigo-400/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-[10px] font-medium shrink-0"
+            >
+              <RefreshCw className={`w-3 h-3 ${recommendationsLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
 
           {recommendationsLoading ? (
             <div className="flex flex-col items-center justify-center py-8 text-slate-400">
