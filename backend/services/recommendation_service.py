@@ -101,8 +101,8 @@ async def generate_recommendations(
     if preferred_genre:
         search_terms.append(f"{preferred_genre} music")
 
-    # Search the three most frequent genres.
-    for genre, _ in genre_counts.most_common(3):
+    # Use library genres only when there is no active listening genre.
+    for genre, _ in (genre_counts.most_common(3) if not preferred_genre else []):
 
         original_genre = next(
             seed.genre
@@ -113,8 +113,8 @@ async def generate_recommendations(
 
         search_terms.append(f"{original_genre} music")
 
-    # Search the two most frequent artists.
-    for artist, _ in artist_counts.most_common(2):
+    # Use library artists only when there is no active listening genre.
+    for artist, _ in (artist_counts.most_common(2) if not preferred_genre else []):
 
         original_artist = next(
             seed.artist
