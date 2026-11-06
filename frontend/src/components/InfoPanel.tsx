@@ -47,6 +47,13 @@ export function InfoPanel({ player, recommendations, recommendationsLoading = fa
     <aside
       className={`flex flex-col w-full xl:w-full shrink-0 h-full bg-white/[0.03] backdrop-blur-xl border border-white/[0.1] rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 ${className}`}
     >
+      <audio
+        ref={previewAudioRef}
+        onEnded={() => setPlayingRecommendationId(null)}
+        onPause={() => setPlayingRecommendationId(null)}
+        className="hidden"
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between gap-2 p-4 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-2 min-w-0">
