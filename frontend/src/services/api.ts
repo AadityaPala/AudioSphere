@@ -110,9 +110,9 @@ export async function fetchEnrichedMetadata(
     }
 }
 
-export async function fetchRecommendations(limit: number = 12): Promise<Recommendation[]> {
+export async function fetchRecommendations(limit: number = 12, preferredGenre?: string): Promise<Recommendation[]> {
     const response = await fetch(
-        `${BACKEND_URL}/recommendations?limit=${encodeURIComponent(limit)}`,
+        `${BACKEND_URL}/recommendations?limit=${encodeURIComponent(limit)}${preferredGenre ? `&genre=${encodeURIComponent(preferredGenre)}` : ''}`,
         { method: 'GET', headers: getAuthHeaders() }
     );
 
