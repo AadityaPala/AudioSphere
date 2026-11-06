@@ -78,7 +78,7 @@ export default function App() {
 
       setRecommendationsLoading(true);
       try {
-        const results = await fetchRecommendations(12, preferredGenre);
+        const results = await fetchRecommendations(12);
         setRecommendations(results);
       } catch (recommendationError) {
         console.error('Failed to load recommendations:', recommendationError);
@@ -97,7 +97,7 @@ export default function App() {
 
     setRecommendationsLoading(true);
     try {
-      const results = await fetchRecommendations(12);
+      const results = await fetchRecommendations(12, preferredGenre);
       setRecommendations(results);
     } catch (error) {
       console.error('Failed to refresh recommendations:', error);
