@@ -1,4 +1,5 @@
-import { Sparkles, Play, X, Music2, Loader2, Mic2, Disc3, Calendar, RefreshCw } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Sparkles, Play, Pause, X, Music2, Loader2, Mic2, Disc3, Calendar, RefreshCw } from 'lucide-react';
 import type { Recommendation } from '../types';
 import { RgbBorder } from './RgbBorder';
 import { useScrollRestore } from '../hooks/useScrollRestore';
@@ -17,6 +18,30 @@ export function InfoPanel({ player, recommendations, recommendationsLoading = fa
   const hasTrack = currentIndex !== -1 && queue[currentIndex];
   const currentUrl = hasTrack ? queue[currentIndex].url : '';
   const scrollRef = useScrollRestore('discover', true);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [playingRecommendationId, setPlayingRecommendationId] = useState<string | null>(null);
+
+  const playRecommendationPreview = async (rec: Recommendation) => {
+    const audio = previewAudioRef.current;
+    if (!audio || !rec.previewUrl) return;
+
+    if (playingRecommendationId === rec.id) {
+      audio.pause();
+      setPlayingRecommendationId(null);
+      return;
+    }
+
+    audio.pause();
+    audio.src = rec.previewUrl;
+    audio.currentTime = 0;
+    try {
+      await audio.play();
+      setPlayingRecommendationId(rec.id);
+    } catch (error) {
+      console.error('Could not play recommendation preview:', error);
+      setPlayingRecommendationId(null);
+    }
+  };
 
   return (
     <aside
@@ -168,15 +193,15 @@ export function InfoPanel({ player, recommendations, recommendationsLoading = fa
                   </div>
                   <button
                     type="button"
-                    title="Find on YouTube"
-                    onClick={() => {
-                      if (rec.youtubeSearchUrl) {
-                        window.open(rec.youtubeSearchUrl, '_blank', 'noopener,noreferrer');
-                      }
-                    }}
-                    className="shrink-0 grid place-items-center w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-300 opacity-0 group-hover:opacity-100 hover:bg-indigo-500 hover:text-white transition-all duration-300"
+                    title={rec.previewUrl ? (playingRecommendationId === rec.id ? 'Pause preview' : 'Play preview') : 'Preview unavailable'}
+                    aria-label={rec.previewUrl ? (playingRecommendationId === rec.id ? 'Pause preview' : 'Play preview') : 'Preview unavailable'}
+                    disabled={!rec.previewUrl}
+                    onClick={() => void playRecommendationPreview(rec)}
+                    className="shrink-0 grid place-items-center w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-300 opacity-0 group-hover:opacity-100 hover:bg-indigo-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300"
                   >
-                    <Play className="w-3 h-3 fill-current" />
+                    {playingRecommendationId === rec.id
+                      ? <Pause className="w-3 h-3 fill-current" />
+                      : <Play className="w-3 h-3 fill-current" />}
                   </button>
                 </li>
               ))}
