@@ -92,6 +92,21 @@ export default function App() {
     }
   };
 
+  const refreshRecommendations = async () => {
+    if (recommendationsLoading) return;
+
+    setRecommendationsLoading(true);
+    try {
+      const results = await fetchRecommendations(12);
+      setRecommendations(results);
+    } catch (error) {
+      console.error('Failed to refresh recommendations:', error);
+      window.alert('Could not refresh recommendations. Please try again.');
+    } finally {
+      setRecommendationsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (token) loadSongs();
   }, [token]);
@@ -224,7 +239,7 @@ export default function App() {
 
               <HSeparator />
               <Panel id="info" defaultSize="24%" minSize="16%" maxSize="36%">
-                <InfoPanel player={player} recommendations={recommendations} recommendationsLoading={recommendationsLoading} className="h-full" />
+                <InfoPanel player={player} recommendations={recommendations} recommendationsLoading={recommendationsLoading} onRefreshRecommendations={refreshRecommendations} className="h-full" />
               </Panel>
             </Group>
           </div>
@@ -251,7 +266,7 @@ export default function App() {
           >
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
             <div className={`absolute top-0 right-0 h-full w-full max-w-md p-3 transition-transform duration-300 ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-              <InfoPanel player={player} recommendations={recommendations} recommendationsLoading={recommendationsLoading} onClose={() => setDrawerOpen(false)} />
+              <InfoPanel player={player} recommendations={recommendations} recommendationsLoading={recommendationsLoading} onRefreshRecommendations={refreshRecommendations} onClose={() => setDrawerOpen(false)} />
             </div>
           </div>
         </>
