@@ -1,6 +1,7 @@
 
 import asyncio
 import logging
+import re
 
 from collections import Counter
 
@@ -18,6 +19,19 @@ from utils.music_utils import (
 
 
 logger = logging.getLogger("audiosphere.recommendations")
+
+
+def normalize_track_title(value: str | None) -> str:
+    """Normalize YouTube-style titles so saved songs are excluded reliably."""
+    value = value or ""
+    value = re.sub(
+        r"\\s*[\\(\\[][^)\\]]*(official|video|audio|lyrics|visualizer|4k|hd)[^)\\]]*[\\)\\]]",
+        "",
+        value,
+        flags=re.IGNORECASE,
+    )
+    value = re.sub(r"\\s*[-|–]\\s*(official video|official audio|lyrics|topic)$", "", value, flags=re.IGNORECASE)
+    return normalize_text(value)
 
 
 async def search_itunes(
@@ -58,6 +72,8 @@ async def generate_recommendations(
 ) -> list[RecommendationResponse]:
 
     seeds = request.seeds
+    preferred_genre = (request.preferredGenre or "").strip()
+    normalized_preferred_genre = normalize_text(preferred_genre)
 
     # Identify the user's preferred artists and genres.
     genre_counts = Counter(
@@ -73,15 +89,17 @@ async def generate_recommendations(
     )
 
     # Exclude songs already saved by the user.
-    existing_tracks = {
-        (
-            normalize_text(seed.title),
-            normalize_text(seed.artist),
-        )
+    existing_titles = {
+        normalize_track_title(seed.title)
         for seed in seeds
+        if seed.title
     }
 
     search_terms = []
+
+    # A currently playing track's genre takes priority over library-wide taste.
+    if preferred_genre:
+        search_terms.append(f"{preferred_genre} music")
 
     # Search the three most frequent genres.
     for genre, _ in genre_counts.most_common(3):
@@ -149,16 +167,24 @@ async def generate_recommendations(
             normalized_title = normalize_text(title)
             normalized_artist = normalize_text(artist)
 
-            if (
-                normalized_title,
-                normalized_artist,
-            ) in existing_tracks:
+            # Exclude saved tracks by normalized title. Artist is not always
+            # available in older library records, so title-only matching is
+            # deliberately used to avoid re-recommending those tracks.
+            if normalize_track_title(title) in existing_titles:
                 continue
 
             genre = track.get("primaryGenreName") or ""
             normalized_genre = normalize_text(genre)
 
+            # When a current genre is supplied, keep the result set focused
+            # on that genre instead of blending it with older library tastes.
+            if normalized_preferred_genre and normalized_preferred_genre not in normalized_genre:
+                continue
+
             score = 0.0
+
+            if normalized_preferred_genre and normalized_preferred_genre in normalized_genre:
+                score += 100.0
 
             # Genre similarity.
             if normalized_genre in genre_counts:
@@ -205,7 +231,9 @@ async def generate_recommendations(
                 ),
                 score=score,
                 reason=(
-                    f"Because you listen to {genre}"
+                    f"Because you're listening to {genre}"
+                    if normalized_preferred_genre and normalized_preferred_genre in normalized_genre
+                    else f"Because you listen to {genre}"
                     if normalized_genre in genre_counts
                     else f"More music by {artist}"
                 ),
