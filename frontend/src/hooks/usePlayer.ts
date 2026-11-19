@@ -87,6 +87,16 @@ export function usePlayer(initialSongs: Song[]) {
     void playSong(Math.max(0, Math.min(startIndex, tracks.length - 1)));
   }, [playSong]);
 
+  const playLibraryTrack = useCallback((url: string) => {
+    const libraryIndex = songs.findIndex((song) => song.url === url);
+    if (libraryIndex < 0) return;
+    queueRef.current = songs;
+    indexRef.current = -1;
+    setQueue(songs);
+    setMode('sequential');
+    void playSong(libraryIndex);
+  }, [songs, playSong]);
+
   const restoreLibraryQueue = useCallback(() => {
     queueRef.current = songs;
     indexRef.current = -1;
@@ -184,6 +194,6 @@ export function usePlayer(initialSongs: Song[]) {
   return {
     songs, queue, currentIndex, isPlaying, isBuffering, mode, currentTime, duration, volume, meta,
     enriched, enriching,
-    playSong, playDiscoveryTracks, restoreLibraryQueue, nextSong, prevSong, togglePlay, toggleShuffle, seekTo, changeVolume
+    playSong, playDiscoveryTracks, playLibraryTrack, restoreLibraryQueue, nextSong, prevSong, togglePlay, toggleShuffle, seekTo, changeVolume
   };
 }
