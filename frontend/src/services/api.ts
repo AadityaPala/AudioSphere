@@ -230,12 +230,21 @@ function asRecord(value: any): Record<string, any> {
 }
 
 function unwrapList(data: any, keys: string[]): any[] {
-    let value = data;
-    for (const key of keys) {
-        if (Array.isArray(value)) return value;
-        value = asRecord(value)[key];
+    if (Array.isArray(data)) return data;
+    const queue: any[] = [data];
+    const seen = new Set<any>();
+    const preferred = [...keys, 'artist', 'track', 'items', 'results'];
+    while (queue.length) {
+        const current = queue.shift();
+        if (!current || typeof current !== 'object' || seen.has(current)) continue;
+        seen.add(current);
+        for (const key of preferred) {
+            const value = current[key];
+            if (Array.isArray(value)) return value;
+            if (value && typeof value === 'object') queue.push(value);
+        }
     }
-    return Array.isArray(value) ? value : [];
+    return [];
 }
 
 function imageFromLastFm(value: any): string {
@@ -299,13 +308,13 @@ async function discoveryGet<T>(path: string): Promise<T> {
 /** Reads the Last.fm chart through the Java API; discovery remains separate from the user's library. */
 export async function fetchDiscoveryCharts(limit = 12): Promise<DiscoveryTrack[]> {
     const data = await discoveryGet<any>(`/discovery/charts?limit=${limit}`);
-    const list = unwrapList(data, ['tracks', 'track']) ;
+    const list = unwrapList(data, ['tracks', 'chart', 'toptracks']) ;
     return list.map((item, index) => normalizeDiscoveryTrack(item, index));
 }
 
 export async function fetchPopularArtists(limit = 12): Promise<DiscoveryArtist[]> {
     const data = await discoveryGet<any>(`/discovery/artists?limit=${limit}`);
-    const list = unwrapList(data, ['artists', 'artist', 'topartists']);
+    const list = unwrapList(data, ['artists', 'topartists']);
     return list.map(normalizeDiscoveryArtist);
 }
 
