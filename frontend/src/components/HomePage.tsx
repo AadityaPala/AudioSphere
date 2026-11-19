@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, type RefObject } from 'react';
 import { Disc3, Loader2, Music2, Play, Radio, RefreshCw, Sparkles, Users } from 'lucide-react';
 import type { DiscoveryArtist, DiscoveryTrack, Song } from '../types';
 import { fetchArtistTracks, fetchDiscoveryCharts, fetchPopularArtists, resolveDiscoveryTrack } from '../services/api';
-import { RgbBorder } from './RgbBorder';
 import { useScrollRestore } from '../hooks/useScrollRestore';
 
 interface HomePageProps {
@@ -80,27 +79,25 @@ export function HomePage({ displayName, songs, player }: HomePageProps) {
   const playDiscovery = async (track: DiscoveryTrack, queue: DiscoveryTrack[]) => {
     setPlayingTrackId(track.id);
     try {
-      const resolved = await Promise.allSettled(
-        queue.map(async (item) => {
-          const videoId = item.videoId || await resolveDiscoveryTrack(item.artist, item.title);
-          return { url: `https://www.youtube.com/watch?v=${videoId}`, title: item.title };
-        })
-      );
-      const playable = resolved
-        .filter((item): item is PromiseFulfilledResult<Song> => item.status === 'fulfilled')
-        .map((item) => item.value);
-      if (!playable.length) throw new Error('YouTube could not find playable videos for these tracks.');
-      const selectedUrl = `https://www.youtube.com/watch?v=${track.videoId || ''}`;
-      let selectedIndex = track.videoId ? playable.findIndex((item) => item.url === selectedUrl) : -1;
-      if (selectedIndex < 0) {
-        const resolvedCurrent = await resolveDiscoveryTrack(track.artist, track.title);
-        const currentUrl = `https://www.youtube.com/watch?v=${resolvedCurrent}`;
-        selectedIndex = playable.findIndex((item) => item.url === currentUrl);
-        if (selectedIndex < 0) {
-          playable.unshift({ url: currentUrl, title: track.title });
-          selectedIndex = 0;
+      const selectedQueueIndex = queue.findIndex((item) => item.id === track.id);
+      const resolved = await Promise.allSettled(queue.map(async (item) => {
+        const videoId = item.videoId || await resolveDiscoveryTrack(item.artist, item.title);
+        return { url: `https://www.youtube.com/watch?v=${videoId}`, title: item.title };
+      }));
+      const playable: Song[] = [];
+      let selectedIndex = -1;
+      resolved.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          if (index === selectedQueueIndex) selectedIndex = playable.length;
+          playable.push(result.value);
         }
+      });
+      if (selectedIndex < 0) {
+        const videoId = track.videoId || await resolveDiscoveryTrack(track.artist, track.title);
+        playable.unshift({ url: `https://www.youtube.com/watch?v=${videoId}`, title: track.title });
+        selectedIndex = 0;
       }
+      if (!playable.length) throw new Error('YouTube could not find playable videos for these tracks.');
       player.playDiscoveryTracks(playable, selectedIndex);
     } catch (cause) {
       window.alert(cause instanceof Error ? cause.message : 'Unable to play this track.');
