@@ -320,7 +320,7 @@ export async function fetchPopularArtists(limit = 12): Promise<DiscoveryArtist[]
 
 export async function fetchArtistTracks(artist: string, limit = 12): Promise<DiscoveryTrack[]> {
     const data = await discoveryGet<any>(`/discovery/artists/${encodeURIComponent(artist)}/tracks?limit=${limit}`);
-    const list = unwrapList(data, ['tracks', 'track']);
+    const list = unwrapList(data, ['tracks', 'toptracks']);
     return list.map((item, index) => normalizeDiscoveryTrack(item, index, artist));
 }
 
