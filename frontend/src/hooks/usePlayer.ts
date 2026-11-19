@@ -83,7 +83,6 @@ export function usePlayer(initialSongs: Song[]) {
     indexRef.current = -1;
     setQueue(tracks);
     setCurrentIndex(-1);
-    setMode('sequential');
     void playSong(Math.max(0, Math.min(startIndex, tracks.length - 1)));
   }, [playSong]);
 
