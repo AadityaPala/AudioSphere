@@ -7,6 +7,9 @@ import time
 from urllib.parse import quote
 
 import httpx
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger("audiosphere.discovery")
 
