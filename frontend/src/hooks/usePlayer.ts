@@ -76,6 +76,24 @@ export function usePlayer(initialSongs: Song[]) {
     }
   }, []);
 
+  const playDiscoveryTracks = useCallback((tracks: Song[], startIndex = 0) => {
+    if (!tracks.length) return;
+    // Discovery playback uses a transient queue; it never writes to the user's library.
+    queueRef.current = tracks;
+    indexRef.current = -1;
+    setQueue(tracks);
+    setCurrentIndex(-1);
+    setMode('sequential');
+    void playSong(Math.max(0, Math.min(startIndex, tracks.length - 1)));
+  }, [playSong]);
+
+  const restoreLibraryQueue = useCallback(() => {
+    queueRef.current = songs;
+    indexRef.current = -1;
+    setQueue(songs);
+    setCurrentIndex(-1);
+  }, [songs]);
+
   const nextSong = useCallback(() => {
     if (queueRef.current.length === 0) return;
     const nextIdx = (indexRef.current + 1) % queueRef.current.length;
@@ -166,6 +184,6 @@ export function usePlayer(initialSongs: Song[]) {
   return {
     songs, queue, currentIndex, isPlaying, isBuffering, mode, currentTime, duration, volume, meta,
     enriched, enriching,
-    playSong, nextSong, prevSong, togglePlay, toggleShuffle, seekTo, changeVolume
+    playSong, playDiscoveryTracks, restoreLibraryQueue, nextSong, prevSong, togglePlay, toggleShuffle, seekTo, changeVolume
   };
 }
