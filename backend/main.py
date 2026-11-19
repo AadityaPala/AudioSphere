@@ -14,6 +14,7 @@ from schemas.recommendation import (
     RecommendationResponse,
 )
 from services.recommendation_service import generate_recommendations
+from routers.discovery import router as discovery_router
 
 
 app = FastAPI(
@@ -25,6 +26,7 @@ Instrumentator().instrument(app).expose(app)
 
 logger = logging.getLogger("audiosphere.lyrics")
 
+app.include_router(discovery_router)
 
 # Allow local development, Caddy gateway, and Vercel frontend
 app.add_middleware(

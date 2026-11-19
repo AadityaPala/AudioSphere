@@ -1,3 +1,4 @@
+
 FROM python:3.12-slim
 
 # Install uv
@@ -19,6 +20,7 @@ COPY main.py ./
 # Copy all Python packages required by main.py
 COPY schemas/ ./schemas/
 COPY services/ ./services/
+COPY routers/ ./routers/
 COPY utils/ ./utils/
 
 EXPOSE 8000
