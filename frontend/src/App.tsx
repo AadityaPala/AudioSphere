@@ -253,7 +253,7 @@ export default function App() {
           {/* Mobile / tablet layout: stacked flex, drawer for info */}
           <div className="xl:hidden flex flex-1 min-h-0 w-full gap-3 p-3 xl:pt-3">
             <Sidebar
-              songs={player.queue}
+              songs={player.songs}
               queueMode={player.mode}
               handleAdd={handleAdd}
               handleRemove={handleRemove}
