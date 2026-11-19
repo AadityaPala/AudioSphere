@@ -203,3 +203,125 @@ export async function removeSong(url: string): Promise<void> {
     });
     if (!res.ok) throw new Error(`Failed to remove track (HTTP ${res.status}).`);
 }
+
+
+export interface DiscoveryArtist {
+    id: string;
+    name: string;
+    image: string;
+    listeners?: string;
+    url?: string;
+}
+
+export interface DiscoveryTrack {
+    id: string;
+    title: string;
+    artist: string;
+    album?: string;
+    artwork: string;
+    duration?: string;
+    url?: string;
+    listeners?: string;
+    videoId?: string;
+}
+
+function asRecord(value: any): Record<string, any> {
+    return value && typeof value === 'object' ? value : {};
+}
+
+function unwrapList(data: any, keys: string[]): any[] {
+    let value = data;
+    for (const key of keys) {
+        if (Array.isArray(value)) return value;
+        value = asRecord(value)[key];
+    }
+    return Array.isArray(value) ? value : [];
+}
+
+function imageFromLastFm(value: any): string {
+    if (typeof value === 'string') return value;
+    if (Array.isArray(value)) {
+        const preferred = [...value].reverse().find((item) => item?.['#text'] || item?.url);
+        return preferred?.['#text'] || preferred?.url || '';
+    }
+    return value?.['#text'] || value?.url || '';
+}
+
+function normalizeDiscoveryArtist(raw: any, index: number): DiscoveryArtist {
+    const artist = asRecord(raw);
+    const name = artist.name || artist.artist?.name || 'Unknown artist';
+    return {
+        id: String(artist.mbid || artist.id || name || index),
+        name,
+        image: imageFromLastFm(artist.image || artist.images || artist.artwork) ||
+            'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600&auto=format&fit=crop&q=80',
+        listeners: artist.listeners?.toLocaleString?.() || artist.listeners || artist.playcount?.toLocaleString?.(),
+        url: artist.url,
+    };
+}
+
+function normalizeDiscoveryTrack(raw: any, index: number, fallbackArtist?: string): DiscoveryTrack {
+    const track = asRecord(raw);
+    const artist = typeof track.artist === 'string'
+        ? track.artist
+        : track.artist?.name || track.artistName || fallbackArtist || 'Unknown artist';
+    const title = track.name || track.title || 'Unknown track';
+    return {
+        id: String(track.mbid || track.id || `${artist}-${title}-${index}`),
+        title,
+        artist,
+        album: track.album?.['#text'] || track.album?.title || track.album || '',
+        artwork: imageFromLastFm(track.image || track.album?.image || track.artwork) ||
+            'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
+        duration: track.duration ? formatDiscoveryDuration(track.duration) : undefined,
+        listeners: track.listeners?.toLocaleString?.() || track.listeners,
+        url: track.url,
+        videoId: track.videoId || track.video_id,
+    };
+}
+
+function formatDiscoveryDuration(value: number | string): string {
+    const seconds = Number(value);
+    if (!Number.isFinite(seconds) || seconds <= 0) return '';
+    return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
+}
+
+async function discoveryGet<T>(path: string): Promise<T> {
+    if (!BACKEND_URL) throw new Error('VITE_BACKEND_URL is not configured.');
+    const response = await fetch(`${BACKEND_URL}${path}`, { headers: getAuthHeaders() });
+    if (!response.ok) {
+        const detail = await response.text();
+        throw new Error(`Discovery request failed (HTTP ${response.status}): ${detail || response.statusText}`);
+    }
+    return response.json() as Promise<T>;
+}
+
+/** Reads the Last.fm chart through the Java API; discovery remains separate from the user's library. */
+export async function fetchDiscoveryCharts(limit = 12): Promise<DiscoveryTrack[]> {
+    const data = await discoveryGet<any>(`/discovery/charts?limit=${limit}`);
+    const list = unwrapList(data, ['tracks', 'track']) ;
+    return list.map((item, index) => normalizeDiscoveryTrack(item, index));
+}
+
+export async function fetchPopularArtists(limit = 12): Promise<DiscoveryArtist[]> {
+    const data = await discoveryGet<any>(`/discovery/artists?limit=${limit}`);
+    const list = unwrapList(data, ['artists', 'artist']);
+    return list.map(normalizeDiscoveryArtist);
+}
+
+export async function fetchArtistTracks(artist: string, limit = 12): Promise<DiscoveryTrack[]> {
+    const data = await discoveryGet<any>(`/discovery/artists/${encodeURIComponent(artist)}/tracks?limit=${limit}`);
+    const list = unwrapList(data, ['tracks', 'track']);
+    return list.map((item, index) => normalizeDiscoveryTrack(item, index, artist));
+}
+
+export async function resolveDiscoveryTrack(artist: string, title: string): Promise<string> {
+    const data = await discoveryGet<any>(
+        `/discovery/resolve?artist=${encodeURIComponent(artist)}&title=${encodeURIComponent(title)}`
+    );
+    const videoId = data?.videoId || data?.video_id || data?.id;
+    if (typeof videoId !== 'string' || !videoId.trim()) {
+        throw new Error('No playable YouTube video was found for this track.');
+    }
+    return videoId.trim();
+}
