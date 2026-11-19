@@ -249,11 +249,11 @@ function imageFromLastFm(value: any): string {
 
 function normalizeDiscoveryArtist(raw: any, index: number): DiscoveryArtist {
     const artist = asRecord(raw);
-    const name = artist.name || artist.artist?.name || 'Unknown artist';
+    const name = artist.name || artist.artist?.name || artist.artistName || 'Unknown artist';
     return {
         id: String(artist.mbid || artist.id || name || index),
         name,
-        image: imageFromLastFm(artist.image || artist.images || artist.artwork) ||
+        image: imageFromLastFm(artist.image || artist.images || artist.artwork || artist.imageUrl) ||
             'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600&auto=format&fit=crop&q=80',
         listeners: artist.listeners?.toLocaleString?.() || artist.listeners || artist.playcount?.toLocaleString?.(),
         url: artist.url,
@@ -265,18 +265,18 @@ function normalizeDiscoveryTrack(raw: any, index: number, fallbackArtist?: strin
     const artist = typeof track.artist === 'string'
         ? track.artist
         : track.artist?.name || track.artistName || fallbackArtist || 'Unknown artist';
-    const title = track.name || track.title || 'Unknown track';
+    const title = track.name || track.title || track.trackName || 'Unknown track';
     return {
         id: String(track.mbid || track.id || `${artist}-${title}-${index}`),
         title,
         artist,
         album: track.album?.['#text'] || track.album?.title || track.album || '',
-        artwork: imageFromLastFm(track.image || track.album?.image || track.artwork) ||
+        artwork: imageFromLastFm(track.image || track.album?.image || track.artwork || track.imageUrl || track.albumArtUrl) ||
             'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
         duration: track.duration ? formatDiscoveryDuration(track.duration) : undefined,
         listeners: track.listeners?.toLocaleString?.() || track.listeners,
         url: track.url,
-        videoId: track.videoId || track.video_id,
+        videoId: track.videoId || track.video_id || track.youtubeVideoId,
     };
 }
 
@@ -305,7 +305,7 @@ export async function fetchDiscoveryCharts(limit = 12): Promise<DiscoveryTrack[]
 
 export async function fetchPopularArtists(limit = 12): Promise<DiscoveryArtist[]> {
     const data = await discoveryGet<any>(`/discovery/artists?limit=${limit}`);
-    const list = unwrapList(data, ['artists', 'artist']);
+    const list = unwrapList(data, ['artists', 'artist', 'topartists']);
     return list.map(normalizeDiscoveryArtist);
 }
 
