@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type RefObject } from 'react';
-import { Disc3, Loader2, Music2, Play, Radio, RefreshCw, Sparkles, Users } from 'lucide-react';
+import { Disc3, Loader2, Music2, Play, Radio, RefreshCw, Search, Sparkles, Users } from 'lucide-react';
 import type { DiscoveryArtist, DiscoveryTrack, Song } from '../types';
-import { fetchArtistTracks, fetchDiscoveryCharts, fetchPopularArtists, resolveDiscoveryTrack } from '../services/api';
+import { fetchArtistTracks, fetchDiscoveryCharts, fetchPopularArtists, resolveDiscoveryTrack, searchDiscovery } from '../services/api';
 import { useScrollRestore } from '../hooks/useScrollRestore';
 
 interface HomePageProps {
@@ -37,7 +37,7 @@ export function HomePage({ displayName, songs, player }: HomePageProps) {
   const [loadingArtist, setLoadingArtist] = useState(false);
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
   const [error, setError] = useState('');
-  const [artistError, setArtistError] = useState('');
+  const [artistError, setArtistError] = useState('');\n  const [searchQuery, setSearchQuery] = useState('');\n  const [searchResults, setSearchResults] = useState<{ artists: DiscoveryArtist[]; tracks: DiscoveryTrack[] }>({ artists: [], tracks: [] });\n  const [searching, setSearching] = useState(false);\n  const [searchError, setSearchError] = useState('');
 
   const loadDiscovery = async () => {
     setLoadingHome(true);
@@ -61,6 +61,21 @@ export function HomePage({ displayName, songs, player }: HomePageProps) {
   };
 
   useEffect(() => { void loadDiscovery(); }, []);
+
+  const runSearch = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    if (query.length < 2) return;
+    setSearching(true);
+    setSearchError('');
+    try {
+      setSearchResults(await searchDiscovery(query));
+    } catch (cause) {
+      setSearchError(cause instanceof Error ? cause.message : 'Search failed.');
+    } finally {
+      setSearching(false);
+    }
+  };
 
   const openArtist = async (artist: DiscoveryArtist) => {
     setSelectedArtist(artist);
@@ -159,6 +174,24 @@ export function HomePage({ displayName, songs, player }: HomePageProps) {
           </button>
         </div>
         {error && <p role="status" className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/[0.06] px-4 py-3 text-xs text-amber-200">{error}</p>}
+      </section>
+
+      <section className="px-6 pb-6 sm:px-8">
+        <form onSubmit={runSearch} className="flex max-w-2xl gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search artists or songs..." className="w-full rounded-xl border border-white/10 bg-white/[0.04] py-3 pl-10 pr-3 text-sm outline-none focus:border-indigo-400/50" />
+          </div>
+          <button type="submit" disabled={searching || searchQuery.trim().length < 2} className="rounded-xl border border-indigo-400/20 bg-indigo-500/15 px-4 text-sm text-indigo-100 disabled:opacity-50">{searching ? 'Searching…' : 'Search'}</button>
+        </form>
+        {searchError && <p role="alert" className="mt-2 text-xs text-rose-300">{searchError}</p>}
+        {(searchResults.artists.length > 0 || searchResults.tracks.length > 0) && (
+          <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+            <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-indigo-300">Search results</div>
+            <div className="mb-2 flex flex-wrap gap-2">{searchResults.artists.map((artist) => <button key={artist.id} type="button" onClick={() => void openArtist(artist)} className="rounded-lg bg-white/5 px-3 py-2 text-xs hover:bg-white/10">{artist.name} · Artist</button>)}</div>
+            <div className="grid gap-2 sm:grid-cols-2">{searchResults.tracks.map((track, index) => renderTrack(track, searchResults.tracks, index))}</div>
+          </div>
+        )}
       </section>
 
       <section className="px-6 pb-7 sm:px-8">
