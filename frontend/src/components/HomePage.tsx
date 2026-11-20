@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type RefObject } from 'react';
+import { useEffect, useMemo, useState, type FormEvent, type RefObject } from 'react';
 import { Disc3, Loader2, Music2, Play, Radio, RefreshCw, Search, Sparkles, Users } from 'lucide-react';
 import type { DiscoveryArtist, DiscoveryTrack, Song } from '../types';
 import { fetchArtistTracks, fetchDiscoveryCharts, fetchPopularArtists, resolveDiscoveryTrack, searchDiscovery } from '../services/api';
@@ -62,7 +62,7 @@ export function HomePage({ displayName, songs, player }: HomePageProps) {
 
   useEffect(() => { void loadDiscovery(); }, []);
 
-  const runSearch = async (event: React.FormEvent) => {
+  const runSearch = async (event: FormEvent) => {
     event.preventDefault();
     const query = searchQuery.trim();
     if (query.length < 2) return;
