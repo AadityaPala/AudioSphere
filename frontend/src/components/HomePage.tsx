@@ -37,7 +37,11 @@ export function HomePage({ displayName, songs, player }: HomePageProps) {
   const [loadingArtist, setLoadingArtist] = useState(false);
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
   const [error, setError] = useState('');
-  const [artistError, setArtistError] = useState('');\n  const [searchQuery, setSearchQuery] = useState('');\n  const [searchResults, setSearchResults] = useState<{ artists: DiscoveryArtist[]; tracks: DiscoveryTrack[] }>({ artists: [], tracks: [] });\n  const [searching, setSearching] = useState(false);\n  const [searchError, setSearchError] = useState('');
+  const [artistError, setArtistError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{ artists: DiscoveryArtist[]; tracks: DiscoveryTrack[] }>({ artists: [], tracks: [] });
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState('');
 
   const loadDiscovery = async () => {
     setLoadingHome(true);
