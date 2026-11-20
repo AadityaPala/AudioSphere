@@ -307,7 +307,7 @@ async function discoveryGet<T>(path: string): Promise<T> {
 
 /** Reads the Last.fm chart through the Java API; discovery remains separate from the user's library. */
 export async function fetchDiscoveryCharts(limit = 12): Promise<DiscoveryTrack[]> {
-    const data = await discoveryGet<any>(`/discovery/charts?limit=${limit}`);
+    const data = await discoveryGet<any>(`/discovery/tracks?limit=${limit}`);
     const list = unwrapList(data, ['tracks', 'chart', 'toptracks']) ;
     return list.map((item, index) => normalizeDiscoveryTrack(item, index));
 }
@@ -333,4 +333,17 @@ export async function resolveDiscoveryTrack(artist: string, title: string): Prom
         throw new Error('No playable YouTube video was found for this track.');
     }
     return videoId.trim();
+}
+
+
+export interface DiscoverySearchResults {
+    artists: DiscoveryArtist[];
+    tracks: DiscoveryTrack[];
+}
+
+export async function searchDiscovery(query: string, limit = 10): Promise<DiscoverySearchResults> {
+    const data = await discoveryGet<any>(`/discovery/search?q=${encodeURIComponent(query)}&limit=${limit}`);
+    const artists = unwrapList(data?.artists, ['artists']).map(normalizeDiscoveryArtist);
+    const tracks = unwrapList(data?.tracks, ['tracks']).map((item, index) => normalizeDiscoveryTrack(item, index));
+    return { artists, tracks };
 }
