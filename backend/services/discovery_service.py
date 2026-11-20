@@ -107,6 +107,23 @@ def best_image(images):
     return None
 
 
+
+async def artist_artwork(client, artist_name):
+    # Last.fm may return its generic placeholder instead of artist artwork.
+    try:
+        response = await client.get(ITUNES_URL, params={
+            "term": artist_name, "entity": "album", "attribute": "artistTerm", "limit": 5,
+        })
+        response.raise_for_status()
+        for item in response.json().get("results", []):
+            artwork = item.get("artworkUrl100") or item.get("artworkUrl60")
+            if artwork:
+                return artwork.replace("100x100bb", "600x600bb").replace("100x100", "600x600")
+    except (httpx.HTTPError, ValueError):
+        logger.exception("Artist artwork lookup failed: %s", artist_name)
+    return None
+
+
 async def get_popular_artists(limit=12):
     limit = max(1, min(limit, 30))
     cache_key = f"popular_artists:{limit}"
@@ -427,6 +444,46 @@ async def get_artist_top_tracks(artist, limit=10):
 
     cache_set(cache_key, enriched, ARTIST_TRACKS_TTL)
     return enriched
+
+
+
+async def search_discovery(query, limit=10):
+    query = (query or "").strip()
+    if len(query) < 2:
+        return {"artists": [], "tracks": []}
+    limit = max(1, min(limit, 20))
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        artist_data, track_data = await asyncio.gather(
+            lastfm_request(client, "artist.search", artist=query, limit=limit),
+            lastfm_request(client, "track.search", track=query, limit=limit),
+        )
+    raw_artists = artist_data.get("results", {}).get("artistmatches", {}).get("artist", [])
+    raw_tracks = track_data.get("results", {}).get("trackmatches", {}).get("track", [])
+    if isinstance(raw_artists, dict): raw_artists = [raw_artists]
+    if isinstance(raw_tracks, dict): raw_tracks = [raw_tracks]
+    artists = []
+    for item in raw_artists:
+        name = item.get("name")
+        if not name: continue
+        image = best_image(item.get("image"))
+        if not image or "2a96cbd8b46e442fc41c2b86b821562f" in image:
+            async with httpx.AsyncClient(timeout=12.0) as image_client:
+                image = await artist_artwork(image_client, name)
+        artists.append({"id": artist_id(name, item.get("mbid") or None), "name": name,
+                        "image": image, "listeners": int(item.get("listeners") or 0), "source": "lastfm"})
+    tracks = []
+    for item in raw_tracks:
+        title, artist = item.get("name"), item.get("artist")
+        if title and artist:
+            tracks.append({"id": f"lastfm:{normalize_name(artist)}:{normalize_name(title)}",
+                           "title": title, "artist": artist, "source": "lastfm"})
+    enriched = await asyncio.gather(*(enrich_track_for_discovery(t) for t in tracks))
+    return {"artists": artists, "tracks": enriched}
+
+
+async def resolve_discovery_video(artist, title):
+    async with httpx.AsyncClient(timeout=20.0) as client:
+        return await resolve_youtube_video(client, title, artist)
 
 
 async def get_home_discovery():
