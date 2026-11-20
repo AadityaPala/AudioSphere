@@ -6,7 +6,7 @@ from services.discovery_service import (
     get_trending_tracks,
     get_artist_details,
     get_artist_top_tracks,
-    artist_name_from_id,
+    artist_name_from_id,\n    search_discovery,\n    resolve_discovery_video,
 )
 
 router = APIRouter(
@@ -94,3 +94,20 @@ async def artist_tracks(
             status_code=502,
             detail=f"Could not retrieve artist tracks: {str(exc)}",
         )
+
+
+@router.get("/search")
+async def discovery_search(q: str = Query(..., min_length=2), limit: int = Query(10, ge=1, le=20)):
+    try:
+        return await search_discovery(q, limit)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Discovery search failed: {str(exc)}")
+
+
+@router.get("/resolve")
+async def resolve_track(artist: str = Query(..., min_length=1), title: str = Query(..., min_length=1)):
+    try:
+        video_id = await resolve_discovery_video(artist, title)
+        return {"videoId": video_id}
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Could not resolve track: {str(exc)}")
