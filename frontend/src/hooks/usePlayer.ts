@@ -154,7 +154,12 @@ export function usePlayer(initialSongs: Song[]) {
   const toggleShuffle = () => {
     if (mode === 'sequential') {
       setMode('shuffle');
-      const shuffled = [...songs].sort(() => Math.random() - 0.5);
+      const shuffled = [...songs];
+      // Fisher-Yates guarantees a proper permutation (sort + random is biased).
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
       setQueue(shuffled);
       queueRef.current = shuffled;
       setCurrentIndex(0);
