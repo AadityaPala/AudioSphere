@@ -6,55 +6,26 @@ declare global {
   }
 }
 
-export interface Song {
-  url: string;
-  title: string;
-}
-
+export interface Song { url: string; title: string; }
 export type PlaybackMode = 'sequential' | 'shuffle';
-
-export interface TrackMetadata {
-  artist: string;
-  artwork: string;
-}
-
+export interface TrackMetadata { artist: string; artwork: string; }
 export interface EnrichedMetadata {
-  artist: string;
-  title: string;
-  albumArtUrl: string;
-  genre: string;
-  releaseYear: string;
-  lyrics: string;
+  artist: string; title: string; albumArtUrl: string; genre: string; releaseYear: string; lyrics: string;
 }
-
 export interface Recommendation {
-  id: string;
-  title: string;
-  artist: string;
-  artwork: string | null;
-  genre: string | null;
-  releaseYear: string | null;
-  previewUrl: string | null;
-  trackViewUrl: string | null;
-  youtubeSearchUrl: string;
-  score: number;
-  reason: string;
+  id: string; title: string; artist: string; artwork: string | null; genre: string | null;
+  releaseYear: string | null; previewUrl: string | null; trackViewUrl: string | null;
+  youtubeSearchUrl: string; score: number; reason: string;
 }
-
-export interface MockArtist {
-  id: string;
-  name: string;
-  image: string;
-  monthlyListeners: string;
+export interface DiscoveryArtist {
+  id: string; name: string; image: string; listeners?: string; url?: string;
 }
-
+export interface DiscoveryTrack {
+  id: string; title: string; artist: string; album?: string; artwork: string;
+  duration?: string; url?: string; listeners?: string; videoId?: string;
+}
+export interface MockArtist { id: string; name: string; image: string; monthlyListeners: string; }
 export interface MockTrack {
-  id: string;
-  title: string;
-  artist: string;
-  album: string;
-  artwork: string;
-  duration: string;
-  playable: boolean;
-  url?: string;
+  id: string; title: string; artist: string; album: string; artwork: string;
+  duration: string; playable: boolean; url?: string;
 }

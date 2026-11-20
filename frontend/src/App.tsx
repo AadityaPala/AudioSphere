@@ -154,8 +154,7 @@ export default function App() {
   };
 
   const handlePlayTrack = (url: string) => {
-    const index = player.queue.findIndex((song) => song.url === url);
-    if (index >= 0) player.playSong(index);
+    player.playLibraryTrack(url);
   };
 
   const showOnboarding = !!token && onboarding.loaded && onboarding.needsOnboarding;
@@ -224,7 +223,7 @@ export default function App() {
             <Group orientation="horizontal" className="flex w-full h-full gap-2">
               <Panel id="sidebar" defaultSize="22%" minSize="16%" maxSize="32%">
                 <Sidebar
-                  songs={player.queue}
+                  songs={player.songs}
                   queueMode={player.mode}
                   handleAdd={handleAdd}
                   handleRemove={handleRemove}
@@ -254,7 +253,7 @@ export default function App() {
           {/* Mobile / tablet layout: stacked flex, drawer for info */}
           <div className="xl:hidden flex flex-1 min-h-0 w-full gap-3 p-3 xl:pt-3">
             <Sidebar
-              songs={player.queue}
+              songs={player.songs}
               queueMode={player.mode}
               handleAdd={handleAdd}
               handleRemove={handleRemove}
