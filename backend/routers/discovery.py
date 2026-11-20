@@ -6,7 +6,9 @@ from services.discovery_service import (
     get_trending_tracks,
     get_artist_details,
     get_artist_top_tracks,
-    artist_name_from_id,\n    search_discovery,\n    resolve_discovery_video,
+    artist_name_from_id,
+    search_discovery,
+    resolve_discovery_video,
 )
 
 router = APIRouter(
