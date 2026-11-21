@@ -22,7 +22,7 @@ interface SidebarProps {
   onRefreshRecommendations?: () => void;
 }
 
-export function Sidebar({ songs, queueMode = 'sequential', handleAdd, handleRemove, handlePlay, loading, displayName = null, currentTrackUrl = null, isPlaying = false, className = '', recommendations = [], recommendationsLoading = false, onRefreshRecommendations }: SidebarProps) {
+export function Sidebar({ songs, handleAdd, handleRemove, handlePlay, loading, displayName = null, currentTrackUrl = null, isPlaying = false, className = '', recommendations = [], recommendationsLoading = false, onRefreshRecommendations }: SidebarProps) {
   const [inputUrl, setInputUrl] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'library' | 'recommendations'>('library');
