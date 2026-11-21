@@ -67,9 +67,7 @@ export function usePlayer(initialSongs: Song[]) {
 
   useEffect(() => {
     volumeRef.current = volume;
-    if (playerReadyRef.current) {
-      playerRef.current?.setVolume(volume);
-    }
+    if (playerReadyRef.current) playerRef.current?.setVolume(volume);
   }, [volume]);
 
   useEffect(() => {
@@ -159,9 +157,7 @@ export function usePlayer(initialSongs: Song[]) {
       setEnriching(true);
 
       const enrichedMetadata = await fetchEnrichedMetadata(metadata.artist, target.title);
-      if (requestId === requestIdRef.current) {
-        setEnriched(enrichedMetadata);
-      }
+      if (requestId === requestIdRef.current) setEnriched(enrichedMetadata);
     } catch (error) {
       console.warn('[AudioSphere] Track metadata lookup failed:', error);
     } finally {
@@ -218,8 +214,6 @@ export function usePlayer(initialSongs: Song[]) {
 
       try {
         playerRef.current = new (window as any).YT.Player('yt-hidden-player', {
-          width: '1',
-          height: '1',
           playerVars: {
             playsinline: 1,
             enablejsapi: 1,
@@ -303,8 +297,7 @@ export function usePlayer(initialSongs: Song[]) {
     };
 
     const onApiReady = () => {
-      if (!active) return;
-      initializePlayer();
+      if (active) initializePlayer();
     };
 
     const yt = (window as any).YT;
@@ -314,7 +307,11 @@ export function usePlayer(initialSongs: Song[]) {
       // Install the callback before adding the script: the API can become ready very quickly.
       const previousCallback = (window as any).onYouTubeIframeAPIReady;
       (window as any).onYouTubeIframeAPIReady = () => {
-        if (typeof previousCallback === 'function') previousCallback();
+        try {
+          if (typeof previousCallback === 'function') previousCallback();
+        } catch (error) {
+          console.warn('[AudioSphere] Existing YouTube API callback failed:', error);
+        }
         onApiReady();
       };
 
