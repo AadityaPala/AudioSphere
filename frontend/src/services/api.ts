@@ -324,9 +324,10 @@ export async function fetchArtistTracks(artist: string, limit = 12): Promise<Dis
     return list.map((item, index) => normalizeDiscoveryTrack(item, index, artist));
 }
 
-export async function resolveDiscoveryTrack(artist: string, title: string): Promise<string> {
-    const data = await discoveryGet<any>(
-        `/discovery/resolve?artist=${encodeURIComponent(artist)}&title=${encodeURIComponent(title)}`
+export async function resolveDiscoveryTrack(artist: string, title: string, excludeVideoId?: string): Promise<string> {
+    const params = new URLSearchParams({ artist, title });
+    if (excludeVideoId) params.set("excludeVideoId", excludeVideoId);
+    const data = await discoveryGet<any>(`/discovery/resolve?${params.toString()}`
     );
     const videoId = data?.videoId || data?.video_id || data?.id;
     if (typeof videoId !== 'string' || !videoId.trim()) {
