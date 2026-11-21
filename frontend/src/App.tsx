@@ -161,7 +161,6 @@ export default function App() {
 
   return (
     <div className="relative h-screen w-screen flex flex-col bg-[#06060f] text-slate-100 overflow-hidden font-sans">
-      <div id="yt-hidden-player" className="absolute left-[9999px] top-[9999px] opacity-0 pointer-events-none" />
 
       {/* Deep, colorful ambient gradient background */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
@@ -232,6 +231,9 @@ export default function App() {
                   displayName={onboarding.displayName}
                   currentTrackUrl={player.currentIndex >= 0 ? player.queue[player.currentIndex]?.url ?? null : null}
                   isPlaying={player.isPlaying}
+                  recommendations={recommendations}
+                  recommendationsLoading={recommendationsLoading}
+                  onRefreshRecommendations={() => void refreshRecommendations(player.enriched?.genre)}
                   className="h-full"
                 />
               </Panel>
@@ -245,7 +247,7 @@ export default function App() {
 
               <HSeparator />
               <Panel id="info" defaultSize="24%" minSize="16%" maxSize="36%">
-                <InfoPanel player={player} recommendations={recommendations} recommendationsLoading={recommendationsLoading} onRefreshRecommendations={() => void refreshRecommendations(player.enriched?.genre)} className="h-full" />
+                <InfoPanel player={player} recommendations={[]} className="h-full" />
               </Panel>
             </Group>
           </div>
@@ -262,6 +264,9 @@ export default function App() {
               displayName={onboarding.displayName}
               currentTrackUrl={player.currentIndex >= 0 ? player.queue[player.currentIndex]?.url ?? null : null}
               isPlaying={player.isPlaying}
+              recommendations={recommendations}
+              recommendationsLoading={recommendationsLoading}
+              onRefreshRecommendations={() => void refreshRecommendations(player.enriched?.genre)}
             />
             <PlayerView player={player} onOpenInfo={() => setDrawerOpen(true)} />
           </div>
@@ -272,7 +277,7 @@ export default function App() {
           >
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
             <div className={`absolute top-0 right-0 h-full w-full max-w-md p-3 transition-transform duration-300 ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-              <InfoPanel player={player} recommendations={recommendations} recommendationsLoading={recommendationsLoading} onRefreshRecommendations={() => void refreshRecommendations(player.enriched?.genre)} onClose={() => setDrawerOpen(false)} />
+              <InfoPanel player={player} recommendations={[]} onClose={() => setDrawerOpen(false)} />
             </div>
           </div>
         </>
