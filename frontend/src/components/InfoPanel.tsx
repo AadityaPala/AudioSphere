@@ -6,9 +6,10 @@ interface InfoPanelProps {
   player: any;
   className?: string;
   onClose?: () => void;
+  playerHostId: string;
 }
 
-export function InfoPanel({ player, className = '', onClose }: InfoPanelProps) {
+export function InfoPanel({ player, className = '', onClose, playerHostId }: InfoPanelProps) {
   const { meta, enriched, enriching, currentIndex, queue, isPlaying, isBuffering } = player;
   const hasTrack = currentIndex !== -1 && queue[currentIndex];
   const currentUrl = hasTrack ? queue[currentIndex].url : '';
@@ -105,7 +106,7 @@ export function InfoPanel({ player, className = '', onClose }: InfoPanelProps) {
 
         <section className="space-y-3">
           <h3 className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase"><Disc3 className="w-3.5 h-3.5" /> YouTube Player</h3>
-          <div className="w-full overflow-hidden rounded-2xl border border-white/10 bg-black shadow-xl"><div id="yt-hidden-player" className="aspect-video w-full min-h-[200px] bg-black" /></div>
+          <div className="w-full overflow-hidden rounded-2xl border border-white/10 bg-black shadow-xl"><div id={playerHostId} className="aspect-video w-full min-h-[200px] bg-black" /></div>
           <p className="text-[10px] leading-relaxed text-slate-500">YouTube playback is shown here. Some videos may still be unavailable for embedding due to the uploader's restrictions.</p>
         </section>
       </div>
