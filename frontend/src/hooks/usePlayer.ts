@@ -214,7 +214,10 @@ export function usePlayer(initialSongs: Song[]) {
       playerCreated = true;
 
       try {
-        playerRef.current = new (window as any).YT.Player('yt-hidden-player', {
+        const playerHostId = window.matchMedia('(min-width: 1280px)').matches
+          ? 'yt-hidden-player-desktop'
+          : 'yt-hidden-player-mobile';
+        playerRef.current = new (window as any).YT.Player(playerHostId, {
           width: '100%',
           height: '100%',
           playerVars: {
