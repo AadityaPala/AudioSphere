@@ -177,6 +177,17 @@ export default function App() {
       <RippleLayer />
       <CustomCursor />
 
+      {/* Persistent YouTube host: keep mounted across view changes while playback is active. */}
+      <div className="fixed bottom-4 right-4 z-[60] w-[min(340px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-white/15 bg-black shadow-2xl">
+        <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-300">YouTube Player</span>
+          <span className="text-[10px] text-slate-500">AudioSphere playback</span>
+        </div>
+        <div className="relative aspect-video w-full">
+          <div id="yt-audiosphere-player" className="absolute inset-0 h-full w-full bg-black" />
+        </div>
+      </div>
+
       <AuthOverlay token={token} />
 
       {token && (
@@ -247,7 +258,7 @@ export default function App() {
 
               <HSeparator />
               <Panel id="info" defaultSize="24%" minSize="16%" maxSize="36%">
-                <InfoPanel player={player} playerHostId="yt-hidden-player-desktop" className="h-full" />
+                <InfoPanel player={player} className="h-full" />
               </Panel>
             </Group>
           </div>
@@ -277,7 +288,7 @@ export default function App() {
           >
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
             <div className={`absolute top-0 right-0 h-full w-full max-w-md p-3 transition-transform duration-300 ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-              <InfoPanel player={player} playerHostId="yt-hidden-player-mobile" onClose={() => setDrawerOpen(false)} />
+              <InfoPanel player={player} onClose={() => setDrawerOpen(false)} />
             </div>
           </div>
         </>
