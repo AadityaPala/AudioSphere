@@ -301,7 +301,8 @@ export function usePlayer(initialSongs: Song[]) {
                       const metadata = await fetchTrackMetadata(failedTrack.title);
                       const replacementVideoId = await resolveDiscoveryTrack(
                         metadata.artist,
-                        failedTrack.title
+                        failedTrack.title,
+                        failedVideoId || undefined
                       );
 
                       if (!active || failedRequestId !== requestIdRef.current) return;
