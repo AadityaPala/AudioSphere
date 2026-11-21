@@ -107,9 +107,9 @@ async def discovery_search(q: str = Query(..., min_length=2), limit: int = Query
 
 
 @router.get("/resolve")
-async def resolve_track(artist: str = Query(..., min_length=1), title: str = Query(..., min_length=1)):
+async def resolve_track(artist: str = Query(..., min_length=1), title: str = Query(..., min_length=1), exclude_video_id: str | None = Query(None, alias="excludeVideoId")):
     try:
-        video_id = await resolve_discovery_video(artist, title)
+        video_id = await resolve_discovery_video(artist, title, exclude_video_id)
         return {"videoId": video_id}
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Could not resolve track: {str(exc)}")
