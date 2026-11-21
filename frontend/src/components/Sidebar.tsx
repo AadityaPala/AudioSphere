@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Plus, Trash2, Menu, X, Music, Library } from 'lucide-react';
-import type { Song } from '../types';
+import type { Song, Recommendation } from '../types';
 import { TrackThumbnail } from './TrackThumbnail';
 import { UserAvatar } from './UserAvatar';
 import { RgbBorder } from './RgbBorder';
@@ -17,11 +17,16 @@ interface SidebarProps {
   currentTrackUrl?: string | null;
   isPlaying?: boolean;
   className?: string;
+  recommendations?: Recommendation[];
+  recommendationsLoading?: boolean;
+  onRefreshRecommendations?: () => void;
 }
 
-export function Sidebar({ songs, queueMode = 'sequential', handleAdd, handleRemove, handlePlay, loading, displayName = null, currentTrackUrl = null, isPlaying = false, className = '' }: SidebarProps) {
+export function Sidebar({ songs, queueMode = 'sequential', handleAdd, handleRemove, handlePlay, loading, displayName = null, currentTrackUrl = null, isPlaying = false, className = '', recommendations = [], recommendationsLoading = false, onRefreshRecommendations }: SidebarProps) {
   const [inputUrl, setInputUrl] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'library' | 'recommendations'>('library');
+  const previewRef = useRef<HTMLAudioElement | null>(null);
   const scrollRef = useScrollRestore('library', songs.length >= 0);
 
   const submit = async (e: React.FormEvent) => {
@@ -65,12 +70,11 @@ export function Sidebar({ songs, queueMode = 'sequential', handleAdd, handleRemo
           </div>
         </div>
 
-        {/* Section label */}
-        <div className="flex items-center gap-2 mt-4 mb-3">
-          <Library className="w-3.5 h-3.5 text-indigo-300" />
-          <h3 className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase whitespace-nowrap">{queueMode === 'shuffle' ? 'Shuffled Songs' : 'Your Library'}</h3>
+        <div className="mt-4 mb-3 grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-black/20 p-1 shrink-0">
+          <button type="button" onClick={() => setActiveTab('library')} className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-[10px] font-semibold uppercase tracking-wide transition-all ${activeTab === 'library' ? 'bg-indigo-500/20 text-indigo-100 border border-indigo-400/30' : 'text-slate-400 hover:text-white'}`}><Library className="w-3.5 h-3.5" /> Your Library</button>
+          <button type="button" onClick={() => setActiveTab('recommendations')} className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-[10px] font-semibold uppercase tracking-wide transition-all ${activeTab === 'recommendations' ? 'bg-indigo-500/20 text-indigo-100 border border-indigo-400/30' : 'text-slate-400 hover:text-white'}`}><Music className="w-3.5 h-3.5" /> Recommendations</button>
         </div>
-
+        {activeTab === 'library' ? (
         {/* Add song form */}
         <form onSubmit={submit} className="flex gap-2 mb-3 shrink-0">
           <input
@@ -141,6 +145,24 @@ export function Sidebar({ songs, queueMode = 'sequential', handleAdd, handleRemo
             );
           })}
         </ul>
+        ) : (
+          <div className="flex-1 min-h-0 flex flex-col">
+            <div className="flex items-center justify-between gap-2 mb-3 shrink-0">
+              <span className="text-[10px] uppercase tracking-wider text-slate-400">{recommendations.length} picks for you</span>
+              <button type="button" onClick={onRefreshRecommendations} disabled={recommendationsLoading || !onRefreshRecommendations} className="text-[10px] rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-slate-300 hover:bg-indigo-500/20 disabled:opacity-50">{recommendationsLoading ? 'Refreshing…' : 'Refresh'}</button>
+            </div>
+            <audio ref={previewRef} className="hidden" />
+            <ul className="flex-1 min-h-0 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+              {recommendationsLoading && <li className="py-8 text-center text-xs text-slate-400">Finding music for you…</li>}
+              {!recommendationsLoading && recommendations.length === 0 && <li className="py-8 text-center text-xs text-slate-500">Add tracks to your library to discover music.</li>}
+              {recommendations.map((rec) => <li key={rec.id} className="flex items-center gap-2 rounded-2xl border border-white/5 bg-white/[0.04] p-2.5">
+                {rec.artwork ? <img src={rec.artwork} alt="" className="h-10 w-10 shrink-0 rounded-xl object-cover" /> : <div className="h-10 w-10 shrink-0 rounded-xl bg-white/10" />}
+                <div className="min-w-0 flex-1"><p className="truncate text-xs font-medium text-slate-100">{rec.title}</p><p className="truncate text-[10px] text-slate-400">{rec.artist}</p><p className="truncate text-[9px] text-indigo-300/80">{rec.reason}</p></div>
+                {rec.previewUrl && <button type="button" title="Play preview" aria-label={`Play preview of ${rec.title}`} onClick={() => { const audio = previewRef.current; if (audio) { audio.pause(); audio.src = rec.previewUrl!; void audio.play().catch((error) => console.warn('Preview playback failed:', error)); } }} className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-indigo-500/20 text-indigo-200 hover:bg-indigo-500 hover:text-white"><Music className="h-3.5 w-3.5" /></button>}
+              </li>)}
+            </ul>
+          </div>
+        )}
       </aside>
 
       {/* Mobile Backdrop */}
