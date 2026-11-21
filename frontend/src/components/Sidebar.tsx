@@ -75,6 +75,7 @@ export function Sidebar({ songs, queueMode = 'sequential', handleAdd, handleRemo
           <button type="button" onClick={() => setActiveTab('recommendations')} className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-[10px] font-semibold uppercase tracking-wide transition-all ${activeTab === 'recommendations' ? 'bg-indigo-500/20 text-indigo-100 border border-indigo-400/30' : 'text-slate-400 hover:text-white'}`}><Music className="w-3.5 h-3.5" /> Recommendations</button>
         </div>
         {activeTab === 'library' ? (
+          <>
         {/* Add song form */}
         <form onSubmit={submit} className="flex gap-2 mb-3 shrink-0">
           <input
@@ -145,6 +146,7 @@ export function Sidebar({ songs, queueMode = 'sequential', handleAdd, handleRemo
             );
           })}
         </ul>
+          </>
         ) : (
           <div className="flex-1 min-h-0 flex flex-col">
             <div className="flex items-center justify-between gap-2 mb-3 shrink-0">
