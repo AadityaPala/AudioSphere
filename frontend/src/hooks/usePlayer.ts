@@ -299,6 +299,7 @@ export function usePlayer(initialSongs: Song[]) {
                   void (async () => {
                     try {
                       const metadata = await fetchTrackMetadata(failedTrack.title);
+                      const failedVideoId = extractYouTubeVideoId(failedTrack.url);
                       const replacementVideoId = await resolveDiscoveryTrack(
                         metadata.artist,
                         failedTrack.title,
@@ -308,7 +309,6 @@ export function usePlayer(initialSongs: Song[]) {
                       if (!active || failedRequestId !== requestIdRef.current) return;
 
                       const latestTrack = queueRef.current[indexRef.current];
-                      const failedVideoId = extractYouTubeVideoId(failedTrack.url);
 
                       if (
                         !latestTrack ||
