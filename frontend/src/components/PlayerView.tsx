@@ -68,6 +68,7 @@ export function PlayerView({ player, className = '' }: PlayerViewProps) {
     currentIndex,
     isPlaying,
     isBuffering,
+    playerError,
     mode,
     currentTime,
     duration,
@@ -141,6 +142,11 @@ export function PlayerView({ player, className = '' }: PlayerViewProps) {
                     {year ? ' · ' + year : ''}
                   </p>
                 </div>
+                {playerError && (
+                  <p className="mt-2 text-xs leading-relaxed text-rose-300" role="alert">
+                    {playerError}
+                  </p>
+                )}
               </div>
 
               <div className="vinyl-player__progress">
