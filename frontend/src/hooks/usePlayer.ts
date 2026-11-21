@@ -215,6 +215,8 @@ export function usePlayer(initialSongs: Song[]) {
 
       try {
         playerRef.current = new (window as any).YT.Player('yt-hidden-player', {
+          width: '100%',
+          height: '100%',
           playerVars: {
             playsinline: 1,
             enablejsapi: 1,
