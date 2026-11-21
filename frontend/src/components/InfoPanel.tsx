@@ -6,7 +6,6 @@ interface InfoPanelProps {
   player: any;
   className?: string;
   onClose?: () => void;
-  playerHostId: string;
 }
 
 export function InfoPanel({ player, className = '', onClose, playerHostId }: InfoPanelProps) {
@@ -104,11 +103,7 @@ export function InfoPanel({ player, className = '', onClose, playerHostId }: Inf
           )}
         </section>
 
-        <section className="space-y-3">
-          <h3 className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase"><Disc3 className="w-3.5 h-3.5" /> YouTube Player</h3>
-          <div className="w-full overflow-hidden rounded-2xl border border-white/10 bg-black shadow-xl"><div className="relative aspect-video min-h-[200px] w-full"><div id={playerHostId} className="absolute inset-0 h-full w-full bg-black" /></div></div>
-          <p className="text-[10px] leading-relaxed text-slate-500">YouTube playback is shown here. Some videos may still be unavailable for embedding due to the uploader's restrictions.</p>
-        </section>
+
       </div>
     </aside>
   );
