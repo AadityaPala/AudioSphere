@@ -19,6 +19,7 @@ YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 LASTFM_URL = "https://ws.audioscrobbler.com/2.0/"
 ITUNES_URL = "https://itunes.apple.com/search"
 YOUTUBE_URL = "https://www.googleapis.com/youtube/v3/search"
+YOUTUBE_VIDEOS_URL = "https://www.googleapis.com/youtube/v3/videos"
 
 # In-memory TTL cache.
 # This is suitable for the initial single-instance deployment.
@@ -231,8 +232,9 @@ async def enrich_track(client, title, artist):
 
 
 async def resolve_youtube_video(client, title, artist):
+    # Version the cache so older, unvalidated video IDs are never reused.
     cache_key = (
-        f"youtube:{normalize_name(artist)}:"
+        f"youtube:embeddable:v2:{normalize_name(artist)}:"
         f"{normalize_name(title)}"
     )
 
@@ -263,7 +265,7 @@ async def resolve_youtube_video(client, title, artist):
         expected_title = normalize_name(title)
         expected_artist = normalize_name(artist)
 
-        selected_video = None
+        candidate_video_ids = []
 
         for item in results:
             snippet = item.get("snippet", {})
@@ -291,8 +293,28 @@ async def resolve_youtube_video(client, title, artist):
             )
 
             if title_matches and artist_matches:
-                selected_video = video_id
-                break
+                candidate_video_ids.append(video_id)
+
+        # Search results do not expose embedding eligibility. Ask videos.list
+        # for the authoritative status.embeddable flag before selecting one.
+        selected_video = None
+        if candidate_video_ids:
+            status_response = await client.get(
+                YOUTUBE_VIDEOS_URL,
+                params={
+                    "part": "status",
+                    "id": ",".join(candidate_video_ids),
+                    "key": YOUTUBE_API_KEY,
+                },
+            )
+            status_response.raise_for_status()
+
+            for video in status_response.json().get("items", []):
+                video_id = video.get("id")
+                embeddable = video.get("status", {}).get("embeddable")
+                if video_id and embeddable is True:
+                    selected_video = video_id
+                    break
 
         # Cache negative results briefly to avoid repeated
         # expensive searches for unresolvable tracks.
