@@ -1,24 +1,18 @@
-import { useRef } from 'react';
 import { Sparkles, X, Music2, Loader2, Mic2, Disc3, Calendar } from 'lucide-react';
-import type { Recommendation } from '../types';
 import { RgbBorder } from './RgbBorder';
 import { useScrollRestore } from '../hooks/useScrollRestore';
 
 interface InfoPanelProps {
   player: any;
-  recommendations: Recommendation[];
-  recommendationsLoading?: boolean;
-  onRefreshRecommendations?: () => void;
   className?: string;
   onClose?: () => void;
 }
 
-export function InfoPanel({ player, recommendations, recommendationsLoading = false, onRefreshRecommendations, className = '', onClose }: InfoPanelProps) {
+export function InfoPanel({ player, className = '', onClose }: InfoPanelProps) {
   const { meta, enriched, enriching, currentIndex, queue, isPlaying, isBuffering } = player;
   const hasTrack = currentIndex !== -1 && queue[currentIndex];
   const currentUrl = hasTrack ? queue[currentIndex].url : '';
   const scrollRef = useScrollRestore('discover', true);
-  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
 
 
 
