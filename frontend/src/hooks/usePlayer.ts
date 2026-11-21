@@ -223,6 +223,7 @@ export function usePlayer(initialSongs: Song[]) {
           playerVars: {
             playsinline: 1,
             enablejsapi: 1,
+            origin: window.location.origin,
           },
           events: {
             onReady: (event: any) => {
