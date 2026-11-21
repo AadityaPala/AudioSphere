@@ -214,10 +214,15 @@ export function usePlayer(initialSongs: Song[]) {
       playerCreated = true;
 
       try {
-        const playerHostId = window.matchMedia('(min-width: 1280px)').matches
-          ? 'yt-hidden-player-desktop'
-          : 'yt-hidden-player-mobile';
-        playerRef.current = new (window as any).YT.Player(playerHostId, {
+        const playerHost = document.getElementById('yt-audiosphere-player');
+        if (!playerHost || !playerHost.isConnected) {
+          playerCreated = false;
+          setIsBuffering(false);
+          setPlayerError('The YouTube player container is not mounted. Please reload AudioSphere.');
+          console.error('[AudioSphere] YouTube player host is missing from the DOM.');
+          return;
+        }
+        playerRef.current = new (window as any).YT.Player(playerHost, {
           width: '100%',
           height: '100%',
           playerVars: {
