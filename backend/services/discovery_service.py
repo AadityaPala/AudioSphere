@@ -231,103 +231,75 @@ async def enrich_track(client, title, artist):
         }
 
 
-async def resolve_youtube_video(client, title, artist):
-    # Version the cache so older, unvalidated video IDs are never reused.
-    cache_key = (
-        f"youtube:embeddable:v2:{normalize_name(artist)}:"
-        f"{normalize_name(title)}"
-    )
-
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
-
+async def resolve_youtube_video(client, title, artist, exclude_video_ids=None):
+    """Resolve a different explicitly embeddable candidate for playback fallback."""
+    excluded = {value for value in (exclude_video_ids or []) if value}
+    cache_key = f"youtube:embeddable:v3:{normalize_name(artist)}:{normalize_name(title)}"
+    if not excluded:
+        cached = cache_get(cache_key)
+        if cached is not None:
+            return cached
     if not YOUTUBE_API_KEY:
         logger.warning("YOUTUBE_API_KEY is not configured")
         return None
 
+    queries = [f"{artist} {title} official audio", f"{artist} {title} official", f"{artist} {title}"]
+    candidates, seen = [], set()
     try:
-        response = await client.get(
-            YOUTUBE_URL,
-            params={
-                "part": "snippet",
-                "q": f"{artist} {title} official audio",
-                "type": "video",
-                "videoCategoryId": "10",
-                "maxResults": 5,
-                "key": YOUTUBE_API_KEY,
-            },
-        )
+        for query in queries:
+            response = await client.get(YOUTUBE_URL, params={
+                "part": "snippet", "q": query, "type": "video",
+                "videoCategoryId": "10", "maxResults": 10, "key": YOUTUBE_API_KEY,
+            })
+            response.raise_for_status()
+            for item in response.json().get("items", []):
+                video_id = item.get("id", {}).get("videoId")
+                if not video_id or video_id in seen or video_id in excluded:
+                    continue
+                snippet = item.get("snippet", {})
+                candidate_title = normalize_name(snippet.get("title", ""))
+                channel = normalize_name(snippet.get("channelTitle", ""))
+                expected_title, expected_artist = normalize_name(title), normalize_name(artist)
+                title_match = expected_title in candidate_title or all(
+                    token in candidate_title for token in expected_title.split() if len(token) > 2
+                )
+                artist_match = expected_artist in candidate_title or expected_artist in channel or all(
+                    token in candidate_title + channel for token in expected_artist.split() if len(token) > 2
+                )
+                score = (4 if title_match else 0) + (3 if artist_match else 0)
+                if "official" in candidate_title or "topic" in channel:
+                    score += 1
+                if any(word in candidate_title for word in ("live", "cover", "karaoke")):
+                    score -= 2
+                seen.add(video_id)
+                candidates.append((score, video_id))
 
-        response.raise_for_status()
-        results = response.json().get("items", [])
-
-        expected_title = normalize_name(title)
-        expected_artist = normalize_name(artist)
-
-        candidate_video_ids = []
-
-        for item in results:
-            snippet = item.get("snippet", {})
-            candidate_title = normalize_name(
-                snippet.get("title", "")
-            )
-            channel = normalize_name(
-                snippet.get("channelTitle", "")
-            )
-
-            video_id = item.get("id", {}).get("videoId")
-
-            if not video_id:
+        candidates.sort(key=lambda item: item[0], reverse=True)
+        ids = [video_id for score, video_id in candidates if score >= 4]
+        if not ids:
+            ids = [video_id for _, video_id in candidates]
+        for offset in range(0, len(ids), 50):
+            batch = ids[offset:offset + 50]
+            if not batch:
                 continue
-
-            # Require title relevance. Channel matching is
-            # supporting evidence, not a mandatory condition.
-            title_matches = (
-                expected_title in candidate_title
-                or candidate_title in expected_title
-            )
-
-            artist_matches = expected_artist in (
-                candidate_title + channel
-            )
-
-            if title_matches and artist_matches:
-                candidate_video_ids.append(video_id)
-
-        # Search results do not expose embedding eligibility. Ask videos.list
-        # for the authoritative status.embeddable flag before selecting one.
-        selected_video = None
-        if candidate_video_ids:
-            status_response = await client.get(
-                YOUTUBE_VIDEOS_URL,
-                params={
-                    "part": "status",
-                    "id": ",".join(candidate_video_ids),
-                    "key": YOUTUBE_API_KEY,
-                },
-            )
+            status_response = await client.get(YOUTUBE_VIDEOS_URL, params={
+                "part": "status", "id": ",".join(batch), "key": YOUTUBE_API_KEY,
+            })
             status_response.raise_for_status()
-
-            for video in status_response.json().get("items", []):
-                video_id = video.get("id")
-                embeddable = video.get("status", {}).get("embeddable")
-                if video_id and embeddable is True:
-                    selected_video = video_id
-                    break
-
-        # Cache negative results briefly to avoid repeated
-        # expensive searches for unresolvable tracks.
-        cache_set(
-            cache_key,
-            selected_video,
-            YOUTUBE_TTL if selected_video else 60 * 60,
-        )
-
-        return selected_video
-
+            flags = {
+                item.get("id"): item.get("status", {}).get("embeddable")
+                for item in status_response.json().get("items", [])
+            }
+            for video_id in batch:
+                if flags.get(video_id) is True:
+                    if not excluded:
+                        cache_set(cache_key, video_id, YOUTUBE_TTL)
+                    return video_id
+        if not excluded:
+            cache_set(cache_key, None, 300)
+        return None
     except (httpx.HTTPError, ValueError):
-        logger.exception("YouTube resolution failed: %s", title)
+        logger.exception("YouTube resolution failed: %s - %s", artist, title)
         return None
 
 
@@ -503,9 +475,11 @@ async def search_discovery(query, limit=10):
     return {"artists": artists, "tracks": enriched}
 
 
-async def resolve_discovery_video(artist, title):
+async def resolve_discovery_video(artist, title, exclude_video_id=None):
     async with httpx.AsyncClient(timeout=20.0) as client:
-        return await resolve_youtube_video(client, title, artist)
+        return await resolve_youtube_video(
+            client, title, artist, [exclude_video_id] if exclude_video_id else None
+        )
 
 
 async def get_home_discovery():
