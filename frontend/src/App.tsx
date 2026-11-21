@@ -247,7 +247,7 @@ export default function App() {
 
               <HSeparator />
               <Panel id="info" defaultSize="24%" minSize="16%" maxSize="36%">
-                <InfoPanel player={player} recommendations={[]} className="h-full" />
+                <InfoPanel player={player} className="h-full" />
               </Panel>
             </Group>
           </div>
@@ -277,7 +277,7 @@ export default function App() {
           >
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
             <div className={`absolute top-0 right-0 h-full w-full max-w-md p-3 transition-transform duration-300 ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-              <InfoPanel player={player} recommendations={[]} onClose={() => setDrawerOpen(false)} />
+              <InfoPanel player={player} onClose={() => setDrawerOpen(false)} />
             </div>
           </div>
         </>
