@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Song, PlaybackMode, TrackMetadata, EnrichedMetadata } from '../types';
-import { fetchTrackMetadata, fetchEnrichedMetadata } from '../services/api';
+import { fetchTrackMetadata, fetchEnrichedMetadata, resolveDiscoveryTrack } from '../services/api';
 
 const DEFAULT_ARTWORK = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80';
 const YOUTUBE_API_URL = 'https://www.youtube.com/iframe_api';
@@ -59,6 +59,7 @@ export function usePlayer(initialSongs: Song[]) {
   const indexRef = useRef(currentIndex);
   const volumeRef = useRef(volume);
   const requestIdRef = useRef(0);
+  const fallbackAttemptedRequestRef = useRef<number | null>(null);
 
   useEffect(() => {
     queueRef.current = queue;
@@ -273,6 +274,72 @@ export function usePlayer(initialSongs: Song[]) {
               clearPlaybackTimers();
               setIsPlaying(false);
               setIsBuffering(false);
+
+              // A 101/150 response is video-specific. Resolve a replacement through
+              // the existing Python YouTube Data API integration, which now filters
+              // candidates using videos.list status.embeddable.
+              if (
+                (event.data === 101 || event.data === 150) &&
+                fallbackAttemptedRequestRef.current !== requestIdRef.current
+              ) {
+                const failedRequestId = requestIdRef.current;
+                const failedIndex = indexRef.current;
+                const failedTrack = queueRef.current[failedIndex];
+
+                if (failedTrack) {
+                  fallbackAttemptedRequestRef.current = failedRequestId;
+                  setIsBuffering(true);
+                  setPlayerError('This video cannot be embedded. Looking for an eligible alternative…');
+
+                  void (async () => {
+                    try {
+                      const metadata = await fetchTrackMetadata(failedTrack.title);
+                      const replacementVideoId = await resolveDiscoveryTrack(
+                        metadata.artist,
+                        failedTrack.title
+                      );
+
+                      if (!active || failedRequestId !== requestIdRef.current) return;
+
+                      const latestTrack = queueRef.current[indexRef.current];
+                      const failedVideoId = extractYouTubeVideoId(failedTrack.url);
+
+                      if (
+                        !latestTrack ||
+                        latestTrack.url !== failedTrack.url ||
+                        !replacementVideoId ||
+                        replacementVideoId === failedVideoId
+                      ) {
+                        throw new Error('No different embeddable YouTube video was found.');
+                      }
+
+                      const replacementUrl = `https://www.youtube.com/watch?v=${replacementVideoId}`;
+                      const updatedQueue = [...queueRef.current];
+                      updatedQueue[indexRef.current] = {
+                        ...latestTrack,
+                        url: replacementUrl,
+                      };
+                      queueRef.current = updatedQueue;
+                      setQueue(updatedQueue);
+
+                      console.info(
+                        '[AudioSphere] Replaced non-embeddable video with an eligible alternative:',
+                        replacementVideoId
+                      );
+                      loadVideo(replacementVideoId);
+                    } catch (error) {
+                      if (!active || failedRequestId !== requestIdRef.current) return;
+                      setIsBuffering(false);
+                      setPlayerError(
+                        'This YouTube video cannot be embedded, and no eligible alternative was found for this track.'
+                      );
+                      console.warn('[AudioSphere] YouTube embedding fallback failed:', error);
+                    }
+                  })();
+
+                  return;
+                }
+              }
 
               const messages: Record<number, string> = {
                 2: 'YouTube rejected this video ID.',
