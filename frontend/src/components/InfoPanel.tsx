@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { Sparkles, Play, Pause, X, Music2, Loader2, Mic2, Disc3, Calendar, RefreshCw } from 'lucide-react';
+import { useRef } from 'react';
+import { Sparkles, X, Music2, Loader2, Mic2, Disc3, Calendar } from 'lucide-react';
 import type { Recommendation } from '../types';
 import { RgbBorder } from './RgbBorder';
 import { useScrollRestore } from '../hooks/useScrollRestore';
@@ -19,40 +19,14 @@ export function InfoPanel({ player, recommendations, recommendationsLoading = fa
   const currentUrl = hasTrack ? queue[currentIndex].url : '';
   const scrollRef = useScrollRestore('discover', true);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
-  const [playingRecommendationId, setPlayingRecommendationId] = useState<string | null>(null);
 
-  const playRecommendationPreview = async (rec: Recommendation) => {
-    const audio = previewAudioRef.current;
-    if (!audio || !rec.previewUrl) return;
 
-    if (playingRecommendationId === rec.id) {
-      audio.pause();
-      setPlayingRecommendationId(null);
-      return;
-    }
-
-    audio.pause();
-    audio.src = rec.previewUrl;
-    audio.currentTime = 0;
-    try {
-      await audio.play();
-      setPlayingRecommendationId(rec.id);
-    } catch (error) {
-      console.error('Could not play recommendation preview:', error);
-      setPlayingRecommendationId(null);
-    }
-  };
 
   return (
     <aside
       className={`flex flex-col w-full xl:w-full shrink-0 h-full bg-white/[0.03] backdrop-blur-xl border border-white/[0.1] rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 ${className}`}
     >
-      <audio
-        ref={previewAudioRef}
-        onEnded={() => setPlayingRecommendationId(null)}
-        onPause={() => setPlayingRecommendationId(null)}
-        className="hidden"
-      />
+
 
       {/* Header */}
       <div className="flex items-center justify-between gap-2 p-4 border-b border-white/10 shrink-0">
@@ -135,85 +109,10 @@ export function InfoPanel({ player, recommendations, recommendationsLoading = fa
           )}
         </section>
 
-        {/* Recommendations */}
-        <section>
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <h3 className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase whitespace-nowrap">
-              <Sparkles className="w-3.5 h-3.5" /> Recommended
-            </h3>
-            <button
-              type="button"
-              onClick={onRefreshRecommendations}
-              disabled={recommendationsLoading || !onRefreshRecommendations}
-              title="Refresh recommendations"
-              aria-label="Refresh recommendations"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.05] border border-white/10 text-slate-300 hover:text-white hover:bg-indigo-500/20 hover:border-indigo-400/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-[10px] font-medium shrink-0"
-            >
-              <RefreshCw className={`w-3 h-3 ${recommendationsLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
-          </div>
-
-          {recommendationsLoading ? (
-            <div className="flex flex-col items-center justify-center py-8 text-slate-400">
-              <Loader2 className="w-5 h-5 animate-spin mb-2 text-indigo-300" />
-              <p className="text-xs">Finding music for you...</p>
-            </div>
-          ) : recommendations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center text-slate-500">
-              <Music2 className="w-7 h-7 mb-2 opacity-50" />
-              <p className="text-xs">Add some tracks to your library to discover new music.</p>
-            </div>
-          ) : (
-            <ul className="space-y-2">
-              {recommendations.map((rec) => (
-                <li
-                  key={rec.id}
-                  className="group flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/10 hover:border-white/15 transition-all duration-300"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {rec.artwork ? (
-                      <img
-                        src={rec.artwork}
-                        alt={rec.title}
-                        className="w-10 h-10 rounded-xl object-cover shadow-md group-hover:scale-105 transition-transform duration-300 shrink-0"
-                        onError={(event) => {
-                          event.currentTarget.style.visibility = 'hidden';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-xl bg-white/10 grid place-items-center shrink-0">
-                        <Music2 className="w-4 h-4 text-slate-400" />
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-slate-200 truncate whitespace-nowrap group-hover:text-indigo-300 transition-colors duration-300">
-                        {rec.title}
-                      </p>
-                      <p className="text-[10px] text-slate-400 truncate whitespace-nowrap">
-                        {rec.artist}
-                      </p>
-                      <p className="text-[9px] text-indigo-300/80 truncate mt-0.5">
-                        {rec.reason}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    title={rec.previewUrl ? (playingRecommendationId === rec.id ? 'Pause preview' : 'Play preview') : 'Preview unavailable'}
-                    aria-label={rec.previewUrl ? (playingRecommendationId === rec.id ? 'Pause preview' : 'Play preview') : 'Preview unavailable'}
-                    disabled={!rec.previewUrl}
-                    onClick={() => void playRecommendationPreview(rec)}
-                    className="shrink-0 grid place-items-center w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-300 opacity-0 group-hover:opacity-100 hover:bg-indigo-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300"
-                  >
-                    {playingRecommendationId === rec.id
-                      ? <Pause className="w-3 h-3 fill-current" />
-                      : <Play className="w-3 h-3 fill-current" />}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+        <section className="space-y-3">
+          <h3 className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase"><Disc3 className="w-3.5 h-3.5" /> YouTube Player</h3>
+          <div className="w-full overflow-hidden rounded-2xl border border-white/10 bg-black shadow-xl"><div id="yt-hidden-player" className="aspect-video w-full min-h-[200px] bg-black" /></div>
+          <p className="text-[10px] leading-relaxed text-slate-500">YouTube playback is shown here. Some videos may still be unavailable for embedding due to the uploader's restrictions.</p>
         </section>
       </div>
     </aside>
